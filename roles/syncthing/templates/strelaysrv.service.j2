@@ -1,0 +1,16 @@
+[Unit]
+Description=Syncthing Relay Server
+After=network.target
+Documentation=man:strelaysrv(1)
+
+[Service]
+User=syncthing
+Group=syncthing
+WorkingDirectory=/var/lib/syncthing/relaysrv
+EnvironmentFile=/etc/default/syncthing-relaysrv
+ExecStart=/usr/bin/strelaysrv -pools="" -protocol="tcp4" -listen={{ st_relay.addr }}:{{ st_relay.port }} -nat={{ st_relay.nat.enabled }} -nat-lease={{ st_relay.nat.lease_minutes }} -nat-renewal={{ st_relay.nat.renewal_minutes }} -nat-timeout={{ st_relay.nat.timeout_seconds }} -network-timeout={{ st_relay.network_timeout_string }} -ping-interval={{ st_relay.ping_interval_string }}
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=strelaysrv.service

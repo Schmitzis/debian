@@ -1,0 +1,3 @@
+---
+st_install_list: ["python3-lxml"]
+st_wan_ip: '127.0.0.1'

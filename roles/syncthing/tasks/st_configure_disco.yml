@@ -1,0 +1,110 @@
+---
+
+#
+# If you are running an instance of Syncthing on the discovery server, you
+# must either add that instance to other devices using a static address or
+# bind the discovery server and Syncthing instances to different IP
+# addresses.
+#
+# :8443 - default listen port
+# :19200 - default replication listen port
+#
+# It is possible to only allow incoming connections from a peer without
+# establishing an outgoing replication connection. To do so, give only the
+# device ID without “@ip:port” address:
+# $ stdiscosrv -replicate=I6K...H76 <other options>
+#
+
+# Extraneous "when" statements are kept as `flush_handlers` won't work 
+# with the conditionals on the top level.
+# https://github.com/ansible/ansible/issues/41313
+
+- name: 'Register parameters of the "syncthing" user'
+  user:
+    name: 'syncthing'
+  register: st_syncthing_user_stat
+
+- name: Assert that user exists (not a bug)
+  assert:
+    that: st_syncthing_user_stat.state == 'present'
+    fail_msg: >
+      Unable to provision Discovery-server for the non-existing user "syncthing"
+
+# Don't remove! Wreaks havoc in addition to being insecure.
+- name: Assert that user does not have UID zero
+  assert:
+    that: st_syncthing_user_stat.uid | int != 0
+    fail_msg: >
+      User "syncthing" has UID 0.
+      This is insecure and installation _will_ break. Aborting.
+    success_msg: >
+      User "syncthing" has UID {{ st_syncthing_user_stat.uid }}
+
+- name: Remove existing Disco certificates
+  file:
+    path: '{{ item }}'
+    state: absent
+  with_items:
+    - '/var/lib/syncthing/discosrv/cert.pem'
+    - '/var/lib/syncthing/discosrv/key.pem'
+  when: st_disco.recreate_certs
+
+- name: Provision discovery server template
+  template:
+    src: stdiscosrv.service.j2
+    dest: /lib/systemd/system/syncthing-discosrv.service
+    owner: root
+    mode: 0644
+  become: True
+  become_user: root
+  notify:
+    - 'reload systemd'
+    - 'restart disco'
+  when: st_install_disco
+
+  # Tell `systemd` to pick-up the updated unit, running directly as calling the
+  # `- meta: flush_handlers` will inevitably call the same handler from the base role.
+- name: Reload systemd
+  systemd:
+    daemon_reexec: True
+    daemon_reload: True
+    state: restarted
+    name: local-fs.target
+  become: True
+  become_user: root
+
+- name: Discovery-server block
+  block:
+
+  - name: Ensure that Discovery service is running
+    systemd:
+      name: 'syncthing-discosrv.service'
+      enabled: True
+      masked: False
+      state: started
+
+  - name: Register device ID of the Discovery server
+    ansible.builtin.command:
+      cmd: stdiscosrv
+      chdir: /var/lib/syncthing/discosrv
+    become_user: syncthing
+    become: true
+    register: st_disco_out
+    failed_when: '"Server device ID" not in st_disco_out.stdout'
+    changed_when: False
+
+  - name: Extract ID
+    set_fact:
+      st_disco: '{{ st_disco | combine({"id":st_disco_out.stdout
+                  | regex_search("\sID\sis\s(\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7})",
+                  "\1", multiline=True)
+                  | join("")}) }}'
+
+  - name: Assert ID length
+    assert:
+      that:
+        - st_disco.id | length == 63
+      success_msg: 'ID is OK: {{ st_disco.id }}'
+      fail_msg: 'ID length is incorrect, here is what we`ve got: {{ st_disco.id }}'
+
+  when: st_install_disco

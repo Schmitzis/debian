@@ -30,5 +30,8 @@ Provisions Wireguard in any mode imaginable.
 ### [nginx](/roles/nginx/)
 Configures web-server and enrolls an arbitrary number of domains on a remote `nginx` instance.
 
+### [syncthing](/roles/syncthing)
+Configures Syncthing client, relay and discovery servers.
+
 ### [etesync](/roles/etesync/)
 EteBase server running on `uvicorn` and `nginx`, includes automatic HTTPs via `certbot`.

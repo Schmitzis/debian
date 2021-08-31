@@ -1,0 +1,17 @@
+[Unit]
+Description=Syncthing Discovery Server
+After=network.target
+Documentation=man:stdiscosrv(1)
+
+[Service]
+User=syncthing
+Group=syncthing
+WorkingDirectory=/var/lib/syncthing/discosrv
+EnvironmentFile=-/etc/default/syncthing-discosrv
+ExecStart=/usr/bin/stdiscosrv -listen={{ st_disco.addr }}:{{ st_disco.port }} {% if st_disco.replicate | bool %}-replicate={{ st_disco.replica.id }}@{{ st_disco.replica.addr }}:{{ st_disco.replica.port }} -replication-listen={{ st_disco.replica.listen_addr }}:{{ st_disco.replica.listen_port }}{% endif %}
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=stdiscosrv.service

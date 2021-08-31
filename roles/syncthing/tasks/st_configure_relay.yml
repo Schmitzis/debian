@@ -1,0 +1,122 @@
+---
+- name: 'Register parameters of the "syncthing" user'
+  user:
+    name: 'syncthing'
+  register: st_syncthing_user_stat
+
+- name: Assert that user exists (not a bug)
+  assert:
+    that: st_syncthing_user_stat.state == 'present'
+    fail_msg: >
+      Unable to provision Discovery-server for the non-existing user "syncthing"
+
+# Don't remove! Wreaks havoc in addition to being insecure.
+- name: Assert that user does not have UID zero
+  assert:
+    that: st_syncthing_user_stat.uid | int != 0
+    fail_msg: >
+      User "syncthing" has UID 0.
+      This is insecure and installation _will_ break. Aborting.
+    success_msg: >
+      User "syncthing" has UID {{ st_syncthing_user_stat.uid }}
+
+- name: Remove existing Relay certificates
+  file:
+    path: '{{ item }}'
+    state: absent
+  with_items:
+    - '/var/lib/syncthing/relaysrv/cert.pem'
+    - '/var/lib/syncthing/relaysrv/key.pem'
+  when: st_relay.recreate_certs
+
+- name: Provision Relay-server template
+  template:
+    src: strelaysrv.service.j2
+    dest: /lib/systemd/system/syncthing-relaysrv.service
+    owner: root
+    mode: 0644
+  become: True
+  become_user: root
+  when: st_install_relay
+  notify:
+    - 'reload systemd'
+    - 'restart relay'
+
+  # Tell `systemd` to pick-up the updated unit, running directly as calling the
+  # `- meta: flush_handlers` will inevitably call the same handler from the base role.
+- name: Reload systemd
+  systemd:
+    daemon_reexec: True
+    daemon_reload: True
+    state: restarted
+    name: local-fs.target
+  become: True
+  become_user: root
+
+- name: Relay-server block
+  block:
+
+  - name: Ensure that Relay service is stopped
+    systemd:
+      name: 'syncthing-relaysrv.service'
+      enabled: True
+      masked: False
+      state: stopped
+
+    # The same parameters as in the J2 template.
+  - name: Register device ID of the Relay-server
+    shell:
+      cmd: >
+        strelaysrv -debug -pools="" -protocol="tcp4"
+        -listen={{ st_relay.addr }}:{{ st_relay.port }}
+        -nat={{ st_relay.nat.enabled }}
+        -nat-lease={{ st_relay.nat.lease_minutes }}
+        -nat-renewal={{ st_relay.nat.renewal_minutes }}
+        -nat-timeout={{ st_relay.nat.timeout_seconds }}
+        -network-timeout={{ st_relay.network_timeout_string }}
+        -ping-interval={{ st_relay.ping_interval_string }} &
+      chdir: /var/lib/syncthing/relaysrv
+    become_user: syncthing
+    become: true
+    register: st_relay_out
+    failed_when: '" ID: " not in st_relay_out.stderr'
+    changed_when: False
+
+    # No error here, Relay-server dumps output in stderr. Go figure.
+  - name: Extract ID
+    set_fact:
+      st_relay: '{{ st_relay | combine({"id":st_relay_out.stderr
+                  | regex_search("\sID:\s(\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7})",
+                  "\1", multiline=True)
+                  | join("")}) }}'
+
+  - name: Assert ID length
+    assert:
+      that:
+        - st_relay.id | length == 63
+      success_msg: 'ID is OK: {{ st_relay.id }}'
+      fail_msg: 'ID length is incorrect, here is what we`ve got: {{ st_relay.id }}'
+
+    # pids module is not in the core Ansible since 2.10
+  - name: Kill stray strelaysr process
+    shell:
+      cmd: |
+        procs=$(lsof -Pni4 | awk '{print $1,$2,$9}' | grep -E '{{ st_relay.port }}$')
+        p_name=$(echo $procs | cut -d' ' -f1)
+        p_pid=$(echo $procs | cut -d' ' -f2)
+        if [[ $p_name == 'strelaysr' ]]; then
+          kill -s SIGTERM $p_pid;
+        else
+          exit 126;
+        fi
+      executable: '/bin/bash'
+    become: true
+
+  - name: Ensure that Relay service is started
+    systemd:
+      name: 'syncthing-relaysrv.service'
+      enabled: True
+      masked: False
+      state: started
+
+  when: st_install_relay

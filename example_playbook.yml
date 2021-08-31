@@ -208,6 +208,125 @@
       tag_remove_existing_user: true
 
 
+  - name: Execute Syncthing role
+    import_role:
+      name: syncthing
+    tags: role_syncthing
+    vars:
+      st_install_client: True
+      st_install_disco: True
+      st_install_relay: True
+      st_reinstall: true
+
+      st_client: {
+        'addr_use_wan': true,
+        'addr': '' ,
+        'port': '',
+        'announce_broadcast': true,
+        'min_free_space': 5,
+        'config_dir': '',
+        'nat': false,
+        'gui': true,
+        'gui_tls': true,
+        'untrusted': true,
+        'recreate_certs': true,
+        'reconfigure': true,
+
+        'user': {
+          'name': '',
+          'home': '',
+          },
+
+        'default_folder': {
+          'path': '~/sync/default',
+          'type': 'sendreceive',
+          'pause': True
+          },
+
+        'disco': {
+          'addr': '127.0.0.1',
+          'addr_overwrite': true,
+          'port': 8443,
+          'id': '',
+          'id_overwrite': true,
+          'enable': true
+          },
+
+        'relay': {
+          'enable': true,
+          'addr': '',
+          'addr_overwrite': true,
+          'port': 22067,
+          'id': '',
+          'id_overwrite': true,
+          'reconnect_interval_minutes': 10
+          },
+
+        'start': {
+          'on_boot': true,
+          'on_role_completion': 'restarted'
+        },
+
+        'binary': {
+          'shasum': '03ba1fb7326d0893fc5664602694144bbdf7717a895fb554fe89fb996f116433',
+          'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2/syncthing',
+          }
+        }
+
+      st_disco: {
+        'addr': '127.0.0.1',
+        'addr_use_wan': true,
+        'port': '',
+        'id': '',
+        'recreate_certs': true,
+        'replicate': false,
+
+        'replica': {
+          'addr': '10.0.0.1',
+          'port': 19200,
+          'id': '',
+          'listen_addr': '10.0.0.2',
+          'listen_port': 19200,
+          },
+
+        'start': {
+          'on_boot': true,
+          'on_role_completion': 'restarted'
+        },
+
+        'binary': {
+          'shasum': '6988838343dbf98eacb6678d551ae298fa85c1c0a4b0e2b2cff62e7228c442aa',
+          'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2/stdiscosrv',
+          }
+        }
+
+      st_relay: {
+        'addr': '',
+        'addr_use_wan': true,
+        'port': 22067,
+        'network_timeout_string': '2m0s',
+        'ping_interval_string': '1m0s',
+        'recreate_certs': true,
+
+        'nat': {
+          'enabled': false,
+          'lease_minutes': 60,
+          'renewal_minutes': 30,
+          'timeout_seconds': 10
+        },
+
+        'start': {
+          'on_boot': true,
+          'on_role_completion': 'restarted'
+        },
+
+        'binary': {
+          'shasum': '715525cb0e835153a1ff465f312009c2ffc4d5d28294d850018087ee5727d238',
+          'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2/strelaysrv'
+        }
+      }
+
+
   - name: Execute `wireguard` role
     import_role:
       name: wireguard

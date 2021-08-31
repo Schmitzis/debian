@@ -1,0 +1,519 @@
+---
+
+# -------------------------------------------------------------------------------------------------
+# General checks
+# -------------------------------------------------------------------------------------------------
+
+- name: Collect install steps
+  set_fact:
+    st_installs: '{{ st_installs | default([]) + [item] }}'
+  with_items:
+    - '{{ st_install_client }}'
+    - '{{ st_install_disco }}'
+    - '{{ st_install_relay }}'
+
+- name: Check that at least one service is requested
+  assert:
+    that:
+      - True in st_installs
+    success_msg: >
+      Provisioning {{ st_installs | reject("equalto", false) | list | length }} unit(s)
+    fail_msg: >
+      Neither Syncthing client, nor any of the server components are to be installed.
+
+- name: Check if Syncthing client is installed
+  command: dpkg-query --show syncthing
+  failed_when: false
+  changed_when: false
+  register: st_query_client
+
+- name: Check if Discovery-server is installed
+  command: dpkg-query --show syncthing-discosrv
+  failed_when: false
+  changed_when: false
+  register: st_query_disco
+
+- name: Check if Relay-server client is installed
+  command: dpkg-query --show syncthing-relaysrv
+  failed_when: false
+  changed_when: false
+  register: st_query_relay
+
+- name: Ensure we are allowed to overwrite executable binaries
+  assert:
+    that: '{{ not item.install }}'
+    fail_msg: >
+      {{ item.name }} will be replaced, however `st_reinstall` is set to False. Aborting.
+  when: item.present | int == 0 and not st_reinstall
+  with_items:
+    - { install: '{{ st_install_client }}',
+        present: '{{ st_query_client.rc }}',
+        name: 'Client'}
+    - { install: '{{ st_install_disco }}' ,
+        present: '{{ st_query_disco.rc }}' ,
+        name: 'Discovery Server'}
+    - { install: '{{ st_install_relay }}' ,
+        present: '{{ st_query_relay.rc }}' ,
+        name: 'Relay Server'}
+
+- name: 'Provided username is empty, falling back to SSH user "{{ ansible_env.USER }}"'
+  set_fact:
+    st_client: '{{ st_client | combine({"user":{"name":name}}, recursive=True) }}'
+  when: not st_client.user.name
+  vars:
+    name: '{{ ansible_env.USER }}'
+
+- name: 'Register user parameters of "{{ st_client.user.name }}"'
+  user:
+    name: '{{ st_client.user.name }}'
+  register: st_user_stat
+
+- name: Assert that user exists (not a bug)
+  assert:
+    that: st_user_stat.state == 'present'
+    fail_msg: >
+      Unable to provision Client for the non-existing user "{{ st_client.user.name }}"
+
+# Don't remove! Wreaks havoc in addition to being insecure.
+- name: Assert that user does not have UID zero
+  assert:
+    that: st_user_stat.uid | int != 0
+    fail_msg: >
+      {{ st_client.user.name }} has UID 0.
+      This is insecure and installation _will_ break. Aborting.
+    success_msg: >
+      {{ st_client.user.name }} has UID {{ st_user_stat.uid }}
+
+- name: Register user`s homedir
+  set_fact:
+    st_client: '{{ st_client
+                 | combine({"user":{"home":st_user_stat.home}}, recursive=True) }}'
+
+- name: Stat the homedir
+  stat:
+    path: '{{ st_client.user.home }}'
+  become_user: '{{ st_client.user.name }}'
+  become: true
+  register: st_user_home
+
+- name: Assert user can (r/w/x) into it
+  assert:
+    that:
+      - st_user_home.stat.isdir
+      - st_user_home.stat.readable
+      - st_user_home.stat.writeable
+      - st_user_home.stat.executable
+    success_msg: '{{ st_user_stat.home }} has correct permissions.'
+    fail_msg: '{{ st_user_stat.home }} has incorrect permissions. Aborting.'
+
+- name: Register default WAN IP of the target host
+  set_fact:
+    st_wan_ip: '{{ item }}'
+  with_items: '{{ ansible_default_ipv4.address
+                | default(ansible_all_ipv4_addresses[0])
+                | ansible.netcommon.ipv4("address")
+                | ansible.netcommon.ipaddr("public") }}'
+
+- name: Assert there is only 1 WAN IP
+  assert:
+    that: st_wan_ip | ansible.netcommon.ipaddr("size") == 1
+    success_msg: 'WAN IP detected: {{ st_wan_ip }}'
+  when: st_wan_ip | length > 0
+
+# -------------------------------------------------------------------------------------------------
+# Discovery-server checks
+# -------------------------------------------------------------------------------------------------
+
+- name: Discovery-server block
+  block:
+
+  - name: Set Disco`s address to WAN IP as per user`s request
+    set_fact:
+      st_disco: '{{ st_disco | combine({"addr":st_wan_ip}) }}'
+    when: st_disco.addr_use_wan
+
+  - name: Check that discovery address is valid and public
+    assert:
+      that:
+        - st_disco.addr
+          | ansible.netcommon.ipv4("address")
+          | ansible.netcommon.ipaddr("public")
+      success_msg: 'Discovery server address is set to {{ st_disco.addr }}'
+      fail_msg: |
+        {{ st_disco.addr }} is not valid.
+
+        While technically possible, running Disco on localhost doesn't make sense.
+        Other clients won't be able to reach it. Client running on the same machine
+        needs to know server's public IP which requires STUN. Don't do it.
+
+  - name: Set Disco`s own port to 8443 as no port was provided
+    set_fact:
+      st_disco: '{{ st_disco | combine({"port":8443}) }}'
+    when: not st_disco.port
+
+  - name: Assert that discovery-server port is within the valid range
+    assert:
+      that:
+        - st_disco.port | int > 1
+        - st_disco.port | int < 65535
+      success_msg: 'Discovery server will listen on port {{ st_disco.port }}'
+      fail_msg: 'Configured port #{{ st_disco.port }} is invalid'
+
+  - name: Assert that discovery-server replication target port is within the valid range
+    assert:
+      that:
+        - st_disco.replica.port | int > 1
+        - st_disco.replica.port | int < 65535
+      success_msg: 'Discovery server will replicate to port {{ st_disco.replica.port }}'
+      fail_msg: 'Configured port #{{ st_disco.replica.port }} is invalid'
+
+  - name: Assert that Discovery server is replicating to a valid address which is not itself
+    assert:
+      that:
+        - st_disco.replica.addr != '127.0.0.1'
+        - st_disco.replica.addr != 'localhost'
+        - st_disco.replica.addr | ansible.netcommon.ipv4("address") | length > 6
+      success_msg: 'Discovery server will replicate to address {{ st_disco.replica.addr }}'
+      fail_msg: |
+        Discovery server it set to replicate to itself.
+        While technically possible, this doesn't make sense in practise.
+    when: st_disco.replicate
+
+  - name: Assert that Discovery server is accepting replication on a valid port
+    assert:
+      that:
+        - st_disco.replica.listen_port | int > 1
+        - st_disco.replica.listen_port | int < 65535
+        - st_disco.replica.listen_port | int != st_disco.port | int
+        - st_disco.replica.listen_port | int != st_client.port | int
+      success_msg: >
+        Discovery server will listen for replica calls on port {{ st_disco.replica.listen_port }}
+      fail_msg: >
+        Impossible to listen for replica calls on port {{ st_disco.replica.listen_port }}
+    when: st_disco.replicate
+
+  - name: Assert that Discovery server is listening for replication calls on a valid address
+    assert:
+      that: st_disco.replica.listen_addr
+            | ansible.netcommon.ipv4("address")
+            | ansible.netcommon.ipaddr("size") == 1
+      success_msg: >
+        Discovery-server will listen for replica calls on the address
+        {{ st_disco.replica.listen_addr }}
+      fail_msg: >
+        Impossible to listen for replica calls on the address
+        {{ st_disco.replica.listen_addr }}
+    when: st_disco.replicate and st_disco.replica.listen_addr
+
+  - name: Check the provided Discovery binary URL
+    uri:
+      url: '{{ st_disco.binary.url }}'
+    register: st_disco_url_check
+
+  - name: Assert that Discovery binary download URL returns 200
+    assert:
+      that: st_disco_url_check.status == 200
+      fail_msg: >
+        Unexpected response `{{ st_disco_url_check.status }}` from {{ st_client.binary.url }}
+      success_msg: >
+        Status {{ st_disco_url_check.status }}, served by {{ st_disco_url_check.server }}
+        with message {{ st_disco_url_check.msg }}
+
+  when: st_install_disco
+
+# -------------------------------------------------------------------------------------------------
+# Relay checks
+# -------------------------------------------------------------------------------------------------
+
+- name: Relay-server block
+  block:
+
+  - name: Set relay`s address to WAN IP as per user`s request
+    set_fact:
+      st_relay: '{{ st_relay | combine({"addr":st_wan_ip}) }}'
+    when: st_relay.addr_use_wan
+
+  - name: Assert that Relay's address is valid
+    assert:
+      that: '{{ st_relay.addr
+              | ansible.netcommon.ipv4("address")
+              | ansible.netcommon.ipaddr("size") == 1 }}'
+      success_msg: 'Relay will listen on {{ st_relay.addr }}'
+      fail_msg: 'Relay`s address is invalid: `{{ st_relay.addr }}`'
+
+  - name: Assert that NAT traversal is enabled
+    assert:
+      that:
+        - st_client.nat.enabled
+      fail_msg: >
+        Client won't be able to connect with the Relay-server while the latter
+        is listening on {{ st_relay.addr }} and NAT-traversal is disabled.
+    when: not st_relay.addr | ansible.netcommon.ipaddr("public")
+
+  - name: Assert that Relay port is valid
+    assert:
+      that:
+        - st_relay.port | int > 1
+        - st_relay.port | int < 65535
+      success_msg: 'Syncthing relay`s GUI and API will listen on port `{{ st_relay.port }}`'
+
+  - name: Check the provided Relay binary URL
+    uri:
+      url: '{{ st_relay.binary.url }}'
+    register: st_relay_url_check
+
+  - name: Assert that Relay binary download URL returns 200
+    assert:
+      that: st_relay_url_check.status == 200
+      fail_msg: >
+        Unexpected response `{{ st_relay_url_check.status }}` from {{ st_client.binary.url }}
+      success_msg: >
+        Status {{ st_relay_url_check.status }}, served by {{ st_relay_url_check.server }}
+        with message {{ st_relay_url_check.msg }}
+
+  when: st_install_relay
+
+# -------------------------------------------------------------------------------------------------
+# Client checks
+# -------------------------------------------------------------------------------------------------
+
+- name: Client block
+  block:
+
+  - name: Set client`s address to WAN IP as per user`s request
+    set_fact:
+      st_client: '{{ st_client | combine({"addr":st_wan_ip}) }}'
+    when: st_client.addr_use_wan
+
+  - name: Set client`s address to localhost as no address was provided
+    set_fact:
+      st_client: '{{ st_client | combine({"addr":"127.0.0.1"}) }}'
+    when: st_client.addr == '' and not st_client.addr_use_wan
+
+  - name: Assert that client's address is valid
+    assert:
+      that: '{{ st_client.addr
+              | ansible.netcommon.ipv4("address")
+              | ansible.netcommon.ipaddr("size") == 1 }}'
+      success_msg: 'Client will listen on {{ st_client.addr }}'
+      fail_msg: 'Client`s address is invalid: `{{ st_client.addr }}`'
+
+  - name: Set Client`s own port to 8384 as no port was provided
+    set_fact:
+      st_client: '{{ st_client | combine({"port":8384}) }}'
+    when: not st_client.port
+
+  - name: Assert that Client`s own port is correct
+    assert:
+      that:
+        - st_client.port | int > 1
+        - st_client.port | int < 65535
+      success_msg: >
+        Syncthing client`s GUI and API will listen on port `{{ st_client.port }}`
+
+  - name: Assert we are not sourcing variables from modules that are omitted from the play
+    assert:
+      that: item.install
+      fail_msg: >
+        Attempting to use values from units that are omitted in the play. Aborting.
+    when: item.overwrite
+    with_items:
+      - { 'install': st_install_disco, 'overwrite': st_client.disco.addr_overwrite }
+      - { 'install': st_install_disco, 'overwrite': st_client.disco.id_overwrite }
+      - { 'install': st_install_relay, 'overwrite': st_client.relay.addr_overwrite }
+      - { 'install': st_install_relay, 'overwrite': st_client.relay.id_overwrite }
+
+# Relay -------------------------------------------------------------------------------------------
+
+  - name: Set Relay-server port in Client's config to 22067 as no other port was provided
+    set_fact:
+      st_client: '{{ st_client | combine( { "relay":{"port":22067} } , recursive=True) }}'
+    when: not st_client.relay.port
+
+  - name: 'Overwrite Relay-server address to {{ st_relay.addr }}'
+    set_fact:
+      st_client: '{{ st_client
+                   | combine( { "relay":{"addr":st_relay.addr} }, recursive=True) }}'
+    when: st_client.relay.addr_overwrite
+
+  - name: Assert that provided Relay-server address is valid
+    assert:
+      that:
+        - st_client.relay.addr
+          | ansible.netcommon.ipv4("address")
+          | ansible.netcommon.ipaddr("size") == 1
+        - st_client.relay.addr
+          | ansible.netcommon.ipv4("address")
+          | ansible.netcommon.ipaddr("public")
+      success_msg: >
+        'Syncthing client will connect to Relay-server at
+        {{ st_client.relay.addr }}:{{ st_client.relay.port }}'
+
+  - name: Assert that provided Relay-server ID length is correct
+    assert:
+      that: st_client.relay.id | length | int == 63
+      success_msg: >
+        Syncthing client will use Relay-server with the ID {{ st_client.relay.id }}
+    when: st_client.relay.id | length > 0
+
+  - name: Assert we are not overwriting client's config with the new Relay server
+    assert:
+      that: not st_client.relay.id and st_install_relay
+      success_msg: >
+        Will provision Relay server and then use its data to configure the client
+      fail_msg: >
+        Installing Relay server with `st_client.relay.id_overwrite` set to `True`
+        will re-write client`s config with the new server ID.
+
+        Either set it to `False` or remove/comment-out the `st_client.relay.id`.
+
+        ID provided in the playbook: {{ st_client.relay.id }}
+    when: st_client.relay.id_overwrite
+
+  - name: Assert that provided Relay-server port is correct
+    assert:
+      that:
+        - st_client.relay.port | int > 1
+        - st_client.relay.port | int < 65535
+      success_msg: >
+        Syncthing client will use Relay-server on port {{ st_client.relay.port }}
+
+# Discovery ---------------------------------------------------------------------------------------
+
+  - name: Set Discovery-server port in Client's config to 8443 as no other port was provided
+    set_fact:
+      st_client: '{{ st_client | combine( { "disco":{"port":8443} } , recursive=True) }}'
+    when: not st_client.disco.port
+
+  - name: 'Overwrite Discovery-server address to {{ st_disco.addr }}'
+    set_fact:
+      st_client: '{{ st_client
+                   | combine( { "disco":{"addr":st_disco.addr} }, recursive=True) }}'
+    when: st_client.disco.addr_overwrite
+
+  - name: Assert that provided Discovery-server address is valid
+    assert:
+      that:
+        - st_client.disco.addr
+          | ansible.netcommon.ipv4("address")
+          | ansible.netcommon.ipaddr("size") == 1
+        - st_client.disco.addr
+          | ansible.netcommon.ipv4("address")
+          | ansible.netcommon.ipaddr("public")
+      success_msg: >
+        'Syncthing client will connect to Discovery-server at
+        {{ st_client.disco.addr }}:{{ st_client.disco.port }}'
+
+  - name: Assert that provided Discovery-server ID length is correct
+    assert:
+      that: st_client.disco.id | length | int == 63
+      success_msg: >
+        Syncthing client will use Discovery-server with the ID {{ st_client.disco.id }}
+    when: st_client.disco.id | length > 0
+
+  - name: Assert we are not overwriting client's config with the new Discovery server
+    assert:
+      that: not st_client.disco.id and st_install_disco
+      success_msg: >
+        Will provision Discovery-server and then use its data to configure the client
+      fail_msg: >
+        Installing Discovery-server with `st_client.disco.id_overwrite` set to `True`
+        will re-write client`s config with the new server ID.
+
+        Either set it to `False` or remove/comment-out the `st_client.disco.id`.
+
+        ID provided in the playbook: {{ st_client.disco.id }}
+    when: st_client.disco.id_overwrite
+
+  - name: Assert that provided Discovery-server port is correct
+    assert:
+      that:
+        - st_client.disco.port | int > 1
+        - st_client.disco.port | int < 65535
+      success_msg: >
+        Syncthing client will use Discovery-server on port {{ st_client.disco.port }}
+
+# General -----------------------------------------------------------------------------------------
+
+  - name: Check the provided Client update URL
+    uri:
+      url: '{{ st_client.binary.url }}'
+    register: st_client_url_check
+
+  - name: Assert that Client binary download URL returns 200
+    assert:
+      that: st_client_url_check.status == 200
+      fail_msg: >
+        Unexpected response `{{ st_client_url_check.status }}` from {{ st_client.binary.url }}
+      success_msg: >
+        Status {{ st_client_url_check.status }}, served by {{ st_client_url_check.server }}
+        with message {{ st_client_url_check.msg }}
+
+  - name: Assert minimum disk space parameter
+    assert:
+      that:
+        - st_client.min_free_space > 1
+        - st_client.min_free_space < 99
+      success_msg: >
+        Syncthing client will stop syncing when the disk is {{ st_client.min_free_space }}% full
+      fail_msg: >
+        Keeping minimum disk space at {{ st_client.min_free_space }} doesn`t make sense
+
+  when: st_install_client
+
+# -------------------------------------------------------------------------------------------------
+# Final cross-checks
+# -------------------------------------------------------------------------------------------------
+
+- name: Assert that NAT traversal is enabled
+  assert:
+    that:
+      - st_client.nat
+    fail_msg: >
+      Client won't be able to connect with the Discovery-server while the latter
+      is listening on {{ st_disco.addr }} and NAT-traversal is disabled.
+  when: not st_disco.addr | ansible.netcommon.ipaddr("public")
+        and not st_client.disco.addr | ansible.netcommon.ipaddr("public")
+
+- name: Collate defined ports
+  set_fact:
+    st_ports_combined: '{{ st_ports_combined
+                         + [st_client.port]
+                         + [st_disco.port]
+                         + [st_disco.replica.port]
+                         + [st_relay.port]
+                         + [22000] }}'
+  vars:
+    st_ports_combined: []
+
+- name: Warn about the port mismatch
+  fail:
+    msg: >
+      Warning!
+
+      Client is set to look for Discovery-server on port `{{ st_client.disco.port }}`
+      while the server will listen on `{{ st_disco.port }}`.
+
+      This might be valid if you provision independent server/client pair,
+      but might be a mistake.
+  ignore_errors: true
+  when: st_client.disco.port | int != st_disco.port | int
+        and st_client.disco.addr == st_disco.addr
+
+- name: Assert there is no listen port overlap
+  assert:
+    that:
+      - st_ports_combined | unique | length == 5
+    success_msg: >
+      No overlapping ports detected.
+    fail_msg: >
+      There is a listen port overlap between Client, Discovery and Discovery-replica or
+      the Relay-server.
+
+      Client: {{ st_client.port }}
+
+      Discovery: {{ st_disco.port }}
+
+      Discovery-replica: {{ st_disco.replica.port }}
+
+      Relay-server: {{ st_relay.port }}

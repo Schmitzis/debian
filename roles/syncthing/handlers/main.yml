@@ -1,0 +1,30 @@
+---
+- name: Restart discovery server
+  service:
+    name: stdiscosrv.service
+    state: restarted
+  become: true
+  listen: 'restart disco'
+
+- name: Restart Relay-server
+  service:
+    name: strelaysrv.service
+    state: restarted
+  become: true
+  listen: 'restart relay'
+
+- name: Restart syncthing
+  service:
+    name: 'syncthing@{{ st_client.user.name }}.service'
+    state: restarted
+  become: true
+  listen: 'restart syncthing'
+
+- name: Reload systemd
+  systemd:
+    daemon_reexec: True
+    daemon_reload: True
+    state: restarted
+    name: local-fs.target
+  become: True
+  listen: 'reload systemd'

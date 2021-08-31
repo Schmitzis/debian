@@ -1,0 +1,24 @@
+---
+- name: Set systemd unit of Syncthing client into the correct state
+  systemd:
+    name: 'syncthing@{{ st_client.user.name }}.service'
+    enabled: '{{ st_client.start.on_boot }}'
+    masked: False
+    state: '{{ st_client.start.on_role_completion }}'
+  when: st_install_client
+
+- name: Set systemd unit of Discovery-server into the correct state
+  systemd:
+    name: 'stdiscosrv.service'
+    enabled: '{{ st_disco.start.on_boot }}'
+    masked: False
+    state: '{{ st_disco.start.on_role_completion }}'
+  when: st_install_disco
+
+- name: Set systemd unit of Relay-server into the correct state
+  systemd:
+    name: 'strelaysrv.service'
+    enabled: '{{ st_relay.start.on_boot }}'
+    masked: False
+    state: '{{ st_relay.start.on_role_completion }}'
+  when: st_install_relay

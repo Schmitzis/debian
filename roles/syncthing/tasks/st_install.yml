@@ -1,0 +1,86 @@
+---
+
+# --------------------------------------------------------------------------------------------------
+# Install / apt
+# --------------------------------------------------------------------------------------------------
+
+- name: Add Debian`s Syncthing-Client to the install list
+  set_fact:
+    st_install_list: '{{ st_install_list | union(["syncthing"]) }}'
+  when: st_install_client
+
+- name: Add Debian`s Syncthing-discovery to the install list
+  set_fact:
+    st_install_list: '{{ st_install_list | union(["syncthing-discosrv"]) }}'
+  when: st_install_disco
+
+- name: Add Debian`s Syncthing-relay to the install list
+  set_fact:
+    st_install_list: '{{ st_install_list | union(["syncthing-relaysrv"]) }}'
+  when: st_install_relay
+
+- name: Install selected packages
+  apt:
+    pkg: '{{ st_install_list }}'
+    state: present
+  delay: 3
+  retries: 3
+
+# --------------------------------------------------------------------------------------------------
+# Enable and stop systemd services
+# --------------------------------------------------------------------------------------------------
+
+- name: Ensure Syncthing-Client service is enabled and stopped
+  systemd:
+    name: 'syncthing@{{ st_client.user.name }}.service'
+    enabled: True
+    masked: False
+    state: stopped
+  when: st_install_client
+
+- name: Ensure Discovery-Server service is enabled and stopped
+  systemd:
+    name: 'syncthing-discosrv.service'
+    enabled: True
+    masked: False
+    state: stopped
+  when: st_install_disco
+
+- name: Ensure Relay-Server service is enabled and stopped
+  systemd:
+    name: 'syncthing-relaysrv.service'
+    enabled: True
+    masked: False
+    state: stopped
+  when: st_install_relay
+
+# --------------------------------------------------------------------------------------------------
+# Download updated binaries
+# --------------------------------------------------------------------------------------------------
+
+- name: Download relay server
+  get_url:
+    url: '{{ st_relay.binary.url }}'
+    dest: /usr/bin/strelaysrv
+    mode: '0755'
+    owner: root
+    checksum: 'sha256:{{ st_relay.binary.shasum }}'
+  when: st_install_relay
+
+- name: Download discovery server
+  get_url:
+    url: '{{ st_disco.binary.url }}'
+    dest: /usr/bin/stdiscosrv
+    mode: '0755'
+    owner: root
+    checksum: 'sha256:{{ st_disco.binary.shasum }}'
+  when: st_install_disco
+
+- name: Download client
+  get_url:
+    url: '{{ st_client.binary.url }}'
+    dest: /usr/bin/syncthing
+    mode: '0755'
+    owner: root
+    checksum: 'sha256:{{ st_client.binary.shasum }}'
+  when: st_install_client

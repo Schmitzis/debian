@@ -1,0 +1,42 @@
+* SYNCTHING ROLE IS COMPLETED *
+
+Provisioned {{ st_installs | reject("equalto", false) | list | length }} unit(s).
+
+{% if st_install_client %}
+Client:
+
+- Configured for the user "{{ st_client.user.name }}", UID {{ st_user_stat.uid }}
+- GUI and API are on {{ st_client.addr }}:{{ st_client.port }}
+- Sync protocol is on port 22000 (TCP and UDP).
+- {% if st_client.disco.enable %}Using Discovery-server: https://{{ st_client.disco.addr }}:{{ st_client.disco.port }}/?id={{ st_client.disco.id }}{% else %}Discovery-server is disabled{% endif %}
+
+- {% if st_client.relay.enable %}Using Relay-server: https://{{ st_client.relay.addr }}:{{ st_client.relay.port }}/?id={{ st_client.relay.id }}{% else %}Relay-server is disabled{% endif %}
+
+- `syncthing` is {{ st_client.start.on_role_completion }} via systemd and {% if st_client.start.on_boot %}will be started automatically on boot{% else %}will not be started automatically on boot.{% endif %}
+
+- Client's ID: {{ st_client_id.stdout }}
+{% endif %}
+
+{% if st_install_disco %}
+Discovery-server:
+
+- Configured for the user "syncthing", UID {{ st_syncthing_user_stat.uid }}
+- Listening on {{ st_disco.addr }}:{{ st_disco.port }}
+- Discovery-server replication is {% if st_disco.replicate %}set to listen on {{ st_disco.replica.listen_addr }}:{{ st_disco.replica.listen_port }} and connect to {{ st_disco.replica.addr }}:{{ st_disco.replica.port }} {% else %}disabled.{% endif %}
+
+- `stdiscosrv` is {{ st_disco.start.on_role_completion }} via systemd and {% if st_disco.start.on_boot %}will be started automatically on boot{% else %}will not be started automatically on boot.{% endif %}
+
+- Discovery-server ID: {{ st_disco.id }}
+{% endif %}
+
+{% if st_install_relay %}
+Relay-server:
+
+- Configured for the user "syncthing", UID {{ st_syncthing_user_stat.uid }}
+- Listening on {{ st_relay.addr }}:{{ st_relay.port }}
+- {% if st_relay.nat.enabled %}Using UPnP/NAT-PMP to acquire external port mapping.{% else %}UPnP/NAT-PMP is disabled.{% endif %}
+
+- `strelaysrv` is {{ st_relay.start.on_role_completion }} via systemd and {% if st_relay.start.on_boot %}will be started automatically on boot{% else %}will not be started automatically on boot.{% endif %}
+
+- Relay-server ID: {{ st_relay.id }}
+{% endif %}

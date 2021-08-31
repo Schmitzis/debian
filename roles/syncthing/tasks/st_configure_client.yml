@@ -1,0 +1,330 @@
+---
+
+# --------------------------------------------------------------------------------------------------
+# Preflight, keeping here as it relies on the exisitng config and Syncthing being installed
+# --------------------------------------------------------------------------------------------------
+
+- name: Set config folder to the default one
+  set_fact:
+    st_client: '{{ st_client | combine({"config_dir": path}) }}'
+  when: not st_client.config_dir is defined or not st_client.config_dir
+  vars:
+    path: '{{ lookup("env","XDG_CONFIG_HOME") }}/syncthing'
+
+- name: Create config directory if it doesn't exist
+  file:
+    path: '{{ st_client.config_dir }}'
+    state: directory
+
+- name: Delete existing config
+  file:
+    path: '{{ st_client.config_dir }}/config.xml'
+    state: absent
+  when: st_client.reconfigure
+
+- name: Remove existing Client certificates
+  file:
+    path: '{{ item }}'
+    state: absent
+  with_items:
+    - '{{ st_client.config_dir }}/cert.pem'
+    - '{{ st_client.config_dir }}/key.pem'
+  when: st_client.recreate_certs
+
+- name: Generate config
+  shell:
+    cmd: 'syncthing -generate={{ st_client.config_dir }}'
+    chdir: '{{ st_user_stat.home }}'
+  when: st_client.reconfigure
+
+- name: Register current device id
+  shell:
+    cmd: syncthing -device-id
+  register: st_client_id
+  failed_when: st_client_id.stdout | length | int != 63
+  changed_when: st_client_id.rc != 0
+
+- name: Save Syncthing device id
+  set_fact:
+    st_client: '{{ st_client | combine({"id":st_client_id.stdout}) }}'
+
+- name: Overwrite Discovery-server ID with one obtained during this run
+  set_fact:
+    st_client: '{{ st_client | combine( { "disco":{"id":st_disco.id}}, recursive=True) }}'
+  when: st_client.disco.id_overwrite
+
+- name: Overwrite Relay ID with one obtained during this run
+  set_fact:
+    st_client: '{{ st_client | combine( { "relay":{"id":st_relay.id} } , recursive=True) }}'
+  when: st_client.relay.id_overwrite
+
+# --------------------------------------------------------------------------------------------------
+# Options section
+# --------------------------------------------------------------------------------------------------
+
+- name: Remove any existing `listenAddress` directives
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/listenAddress'
+    state: absent
+
+- name: Create `listenAddress` variable
+  set_fact:
+    st_client_listenAddress: 'tcp4://0.0.0.0:22000'
+
+- name: Add relay to the `listenAddress`
+  set_fact:
+    st_client_listenAddress: "{{ st_client_listenAddress }},relay://{{ st_client.relay.addr }}\
+                             :{{ st_client.relay.port }}/?id={{ st_client.relay.id }}"
+  when: st_client.relay.enable
+
+- name: Set `listenAddress` in XML config
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/listenAddress'
+    value: '{{ st_client_listenAddress }}'
+
+  # Broadcast == "local"
+- name: 'Set local announcements to {{ st_client.announce_broadcast }}'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/localAnnounceEnabled'
+    value: '{{ st_client.announce_broadcast | string | lower }}'
+
+  # Unicast == "global"
+- name: 'Set global announcements to {{ st_client.disco.enable }}'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/globalAnnounceEnabled'
+    value: '{{ st_client.disco.enable | string | lower }}'
+
+- name: Set global announcements server address aka Discovery-server
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/globalAnnounceServer'
+    # This *has* to be double-quoted
+    # ref.: https://stackoverflow.com/a/21699210
+    value: "https://{{ st_client.disco.addr }}:{{ st_client.disco.port }}\
+            /?id={{ st_client.disco.id }}"
+
+  # 100::/64 (ipv6 null-route) works, but still reduces the "successful Discovery" counter.
+  # Empty value does not have this behaviour, but shows an annoying notice in GUI.
+  # Choose your poison.
+- name: Disable ipv6 announcements
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/localAnnounceMCAddr'
+    value: '[0100:0000:0000:0000:FFFF:FFFF:FFFF:FFFF]:21027'
+
+- name: Do not open web-browser automatically
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/startBrowser'
+    value: 'false'
+
+- name: Disable usage-reporting
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/urAccepted'
+    value: '-1'
+
+- name: Remove usage-reporting URL
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/urURL'
+    value: ''
+
+- name: Remove Syncthing update-feed URL
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/releasesURL'
+    value: ''
+
+- name: Disable crash-reporting
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/crashReportingEnabled'
+    value: 'false'
+
+- name: Remove crash-reports URL
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/crashReportingURL'
+    value: ''
+
+- name: Set reporting delay to Mersenne prime
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/urInitialDelayS'
+    value: '2147483647'
+
+- name: 'Set relaying to {{ st_client.relay.enable }}'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/relaysEnabled'
+    value: '{{ st_client.relay.enable | string | lower }}'
+
+- name: 'Attempt to reconnect with the relay every
+         {{ st_client.relay.reconnect_interval_minutes }} minutes'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/relayReconnectIntervalM'
+    value: '{{ st_client.relay.reconnect_interval_minutes | string }}'
+  when: st_client.relay.enable
+
+- name: 'Set NAT to {{ st_client.nat }}'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/natEnabled'
+    value: '{{ st_client.nat | string | lower }}'
+
+- name: 'Disable automatic upgrades'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/autoUpgradeIntervalH'
+    value: '0'
+
+- name: 'Set minimum free disk space to {{ st_client.min_free_space }}%'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/minHomeDiskFree'
+    # Fails if integer is passed uncasted
+    value: '{{ st_client.min_free_space | string }}'
+
+  # ref. https://github.com/syncthing/syncthing/issues/7682
+  #
+  # INFO: quic://0.0.0.0:22000 detected NAT type: Symmetric UDP firewall
+  # INFO: quic://0.0.0.0:22000 resolved external address \
+  # quic://X.X.X.X:22000 (via stun.syncthing.net:3478)
+  #                           ^^^^^^^^^^^^^^^^^^
+  #            https://github.com/savchenko/minisync/issues/16
+  #
+  # Question to the audience:
+  #   - Can NAT traversal be enabled without a STUN server?
+  #
+- name: Disable STUN servers as we rely on relaying or direct connect
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/stunServer'
+    value: ''
+
+  # Does not make anything "untrusted", just enables the option
+- name: Enable 'untrusted' feature-flag
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/options/featureFlag'
+    value: 'untrusted'
+
+# --------------------------------------------------------------------------------------------------
+# Device section
+# --------------------------------------------------------------------------------------------------
+
+- name: Allow connecting to this device from ipv4 only
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/device[@id="{{ st_client.id }}"]/allowedNetwork'
+    value: 'tcp4://0.0.0.0/0'
+
+- name: Set device as untrusted
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/device/untrusted'
+    value: '{{ st_client.untrusted | string | lower }}'
+  when: st_client.untrusted
+
+# --------------------------------------------------------------------------------------------------
+# GUI section
+# --------------------------------------------------------------------------------------------------
+
+- name: 'Set GUI to {{ st_client.gui }}'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/gui'
+    attribute: 'enabled'
+    value: '{{ st_client.gui | string | lower }}'
+
+- name: 'Set GUI TLS to {{ st_client.gui_tls }}'
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/gui'
+    attribute: 'tls'
+    value: '{{ st_client.gui_tls | string | lower }}'
+
+- name: Set GUI listen address
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/gui/address'
+    value: '{{ st_client.addr }}:{{ st_client.port }}'
+  when: st_client.gui
+
+# --------------------------------------------------------------------------------------------------
+# Default folder section
+# --------------------------------------------------------------------------------------------------
+
+  # "One or more folder elements must be present in the file"
+- name: Create default share folder
+  file:
+    path: '{{ st_client.default_folder.path }}'
+    state: directory
+
+- name: Change default folder path
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/folder[@id="default"]'
+    attribute: 'path'
+    value: '{{ st_client.default_folder.path }}'
+
+- name: Pause default folder / share
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/folder[@id="default"]/paused'
+    value: '{{ st_client.default_folder.pause | string | lower }}'
+  when: st_client.default_folder.pause
+
+- name: Set default folder type
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/folder[@id="default"]'
+    attribute: 'type'
+    value: '{{ st_client.default_folder.type | string | lower }}'
+
+- name: Set minimum free disk space on the default folder
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/folder[@id="default"]/minDiskFree'
+    value: '{{ st_client.min_free_space | string | lower }}'
+
+# --------------------------------------------------------------------------------------------------
+# "Future" defaults section
+# --------------------------------------------------------------------------------------------------
+
+- name: Setting user-controlled objects that can be added *in future*
+  debug:
+    msg: |
+      Please stay tuned. This is not a bug.
+
+- name: Set default folder as "receive encrypted" for the future folders
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/defaults/folder[@id=""]'
+    attribute: 'type'
+    value: 'receiveencrypted'
+
+- name: Change default folder path for the future folders to $HOME
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/defaults/folder[@id=""]'
+    attribute: 'path'
+    value: '{{ st_client.user.home }}'
+
+- name: Set minimum free disk space for the future folders
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/defaults/folder[@id=""]/minDiskFree'
+    value: '{{ st_client.min_free_space | string | lower }}'
+
+- name: Set future devices as untrusted by default
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/defaults/device/untrusted'
+    value: '{{ st_client.untrusted | string | lower }}'

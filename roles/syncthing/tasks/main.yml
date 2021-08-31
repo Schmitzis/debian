@@ -1,0 +1,49 @@
+---
+- name: Run sanity-checks
+  import_tasks: st_preflight.yml
+  become: True
+  become_user: root
+  tags:
+    - st_assert
+
+- name: Install Syncthing applications
+  import_tasks: st_install.yml
+  become: True
+  become_user: root
+  tags:
+    - st_install
+
+- name: Configure Syncthing discovery server
+  import_tasks: st_configure_disco.yml
+  become: True
+  become_user: root
+  tags:
+    - st_disco
+
+- name: Configure Syncthing relay server
+  import_tasks: st_configure_relay.yml
+  become: True
+  become_user: root
+  tags:
+    - st_relay
+
+- name: Configure syncthing client
+  import_tasks: st_configure_client.yml
+  become: True
+  become_user: '{{ st_client.user.name }}'
+  tags:
+    - st_client
+
+- name: Start services
+  import_tasks: st_configure_systemd.yml
+  become: True
+  become_user: root
+  tags:
+    - st_systemd
+
+- name: Run all relevant handlers
+  meta: flush_handlers
+
+- name: Finale
+  debug:
+    msg: "{{ lookup('template', './finale.j2') }}"
