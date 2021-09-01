@@ -12,6 +12,12 @@
     regexp: '^#(net\/ipv6\/conf\/\w*\/autoconf\=0)'
     replace: '\1'
 
+- name: Disable logging in config
+  lineinfile:
+    path: /etc/ufw/ufw.conf
+    regexp: '^LOGLEVEL'
+    line: 'LOGLEVEL=off'
+
 - name: Whitelist operator's WAN IP before adding anything else
   ufw:
     rule: allow
@@ -29,19 +35,13 @@
     comment: Limit SSH via Ansible
   when: base_limit_ssh
 
-- name: Disable logging in config
-  lineinfile:
-    path: /etc/ufw/ufw.conf
-    regexp: '^LOGLEVEL'
-    line: 'LOGLEVEL=off'
-
 - name: Add UFW rules
   ufw:
     comment: '{{ item.comment | default(omit) }}'
     direction: '{{ item.direction | default("in") }}'  # in/out/router
     from_ip: '{{ item.from | default("any") }}'        # defaults to "any"
     port: '{{ item.port | default("any") }}'           # destination port
-    proto: '{{ item.proto | default("any") }}'
+    proto: '{{ item.proto | default("tcp") }}'         # protocol, TCP by default
     rule: '{{ item.rule }}'                            # allow/deny/limit/reject
     to_ip: '{{ item.to | default("any") }}'            # defaults to "any"
   with_items: '{{ base_ufw_rule }}'
