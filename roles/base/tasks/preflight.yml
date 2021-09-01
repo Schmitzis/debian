@@ -81,6 +81,13 @@
     success_msg: 'Inotify checks passed, limit is {{ inotify_max_user_watches }}'
     fail_msg: 'inotify limit calculated as {{ inotify_max_user_watches }}, this is wrong.\nPlease investigate'
 
+- name: Assert this is not a VM guest
+  set_fact:
+    base_VM_guest: False
+  when:
+    - "not 'Virtual Machine' in (ansible_board_name, ansible_facts.board_name)"
+    - "ansible_virtualization_role != 'guest'"
+
 - name: Parse cpuinfo
   shell:
     cmd: 'grep -i vendor /proc/cpuinfo | head -1 | awk "{print $3}"'

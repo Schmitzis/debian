@@ -170,7 +170,8 @@ base_fw_list:
 | firmware-linux-free   | Binary firmware for various drivers in the Linux kernel. |
 | firmware-misc-nonfree | Binary firmware for various drivers in the Linux kernel. |
 | firmware-realtek      | Binary firmware for Realtek wired/wifi/BT adapters.      |
-| fwupd-amd64-signed    | Tools to manage UEFI firmware updates (signed).          |
+
+`fwupd-amd64-signed` is installed only if target is a physical computer.
 
 ### Platform-specific firmware
 

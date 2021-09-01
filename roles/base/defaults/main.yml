@@ -1,4 +1,5 @@
 ---
+base_VM_guest: True
 gpg_files_found: []
 moduli_are_default: False
 sig_enforce: ''
