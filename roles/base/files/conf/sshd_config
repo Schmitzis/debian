@@ -1,66 +1,62 @@
 #
-# 06 Oct 2020
-# Debian-specific SSHD
+# Tue 17 Aug 2021
+# ===============
 #
 
-Port 22
+Port     22
 Protocol 2
-UseDNS no
-AddressFamily inet
-Compression delayed
 
 HostKey /etc/ssh/ssh_host_ed25519_key
-HostKey /etc/ssh/ssh_host_rsa_key
-
 
 # HostkeyAlgorithms: the public key algorithms accepted for an SSH server to authenticate itself to an SSH client
-HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com
+HostKeyAlgorithms sk-ssh-ed25519@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,ssh-ed25519
 
 # KexAlgorithms: the key exchange methods that are used to generate per-connection keys
 KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
 
 # Ciphers: the ciphers to encrypt the connection
-Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+Ciphers aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,
 
 # MACs: the message authentication codes used to detect traffic modification
 MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
 
-LogLevel ERROR
-StrictModes yes
+# Poke client every 15 seconds, drop connection if there is no response for a minute
+ClientAliveInterval 15
+ClientAliveCountMax 4
 
 LoginGraceTime 10
-MaxAuthTries 3
-MaxSessions 20
-MaxStartups 100:50:200
+MaxAuthTries   3
+MaxSessions    20
+MaxStartups    100:50:200
 
-# Poke client every 10 seconds, drop connection if there is no response for a minute
-ClientAliveInterval 10
-ClientAliveCountMax 6
-
-PubkeyAuthentication yes
-PermitRootLogin prohibit-password
-HostbasedAuthentication no
-PasswordAuthentication no
-PermitEmptyPasswords no
+AddressFamily                   inet
+AllowTcpForwarding              no
+Banner                          /dev/null
 ChallengeResponseAuthentication no
-KerberosAuthentication no
-GSSAPIAuthentication no
-IgnoreRhosts yes
-GatewayPorts no
-AllowTcpForwarding no
-X11Forwarding no
-
-UsePAM no
-PrintMotd no
-PrintLastLog no
-VersionAddendum none
-DebianBanner no
-Banner /dev/null
+Compression                     delayed
+DebianBanner                    no
+GSSAPIAuthentication            no
+GatewayPorts                    no
+HostbasedAuthentication         no
+IgnoreRhosts                    yes
+KerberosAuthentication          no
+LogLevel                        ERROR
+PasswordAuthentication          no
+PermitEmptyPasswords            no
+PermitRootLogin                 prohibit-password
+PrintLastLog                    no
+PrintMotd                       no
+PubkeyAuthentication            yes
+StrictModes                     yes
+UseDNS                          no
+UsePAM                          no
+VersionAddendum                 none
+X11Forwarding                   no
 
 Subsystem sftp internal-sftp
 
 Match Group agents
-    ChrootDirectory %h
-    AllowTcpForwarding no
     AllowAgentForwarding no
-    PermitTunnel no
+    AllowTcpForwarding   no
+    ChrootDirectory      %h
+    PermitTunnel         no
