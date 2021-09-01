@@ -7,11 +7,6 @@
     autoremove: True
   when: base_pkg_remove | length > 0
 
-- name: Install HTTPs apt transport
-  apt:
-    pkg: apt-transport-https
-    state: present
-
 - name: Copy /etc/apt/sources.list
   copy:
     src: conf/sources.list
