@@ -56,7 +56,11 @@
       - firmware-linux-free
       - firmware-misc-nonfree
       - firmware-realtek
-      - fwupd-amd64-signed
+
+- name: Merge fwupd into the global install list
+  set_fact:
+    base_list_global: '{{ base_list_global | union(["fwupd-amd64-signed"]) }}'
+  when: not base_VM_guest
 
 - name: Merge AMD-specific packages
   set_fact:
