@@ -296,7 +296,7 @@
     create: 'yes'
     line: '{{ item }}'
   with_items:
-    - 'APT::ExtractTemplates::TempDir "~/.cache/apt";'
+    - 'APT::ExtractTemplates::TempDir "~/.cache/TMPDIR/apt";'
     - 'APT::Get::AllowUnauthenticated "false";'
     - 'APT::Periodic::AutocleanInterval "2";'
     - 'Acquire::AllowTLS "true";'
@@ -306,6 +306,16 @@
     - 'Acquire::https::AllowRedirect "false";'
     - 'Acquire::https::Timeout "10";'
     - 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
+
+- name: Ensure that TempDir for apt is present
+  file:
+    path: "~/.cache/TMPDIR/apt" 
+    state: directory
+  become: True
+  become_user: '{{ item }}'
+  with_items:
+    - '{{ ansible_env.USER }}'
+    - root
 
 - name: Propagate logrotate configs
   copy:
