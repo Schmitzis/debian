@@ -12,6 +12,15 @@
     regexp: '^#(net\/ipv6\/conf\/\w*\/autoconf\=0)'
     replace: '\1'
 
+- name: Whitelist operator's WAN IP before adding anything else
+  ufw:
+    rule: allow
+    from_ip: '{{ base_operator_ip_wan }}'
+    direction: in
+    comment: 'Whitelist {{ base_operator_ip_wan }}'
+    insert: 1
+  when: base_operator_ip_whitelist
+
 - name: Limit SSH connections
   ufw:
     rule: limit

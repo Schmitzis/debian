@@ -63,6 +63,7 @@ Ansible ≥2.10
 | base_logind_lid_action         | What to do when the lid is closed.                                       | "suspend"          |
 | base_logind_powerbutton_action | Action to execute when power button is pressed.                          | "poweroff"         |
 | base_nmi_watchdog              | Enable NMI watchdog?                                                     | True               |
+| base_operator_ip_whitelist     | Whitelist WAN IP of the Ansible controller?                              | False              |
 | base_pkg_remove                | List of packages to remove.                                              | ['rpcbind']        |
 | base_set_capslock              | Set <kbd>CapsLock</kbd> as <kbd>Ctrl</kbd>.                              | False              |
 | base_set_dpkg_console          | Configure framebuffer/console: font size, encoding, etc.                      | True               |
