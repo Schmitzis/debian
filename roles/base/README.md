@@ -35,6 +35,7 @@ Ansible ≥2.10
 | base_disable_firewire          | Similar to the above.                                                    | True               |
 | base_disable_hfs               | ...                                                                      | True               |
 | base_disable_nonsof            | Blacklist `snd_hda_intel` and `snd_soc_skl` kernel modules.              | False              |
+| base_install_recommends        | Install recommended packages by default?                                 | True               |
 | base_disable_speaker           | Internal "beeper" only, nothing to do with ALSA.                         | True               |
 | base_disable_thunderbolt       | Blacklist Thunderbolt kernel modules. [See why](https://thunderspy.io/). | True               |
 | base_enable_audit              | Enable kernel audit framework.                                           | False              |

@@ -298,6 +298,7 @@
   with_items:
     - 'APT::ExtractTemplates::TempDir "~/.cache/TMPDIR/apt";'
     - 'APT::Get::AllowUnauthenticated "false";'
+    - 'APT::Install-Recommends "{{ base_install_recommends | int }}";'
     - 'APT::Periodic::AutocleanInterval "2";'
     - 'Acquire::AllowTLS "true";'
     - 'Acquire::ForceIPv4 "true";'
@@ -370,4 +371,3 @@
     - base_sudo_cmd_nopwd | length > 6
     - base_sudo_user != 'root'
     - base_sudo_set
-

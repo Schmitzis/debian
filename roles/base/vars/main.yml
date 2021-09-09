@@ -6,6 +6,7 @@ base_disable_bt_autosuspend: false
 base_disable_firewire: true
 base_disable_hfs: true
 base_disable_nonsof: false
+base_install_recommends: true
 base_disable_speaker: true
 base_disable_thunderbolt: true
 base_enable_audit: false
