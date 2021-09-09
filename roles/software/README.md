@@ -12,6 +12,7 @@ Ansible ≥2.10
 |-------------------------------|-----------------------------------------------|---------|
 | sw_alsa_out_card              | Default ALSA output card                      | 0       |
 | sw_alsa_out_device            | Default ALSA output device                    | 0       |
+| sw_list_backports             | Packages to install from `bullseye-backports` | ['...'] |
 | sw_setup_apt                  | List of arbitrary packages to `apt install`.  | []      |
 | sw_setup_audio                | Setup ALSA/PulseAudio                         | true    |
 | sw_setup_clevis               | Install Clevis packages.                      | false   |
@@ -33,6 +34,10 @@ Ansible ≥2.10
 | sw_virtio_network_autostart   | Autostart default virtio network on boot.     | true    |
 | sw_virtio_use_default_network | Use NAT-based, "default" virtio setup.        | true    |
 | sw_virtio_user_addgroup       | Add target user to `virtio` group.            | true    |
+
+### ['...']
+
+These lists are not empty. See their default content in [./vars/main.yml](./vars/main.yml).
 
 ### sw_setup_apt
 

@@ -337,6 +337,16 @@
   delay: 3
   retries: 3
 
+- name: Install backports
+  apt:
+    pkg: '{{ sw_list_backports }}'
+    state: present
+    default_release: bullseye-backports
+    install_recommends: False
+  delay: 3
+  retries: 3
+  when: sw_list_backports | length > 0
+
 # -------------------------------
 
   # Has to be after the install step as i2c group & i2c-dev do not exist yet
