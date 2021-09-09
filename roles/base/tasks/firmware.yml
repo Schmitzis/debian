@@ -1,7 +1,7 @@
 ---
 - name: Download firmware files outside of the tree and install them
   get_url:
-    backup: yes
+    backup: True
     checksum: '{{ item.checksum }}'
     dest: '/lib/firmware/{{ item.dest }}'
     owner: root
