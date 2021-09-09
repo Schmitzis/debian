@@ -1,6 +1,7 @@
 ---
 sw_alsa_out_card: 0
 sw_alsa_out_device: 0
+sw_setup_apt: []
 sw_setup_audio: true
 sw_setup_clevis: false
 sw_setup_deb: []

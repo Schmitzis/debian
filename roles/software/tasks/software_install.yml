@@ -323,6 +323,11 @@
     sw_list_global: '{{ sw_list_global | union(["ddcutil"]) }}'
   when: sw_setup_i2c
 
+- name: Merge user supplied packages into the global install list
+  set_fact:
+    sw_list_global: '{{ sw_list_global | union(sw_setup_apt) }}'
+  when: sw_setup_apt | length > 0
+
 # -------------------------------
 
 - name: Install selected packages
