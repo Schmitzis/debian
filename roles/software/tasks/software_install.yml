@@ -56,6 +56,7 @@
         - bc
         - checksec
         - curl
+        - mtr-tiny
         - debian-goodies
         - debian-security-support # check-support-status
         - dfc
@@ -74,16 +75,17 @@
         - ncal
         - ncdu
         - p7zip-full
+        - pinentry-tty
         - powertop
         - rar
         - ripgrep
         - rpl
         - rsync
         - silversearcher-ag
+        - sshfs
         - tmux
         - tree
         - universal-ctags
-        - unrar
         - unzip
         - wget
         - whois
@@ -136,6 +138,14 @@
       - zstd
   when: sw_setup_wayland
 
+- name: Configure swaylock PAM
+  lineinfile:
+    create: true
+    line: 'auth include login'
+    path: /usr/local/etc/pam.d/swaylock
+    state: present
+  when: sw_setup_wayland
+
 - name: Merge clevis into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_clevis) }}'
@@ -170,6 +180,7 @@
     sw_list_fs:
       - dosfstools
       - fuse-zip
+      - fuse3
       - fuseiso
       - gocryptfs
       - udisks2

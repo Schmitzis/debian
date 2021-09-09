@@ -41,7 +41,7 @@ These lists are not empty. See their default content in [./vars/main.yml](./vars
 
 ### sw_setup_apt
 
-List of optional packages to `apt install`.
+Packages should be availalbe in the chosen repositories. You can check via `apt policy`, `rmadison` or [Tracker](https://tracker.debian.org/).
 
 ### sw_setup_deb
 
