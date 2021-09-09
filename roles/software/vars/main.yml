@@ -1,9 +1,6 @@
 ---
 sw_alsa_out_card: 0
 sw_alsa_out_device: 0
-sw_list_backports:
-  - testssl.sh
-  - diffoscope
 sw_setup_apt: []
 sw_setup_audio: true
 sw_setup_clevis: false
@@ -25,3 +22,240 @@ sw_virtio_install: true
 sw_virtio_network_autostart: true
 sw_virtio_use_default_network: true
 sw_virtio_user_addgroup: true
+
+
+#
+# Backports ---------------------------------------------------------------------------------------
+#
+sw_list_backports:
+  - testssl.sh
+  - diffoscope
+
+
+#
+# Clevis ------------------------------------------------------------------------------------------
+#
+sw_list_clevis:
+  - clevis
+  - clevis-initramfs
+  - clevis-luks
+  - clevis-systemd
+  - clevis-tpm2
+
+
+#
+# Fonts -------------------------------------------------------------------------------------------
+#
+sw_list_fonts:
+  - fonts-ibm-plex
+  - fonts-jetbrains-mono
+  - fonts-liberation
+  - fonts-powerline
+  - fonts-recommended
+  - fonts-terminus
+  - fonts-terminus-otb
+  - fonts-ubuntu
+
+
+#
+# Filesystems -------------------------------------------------------------------------------------
+#
+sw_list_fs:
+  - dosfstools
+  - fuse-zip
+  - fuse3
+  - fuseiso
+  - gocryptfs
+  - udisks2
+
+#
+# Development -------------------------------------------------------------------------------------
+#
+sw_list_dev:
+  - bpython
+  - git
+  - git-sizer
+  - hexyl
+  - libxml2-utils # xmllint
+  - make
+  - pax-utils
+  - python3-pip
+  - python3-virtualenv
+  - strace
+
+#
+# Office ------------------------------------------------------------------------------------------
+#
+sw_list_office:
+  - antiword
+  - catdoc
+  - dbus-x11 # needed by loffice apparently
+  - dictionaries-common
+  - djvulibre-bin
+  - docx2txt
+  - html2text
+  - hunspell
+  - hunspell-en-au
+  - liblibreofficekitgtk # needed for LO menus
+  - libreoffice-gtk3
+  - libreoffice-l10n-en-gb
+  - libreoffice-style-sifr
+  - lyx
+  - mythes-en-au
+  - odt2txt
+  - pandoc
+  - unrtf
+  - wordnet
+  - wordnet-sense-index
+  - wv
+
+#
+# Internet ----------------------------------------------------------------------------------------
+#
+sw_list_internet:
+  - filezilla
+  - firefox-esr
+  - firefox-esr-l10n-en-gb
+  - nmap
+  - bind9-dnsutils
+  - syncthing
+  - weechat
+
+
+#
+# Multimedia --------------------------------------------------------------------------------------
+#
+sw_list_multimedia:
+  - atomicparsley # youtube-dl, merges covers into audio files
+  - ffmpeg
+  - id3v2
+  - imv
+  - libimage-exiftool-perl
+  - mpd
+  - mpv
+  - ncmpcpp
+  - youtube-dl
+
+
+#
+# Wireless ----------------------------------------------------------------------------------------
+#
+sw_list_wireless:
+  - blueman
+  - bluez-firmware
+  - iwd
+  - wavemon
+
+
+#
+# Audio -------------------------------------------------------------------------------------------
+#
+sw_list_audio:
+  - alsa-firmware-loaders
+  - alsa-topology-conf
+  - alsa-ucm-conf
+  - alsa-utils
+  - firmware-sof-signed
+
+
+#
+# VirtIO ------------------------------------------------------------------------------------------
+#
+sw_list_virtio:
+  - virt-manager
+  - libvirt-daemon-config-network
+  - libvirt-daemon-config-nwfilter
+  - libvirt-daemon-system
+
+#
+# Utilities ---------------------------------------------------------------------------------------
+#
+sw_list_utils:
+  - ack
+  - apparmor-profiles
+  - apparmor-profiles-extra
+  - apparmor-utils
+  - apt-listchanges
+  - aria2
+  - atool
+  - bat
+  - bc
+  - checksec
+  - curl
+  - mtr-tiny
+  - debian-goodies
+  - debian-security-support # check-support-status
+  - dfc
+  - entr
+  - exfatprogs
+  - fd-find
+  - fzf
+  - gawk
+  - git
+  - gnupg2
+  - grc
+  - hstr
+  - htop
+  - jq
+  - linux-cpupower
+  - ncal
+  - ncdu
+  - p7zip-full
+  - pinentry-tty
+  - powertop
+  - rar
+  - ripgrep
+  - rpl
+  - rsync
+  - silversearcher-ag
+  - sshfs
+  - tmux
+  - tree
+  - universal-ctags
+  - unzip
+  - wget
+  - whois
+
+#
+# Wayland -----------------------------------------------------------------------------------------
+#
+sw_list_wayland:
+  - adwaita-icon-theme
+  - adwaita-qt
+  - archivemount
+  - brotli
+  - colortest-python
+  - command-not-found
+  - foot
+  - foot-terminfo
+  - gcolor3
+  - gnome-icon-theme
+  - gnome-themes-standard
+  - grim
+  - keepassxc
+  - libglib2.0-bin # gsettings
+  - libplist-utils
+  - libsixel-bin
+  - light
+  - lz4
+  - mako-notifier
+  - physlock
+  - qt5ct
+  - qtwayland5
+  - rlwrap # cht.sh dependency
+  - scdaemon
+  - slurp # screen area selector
+  - socat
+  - sway
+  - swaybg
+  - swayidle
+  - undertime
+  - unicode-data
+  - waybar
+  - wdisplays
+  - wf-recorder
+  - wl-clipboard
+  - wofi
+  - xdg-utils # imv dependency
+  - yubioath-desktop
+  - zstd

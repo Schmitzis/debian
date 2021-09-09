@@ -39,56 +39,11 @@
       pkg:
         - vifm
         - neovim
+        - python3-neovim
 
   - name: Merge utilitites into the global install list
     set_fact:
       sw_list_global: '{{ sw_list_global | union(sw_list_utils) }}'
-    vars:
-      sw_list_utils:
-        - ack
-        - apparmor-profiles
-        - apparmor-profiles-extra
-        - apparmor-utils
-        - apt-listchanges
-        - aria2
-        - atool
-        - bat
-        - bc
-        - checksec
-        - curl
-        - mtr-tiny
-        - debian-goodies
-        - debian-security-support # check-support-status
-        - dfc
-        - entr
-        - exfatprogs
-        - fd-find
-        - fzf
-        - gawk
-        - git
-        - gnupg2
-        - grc
-        - hstr
-        - htop
-        - jq
-        - linux-cpupower
-        - ncal
-        - ncdu
-        - p7zip-full
-        - pinentry-tty
-        - powertop
-        - rar
-        - ripgrep
-        - rpl
-        - rsync
-        - silversearcher-ag
-        - sshfs
-        - tmux
-        - tree
-        - universal-ctags
-        - unzip
-        - wget
-        - whois
 
   when: sw_setup_utils
   # block end (Utilities)
@@ -96,46 +51,6 @@
 - name: Merge Wayland into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_wayland) }}'
-  vars:
-    sw_list_wayland:
-      - adwaita-icon-theme
-      - adwaita-qt
-      - archivemount
-      - brotli
-      - colortest-python
-      - command-not-found
-      - gcolor3
-      - gnome-icon-theme
-      - gnome-themes-standard
-      - grim
-      - keepassxc
-      - libglib2.0-bin # gsettings
-      - libplist-utils
-      - libsixel-bin
-      - light
-      - lz4
-      - mako-notifier
-      - physlock
-      - qt5ct
-      - qtwayland5
-      - rlwrap # cht.sh dependency
-      - scdaemon
-      - slurp # screen area selector
-      - socat
-      - sway
-      - swaybg
-      - swayidle
-      - undertime
-      - unicode-data
-      - waybar
-      - foot
-      - foot-terminfo
-      - wdisplays
-      - wf-recorder
-      - wl-clipboard
-      - wofi
-      - yubioath-desktop
-      - zstd
   when: sw_setup_wayland
 
 - name: Configure swaylock PAM
@@ -149,102 +64,31 @@
 - name: Merge clevis into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_clevis) }}'
-  vars:
-    sw_list_clevis:
-      - clevis
-      - clevis-initramfs
-      - clevis-luks
-      - clevis-systemd
-      - clevis-tpm2
   when: sw_setup_clevis
 
 - name: Merge fonts into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_fonts) }}'
-  vars:
-    sw_list_fonts:
-      - fonts-ibm-plex
-      - fonts-jetbrains-mono
-      - fonts-liberation
-      - fonts-powerline
-      - fonts-recommended
-      - fonts-terminus
-      - fonts-terminus-otb
-      - fonts-ubuntu
   when: sw_setup_fonts
 
 - name: Merge fs into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_fs) }}'
-  vars:
-    sw_list_fs:
-      - dosfstools
-      - fuse-zip
-      - fuse3
-      - fuseiso
-      - gocryptfs
-      - udisks2
   when: sw_setup_fs
 
 - name: Merge dev into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_dev) }}'
-  vars:
-    sw_list_dev:
-      - bpython
-      - cargo
-      - git
-      - git-sizer
-      - hexyl
-      - libxml2-utils # xmllint
-      - make
-      - pax-utils
-      - python3-pip
-      - python3-virtualenv
-      - rustc
-      - strace
   when: sw_setup_dev
 
 - name: Merge office into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_office) }}'
-  vars:
-    sw_list_office:
-      - antiword
-      - catdoc
-      - dbus-x11 # needed by loffice apparently
-      - dictionaries-common
-      - djvulibre-bin
-      - docx2txt
-      - html2text
-      - hunspell
-      - hunspell-en-au
-      - liblibreofficekitgtk # needed for LO menus
-      - libreoffice-gtk3
-      - libreoffice-l10n-en-gb
-      - libreoffice-style-sifr
-      - lyx
-      - mythes-en-au
-      - odt2txt
-      - pandoc
-      - unrtf
-      - wordnet
-      - wordnet-sense-index
-      - wv
   when: sw_setup_office
 
 - name: Merge internet into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_internet) }}'
-  vars:
-    sw_list_internet:
-      - filezilla
-      - firefox-esr
-      - firefox-esr-l10n-en-gb
-      - nmap
-      - bind9-dnsutils
-      - syncthing
-      - weechat
   when: sw_setup_internet
 
   # Setup multimedia
@@ -253,17 +97,6 @@
   - name: Merge multimedia into the global install list
     set_fact:
       sw_list_global: '{{ sw_list_global | union(sw_list_multimedia) }}'
-    vars:
-      sw_list_multimedia:
-          - atomicparsley # youtube-dl, merges covers into audio files
-          - ffmpeg
-          - id3v2
-          - imv
-          - libimage-exiftool-perl
-          - mpd
-          - mpv
-          - ncmpcpp
-          - youtube-dl
 
   - name: Create mpd lyrics folder
     file:
@@ -276,57 +109,19 @@
   # Block end (multimedia)
 
   # Wireless
-- block:
-
-    # TODO:
-    #   Remove this once linux-image and FWs are updated
-    #   Prevents iwd from being stopped/started. Restart works.
-    #   Context: https://bugs.gentoo.org/746539
-    #   Should be fixed by: https://lore.kernel.org/linux-wireless/iwlwifi.20210409123755.ba2ea961f4ae.I8fde32d3196e860efa3b4ec464c42194195b42ec@changeid/
-    # - name: Instruct systemd to hold IWD until link is up
-    #   lineinfile:
-    #     path: '{{ item }}'
-    #     line: 'ExecStartPre=ip link set wlan0 up'
-    #     insertafter: 'StateDirectoryMode=0700'
-    #   with_items:
-    #     - '/lib/systemd/system/iwd.service'
-    #     - '/usr/lib/systemd/system/iwd.service'
-    #     - '/etc/systemd/system/multi-user.target.wants/iwd.service'
-
-  - name: Merge wireless into the global install list
-    set_fact:
-      sw_list_global: '{{ sw_list_global | union(sw_list_wireless) }}'
-    vars:
-      sw_list_wireless:
-        - blueman
-        - bluez-firmware
-        - iwd
-        - wavemon
-
+- name: Merge wireless into the global install list
+  set_fact:
+    sw_list_global: '{{ sw_list_global | union(sw_list_wireless) }}'
   when: sw_setup_wireless
-  # block end
 
 - name: Merge audio into the global install list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_audio) }}'
-  vars:
-    sw_list_audio:
-      - alsa-firmware-loaders
-      - alsa-topology-conf
-      - alsa-ucm-conf
-      - alsa-utils
-      - firmware-sof-signed
   when: sw_setup_audio
 
 - name: Merge virtio packages to the global list
   set_fact:
     sw_list_global: '{{ sw_list_global | union(sw_list_virtio) }}'
-  vars:
-    sw_list_virtio:
-      - virt-manager
-      - libvirt-daemon-config-network
-      - libvirt-daemon-config-nwfilter
-      - libvirt-daemon-system
   when: sw_virtio_install
 
 - name: Merge ddcutil into the global install list
@@ -378,7 +173,7 @@
   when: sw_setup_i2c
   # block end (i2c)
 
-  # Install user-provided packages if there are any
+  # Install user-provided *.deb files if there are any
 - block:
 
     - name: Check if user-supplied .DEBs are installed

@@ -12,7 +12,19 @@ Ansible ≥2.10
 |-------------------------------|-----------------------------------------------|---------|
 | sw_alsa_out_card              | Default ALSA output card                      | 0       |
 | sw_alsa_out_device            | Default ALSA output device                    | 0       |
+| sw_list_audio                 | Audio-related packages.                       | ['...'] |
 | sw_list_backports             | Packages to install from `bullseye-backports` | ['...'] |
+| sw_list_clevis                | Clevis with systemd integration.              | ['...'] |
+| sw_list_dev                   | Development tooling.                          | ['...'] |
+| sw_list_fonts                 | Various system fonts.                         | ['...'] |
+| sw_list_fs                    | uDisks, FUSE and FAT support, `gocryptfs`.    | ['...'] |
+| sw_list_internet              | Tools to comfortably browse the internet.     | ['...'] |
+| sw_list_multimedia            | Music and video playback. Image viewer.       | ['...'] |
+| sw_list_office                | LibreOffice and smaller programs.             | ['...'] |
+| sw_list_utils                 | Extensive selection of various utilities.     | ['...'] |
+| sw_list_virtio                | Everything related to `libvirt`.              | ['...'] |
+| sw_list_wayland               | Wayland-desktop collective.                   | ['...'] |
+| sw_list_wireless              | WiFi and bluetooth support.                   | ['...'] |
 | sw_setup_apt                  | List of arbitrary packages to `apt install`.  | []      |
 | sw_setup_audio                | Setup ALSA/PulseAudio                         | true    |
 | sw_setup_clevis               | Install Clevis packages.                      | false   |
