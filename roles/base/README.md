@@ -29,7 +29,6 @@ Ansible ≥2.10
 | Variable                       | Description                                                              | Default            |
 |--------------------------------|--------------------------------------------------------------------------|--------------------|
 | base_allow_reboot              | Automatically reboot target machine if necessary.                        | False              |
-| base_limit_ssh                 | Allow (and limit) incoming SSH.                                          | False              |
 | base_disable_bluetooth         | Likewise.                                                                | True               |
 | base_disable_bt_autosuspend    | Disable Bluetooth autosuspend. Useful with buggy handsfree devices.      | False              |
 | base_disable_firewire          | Similar to the above.                                                    | True               |
@@ -56,6 +55,7 @@ Ansible ≥2.10
 | base_kresd_secondary_hostname  | ...                                                                      | dns.quad9.net      |
 | base_kresd_secondary_ip        | ...                                                                      | 149.112.112.112    |
 | base_kresd_tls                 | Boolean, forward queries via TCP/TLS or UDP                              | True (TLS)         |
+| base_limit_ssh                 | Allow and limit incoming SSH.                                            | False              |
 | base_locale                    | For example, "en_GB.UTF-8".                                              | en_AU.UTF8         |
 | base_locale_singular           | Instruct `apt` to avoid installing extra languages.                      | True               |
 | base_logind_configure          | Handle idle via `logind`? Configures `/etc/logind.conf`.                 | false              |
@@ -67,7 +67,7 @@ Ansible ≥2.10
 | base_operator_ip_whitelist     | Whitelist WAN IP of the Ansible controller?                              | False              |
 | base_pkg_remove                | List of packages to remove.                                              | ['rpcbind']        |
 | base_set_capslock              | Set <kbd>CapsLock</kbd> as <kbd>Ctrl</kbd>.                              | False              |
-| base_set_dpkg_console          | Configure framebuffer/console: font size, encoding, etc.                      | True               |
+| base_set_dpkg_console          | Configure framebuffer/console: font size, encoding, etc.                 | True               |
 | base_set_dpkg_overrides        | Tighten various filesystem permissions. Use with care!                   | False              |
 | base_set_hostname              | Set target's hostname to the `inventory_hostname`                        | False              |
 | base_set_sigenforce            | Enforce kernel modules signature verification, only with SecureBoot.     | True               |
@@ -109,6 +109,8 @@ base_ufw_rule:
       proto: 'tcp',
       rule: 'deny' }
 ```
+
+Keep in mind that using `proto: any` might have unintended consequences.
 
 #### Quirks
 

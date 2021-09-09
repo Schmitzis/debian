@@ -1,12 +1,10 @@
 ---
 base_allow_reboot: true
-base_limit_ssh: false
 base_disable_bluetooth: true
 base_disable_bt_autosuspend: false
 base_disable_firewire: true
 base_disable_hfs: true
 base_disable_nonsof: false
-base_install_recommends: true
 base_disable_speaker: true
 base_disable_thunderbolt: true
 base_enable_audit: false
@@ -19,6 +17,7 @@ base_grub_timeout: 1
 base_hda_options: []
 base_hide_pid: false
 base_init_on_free: false
+base_install_recommends: true
 base_kresd_blocklist: ""
 base_kresd_install: false
 base_kresd_listen_on_ip: 127.0.0.1
@@ -27,6 +26,7 @@ base_kresd_primary_ip: 9.9.9.9
 base_kresd_secondary_hostname: dns.quad9.net
 base_kresd_secondary_ip: 149.112.112.112
 base_kresd_tls: true
+base_limit_ssh: false
 base_locale: 'en_AU.UTF-8'
 base_locale_singular: true
 base_logind_configure: false

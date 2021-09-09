@@ -15,18 +15,14 @@
     success_msg: 'Detected 5.10 LTS kernel'
     fail_msg: 'Unsupported kernel version, aborting.'
 
-  # Hostname
-- block:
-
-  - name: Assert that desirable hostname is valid
-    assert:
-      that: inventory_hostname is regex('^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$')
-      fail_msg: 'Requested hostname is invalid.\nSee the RFC #1123'
-      success_msg: 'Will set target hostname to "{{ inventory_hostname }}"'
-    when: inventory_hostname | string | length > 0
-
-  when: base_set_hostname
-  # block end
+- name: Assert that desirable hostname is valid
+  assert:
+    that: inventory_hostname is regex('^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$')
+    fail_msg: 'Requested hostname is invalid.\nSee the RFC #1123'
+    success_msg: 'Will set target hostname to "{{ inventory_hostname }}"'
+  when:
+    - inventory_hostname | string | length > 0
+    - base_set_hostname
 
 - name: Check if user has an active sudo ticket
   shell:

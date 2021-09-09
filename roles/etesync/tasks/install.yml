@@ -53,8 +53,8 @@
   #   - https://github.com/pypa/pip/issues/7666
   #   - https://github.com/ansible/ansible/issues/57436
   environment:
-    TMPDIR: "{{ ansible_env.HOME }}/.cache/TMPDIR"
-  become: yes
+    TMPDIR: '{{ ansible_env.HOME }}/.cache/TMPDIR'
+  become: True
   become_user: '{{ ansible_env.USER }}'
   become_flags: '--login'
   become_method: machinectl
