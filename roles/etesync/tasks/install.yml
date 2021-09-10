@@ -55,9 +55,10 @@
   environment:
     TMPDIR: '{{ ansible_env.HOME }}/.cache/TMPDIR'
   become: True
-  become_user: '{{ ansible_env.USER }}'
+  become_user: root
   become_flags: '--login'
-  become_method: machinectl
+  # open a new systemd session that goes through pam_systemd
+  become_method: sudo
 
 - name: Remove example configs
   file:
