@@ -18,4 +18,4 @@
     state: restarted
     masked: False
     enabled: True
-  when: esc_nginx_provision.changed or esc_nginx_enable.changed
+  when: esc_nginx_provision.changed or esc_nginx_enable.changed # noqa 503

@@ -2,12 +2,14 @@
 - name: Run preflight checks
   import_tasks: preflight.yml
   become: True
+  become_user: root
   tags:
     - base_preflight
 
 - name: Setup hostname, locale and timezone
   import_tasks: identity.yml
   become: True
+  become_user: root
   tags:
     - base_locale
 
@@ -20,12 +22,14 @@
 - name: Bootstrap packages
   import_tasks: pkg_bootstrap.yml
   become: True
+  become_user: root
   tags:
     - base_pkg_bootstrap
 
 - name: Install and configure Knot-resolver
   import_tasks: pkg_resolver.yml
   become: True
+  become_user: root
   when: base_kresd_install
   tags:
     - base_knot
@@ -33,6 +37,7 @@
 - name: Install and configure thermald
   import_tasks: thermald.yml
   become: True
+  become_user: root
   when:
     - base_thermald_profiles | length > 0
     - '"Intel" in cpu_vendor'
@@ -42,42 +47,47 @@
 - name: Configure kernel modules
   import_tasks: modules.yml
   become: True
+  become_user: root
   tags:
     - base_settings
 
 - name: Set various settings
   import_tasks: settings.yml
   become: True
+  become_user: root
   tags:
     - base_settings
 
 - name: Configure GRUB
   import_tasks: grub.yml
   become: True
+  become_user: root
   tags:
     - base_grub
 
 - name: Initialise GPG
   import_tasks: gpg.yml
-  become: False
   tags:
     - base_gpg
 
 - name: Configure OpenSSH
   import_tasks: openssh.yml
   become: True
+  become_user: root
   tags:
     - base_openssh
 
 - name: Configure UFW
   import_tasks: ufw.yml
   become: True
+  become_user: root
   tags:
     - base_ufw
 
 - name: Reconfigure console via dpkg
   import_tasks: dpkg_console.yml
   become: True
+  become_user: root
   when: base_set_dpkg_console
   tags:
     - base_dpkg_console
@@ -88,6 +98,7 @@
 - name: Install various firmware
   import_tasks: firmware.yml
   become: True
+  become_user: root
   tags:
     - base_firmware
 

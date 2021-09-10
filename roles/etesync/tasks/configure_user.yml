@@ -15,7 +15,8 @@
     esc_user_found: '{{ esc_user in esc_getent["ansible_facts"]["getent_passwd"] }}'
 
   # When user doesn't exist
-- block:
+- name: (BLOCK) User does not exist
+  block:
 
   - name: Throw random seeds
     set_fact:

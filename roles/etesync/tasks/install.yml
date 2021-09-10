@@ -1,27 +1,11 @@
 ---
-- name: Check if nginx is/was installed
-  shell:
-    cmd: 'dpkg-query --show nginx'
-  failed_when: false
-  changed_when: false
-  register: esc_nginx_dpkg
-
-  # >> If nginx isn't installed...
-- block:
-
-    # Fails if ipv6 is disabled in kernel, #869799
-  - name: Install nginx
-    apt:
-      name: nginx-extras
-      state: latest
-    register: esc_nginx_installed
-    failed_when: False
-    when: esc_nginx_dpkg.rc != 0
-
-  - name: Work around bug `#869799`
-    file:
-      path: /etc/nginx/sites-enabled/default
-      state: absent
+- name: Install nginx
+  apt:
+    name: nginx-extras
+    state: present
+  register: esc_nginx_installed
+  # Fails if ipv6 is disabled in kernel, #869799
+  failed_when: False
 
 - name: Work around bug `#869799`
   file:
@@ -31,7 +15,7 @@
 - name: Install dependencies
   apt:
     name: '{{ pkg }}'
-    state: latest
+    state: present
   vars:
     pkg:
       - certbot
@@ -64,7 +48,7 @@
   environment:
     TMPDIR: '{{ ansible_env.HOME }}/.cache/TMPDIR'
   become: True
-  become_user: root
+  become_user: '{{ ansible_env.USER }}'
   become_flags: '--login'
   # open a new systemd session that goes through pam_systemd
   become_method: sudo

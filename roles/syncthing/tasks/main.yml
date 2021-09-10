@@ -46,4 +46,4 @@
 
 - name: Finale
   debug:
-    msg: "{{ lookup('template', './finale.j2') }}"
+    msg: '{{ lookup("template", "./finale.j2") }}'

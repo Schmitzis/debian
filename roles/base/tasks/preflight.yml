@@ -111,8 +111,8 @@
   register: base_bootmode
   changed_when: false
 
-  # Whitelist op's WAN IP
-- block:
+- name: Whitelist op's WAN IP
+  block:
 
   - name: Get operator`s WAN IP
     shell:

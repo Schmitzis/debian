@@ -3,25 +3,30 @@
   apt:
     name: ['wireguard', 'wireguard-tools']
     state: present
+  become: True
+  become_user: root
   tags:
     - wg_install
 
 - name: Run sanity-checks
   import_tasks: assert_main.yml
   become: True
+  become_user: root
   tags:
     - wg_assert_main
 
 - name: Process provided private key
   import_tasks: peerkey.yml
-  become: True
   when: wg_peerkey | string | length == 44
+  become: True
+  become_user: root
   tags:
     - wg_peerkey
 
 - name: Generate a pair of public/private keys
   import_tasks: genkeys.yml
   become: True
+  become_user: root
   when: not wg_peerkey | bool
   tags:
     - wg_genkeys
@@ -29,13 +34,15 @@
 - name: Generate config file
   import_tasks: genconfig.yml
   become: True
+  become_user: root
   tags:
     - wg_genconfig
 
 - name: Amend UFW ruleset
   import_tasks: ufw.yml
-  become: True
   notify: 'reload ufw'
+  become: True
+  become_user: root
   tags:
     - wg_ufw
 
@@ -46,6 +53,8 @@
     state: present
   when: wg_forward
   notify: 'reload sysctl'
+  become: True
+  become_user: root
   tags:
     - wg_sysctl_routing
 
@@ -59,6 +68,8 @@
   notify:
     - 'reread systemd'
     - 'reload systemd'
+  become: True
+  become_user: root
   tags:
     - wg_systemd
 
@@ -71,6 +82,8 @@
     state: started
     enabled: True
   when: wg_start
+  become: True
+  become_user: root
   tags:
     - wg_systemd
 

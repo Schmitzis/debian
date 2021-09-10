@@ -34,8 +34,8 @@
   register: ngx_tpl_master
   notify: 'restart nginx'
 
-  # >> If there are end-points to work on...
-- block:
+- name: There are end-points to work on...
+  block:
 
   - name: Provision endpoints
     template:

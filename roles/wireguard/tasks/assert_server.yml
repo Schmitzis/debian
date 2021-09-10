@@ -19,8 +19,9 @@
     that:
       - wg_srv is defined
 
-- debug:
-    msg: 'Server`s IP and subnet are undefined.\nProvisioning transparent proxy.'
+- name: Server`s IP and subnet are undefined.
+  debug:
+    msg: 'Provisioning transparent proxy.'
   when: not wg_srv
 
 - name: Assert that subnet calculation performs correctly

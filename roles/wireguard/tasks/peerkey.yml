@@ -14,8 +14,8 @@
     success_msg: 'Private key is accepted by Wireguard, continuing...'
   when: wg_peerkey_test is defined
 
-# Store "clean" keys in variables
-- block:
+- name: Store "clean" keys in variables
+  block:
 
   - name: Derive public key from the provided private one
     shell:
@@ -37,4 +37,4 @@
 
   when: wg_peerkey_test.changed is true and wg_peerkey_test.rc == 0
   no_log: true
-# block end
+  # block end

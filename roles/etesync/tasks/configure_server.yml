@@ -52,7 +52,8 @@
     - esc_admins_num | int == 0
 
   # Select admin name at random unless defined by an operator
-- block:
+- name: (BLOCK) Admin name
+  block:
 
   - name: Generate list of possible names for the admin user
     shell:

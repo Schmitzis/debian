@@ -19,8 +19,8 @@
   when:
     - '"Intel" in cpu_vendor'
 
-  # Intel HDA options
-- block:
+- name: Intel HDA options
+  block:
 
   - name: Create Intel HDA modprobe drop-in
     file:

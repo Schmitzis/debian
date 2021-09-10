@@ -4,6 +4,7 @@
     path: /etc/asound.conf
   register: stat_asound
   become: True
+  become_user: root
 
 - name: Backup existing asound.conf
   copy:
@@ -12,12 +13,14 @@
     dest: '/etc/backup_asound_conf_{{ ansible_date_time.epoch }}'
   when: stat_asound | bool
   become: True
+  become_user: root
 
 - name: Remove existing asound.conf
   file:
     path: /etc/asound.conf
     state: absent
   become: True
+  become_user: root
 
 - name: Check if ~/.asoundrc is present
   stat:

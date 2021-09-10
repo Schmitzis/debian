@@ -4,7 +4,7 @@
   tasks:
 
     #
-    # All parameters are documented in the respective README.md files for each role
+    # All variables are documented in the respective README.md files for each role
     #
 
   - name: Execute `base` role
@@ -12,40 +12,41 @@
       name: base
     tags: role_base
     vars:
-      base_allow_reboot: false
+      base_allow_reboot: false             # Allow system reboot when necessary?
       base_disable_bluetooth: false
-      base_disable_bt_autosuspend: false
+      base_disable_bt_autosuspend: false   # Disable bluetooth autosuspend?
       base_disable_firewire: true
-      base_disable_hfs: true
-      base_disable_nonsof: true
-      base_disable_speaker: false
+      base_disable_hfs: true               # Disable HFS filesystem support?
+      base_disable_nonsof: true            # Disable non-sof Intel HDA?
+      base_disable_speaker: false          # Disable internal speaker?
       base_disable_thunderbolt: false
-      base_enable_audit: false
-      base_fb_font_size: 10x18
+      base_enable_audit: false             # Enable AuditD?
+      base_fb_font_size: 10x18             # Framebuffer font size
       base_fstab_noexec: true
-      base_hda_options: []
-      base_fw_list:
+      base_hda_options: []                 # snd-hda-intel module options
+      base_fw_list:                        # Install under /lib/firmware/
         - { src: 'https://raw.githubusercontent.com/Realtek-OpenSource/android_hardware_realtek/rtk1395/bt/rtkbt/Firmware/BT/rtl8761b_config',
             dest: 'rtl_bt/rtl8761b_config.bin',
             checksum: 'sha256:aa86a092ee58e96256331d5c28c199ceaadec434460e98e7dea20e411e1aa570' }
         - { src: 'https://raw.githubusercontent.com/Realtek-OpenSource/android_hardware_realtek/rtk1395/bt/rtkbt/Firmware/BT/rtl8761b_fw',
             dest: 'rtl_bt/rtl8761b_fw.bin',
             checksum: 'sha256:0b59a1f2422c006837c4b5e46b59d49bfdbca1defb958adbbc0d57ebdc19cc82' }
-      base_generate_moduli: false
-      base_grub_optional: "i8042.unlock=1"
-      base_grub_timeout: 3
-      base_hide_pid: false
-      base_init_on_free: false
-      base_limit_ssh: false
+      base_generate_moduli: false          # OpenSSH DH moduli
+      base_grub_optional: "i8042.unlock=1" # list of optional GRUB parameters
+      base_grub_timeout: 3                 # Boot timeout in seconds
+      base_hide_pid: false                 # Disable acces to /proc in /etc/fstab
+      base_init_on_free: false             # init_on_free=? kernel parameter
+      base_install_recommends: true        # Install from APT-Recommends by default?
+      base_limit_ssh: false                # `ufw limit ssh`
       base_locale: en_AU.UTF-8
-      base_locale_singular: true
+      base_locale_singular: true           # Do not fetch other locales
       base_logind_configure: false
       base_logind_idle_action: suspend
       base_logind_idle_time: 600
       base_logind_lid_action: suspend
       base_logind_powerbutton_action: poweroff
       base_nmi_watchdog: false
-      base_operator_ip_whitelist: False
+      base_operator_ip_whitelist: False    # Whitelist WAN IP of the Ansible Controller?
       base_pkg_remove:
         - wpasupplicant
         - rpcbind
@@ -55,20 +56,20 @@
         - dnsmasq
         - ntp
       base_kresd_blocklist: ""
-      base_kresd_install: true
+      base_kresd_install: true             # Install and configure knot-resolver (`kresd`)
       base_kresd_listen_on_ip: 127.0.0.1
       base_kresd_primary_hostname: dns.quad9.net
       base_kresd_primary_ip: 9.9.9.9
       base_kresd_secondary_hostname: dns.quad9.net
       base_kresd_secondary_ip: 149.112.112.112
       base_kresd_tls: true
-      base_set_capslock: true
-      base_set_dpkg_console: true
-      base_set_dpkg_overrides: true
-      base_set_hostname: false
-      base_set_sigenforce: true
-      base_sleep_enabled: true
-      base_sshd_less_secure: false
+      base_set_capslock: true              # Set CapsLock as CTRL key?
+      base_set_dpkg_console: true          # Configure framebuffer?
+      base_set_dpkg_overrides: true        # Tighten permissions via `dpkg-statoverride`
+      base_set_hostname: false             # Set target hostname to the inventory name
+      base_set_sigenforce: true            # Enable module signing verification
+      base_sleep_enabled: true             # Enable sleep & suspend?
+      base_sshd_less_secure: false         # Less restrictive SSH ciphers & MACs
       base_sudo_cmd_nopwd: "/usr/bin/alsaucm"
       base_sudo_set: true
       base_sudo_user: '{{ ansible_env.USER }}'
@@ -81,7 +82,7 @@
         - thermal-conf.xml.4
         - thermal-conf.xml.auto
       base_timezone: Australia/Adelaide
-      base_trackpoint_drift: 25
+      base_trackpoint_drift: 25            # Fix drifting trackpoint cursor
       base_ufw_rule:
         - { comment: 'Drop incoming TCP traffic from 172.16.17.92 to port 22',
             direction: 'in',
@@ -100,7 +101,7 @@
             rule: 'deny',
             from: '192.168.67.83',
             service: 'Yahoo' }
-      base_vm_writeback: 1500
+      base_vm_writeback: 1500              # vm.dirty_writeback_centisecs
 
 
   - name: Execute `software` role
@@ -108,11 +109,16 @@
       name: software
     tags: role_software
     vars:
+      #
+      # ALSA default output device
+      #
       sw_alsa_out_card: 0
       sw_alsa_out_device: 0
+      #
+      # Toggle installation of a certain software list
+      #
       sw_setup_audio: true
       sw_setup_clevis: true
-      sw_setup_deb: []
       sw_setup_dev: true
       sw_setup_fonts: true
       sw_setup_fs: true
@@ -123,13 +129,193 @@
       sw_setup_utils: true
       sw_setup_wayland: true
       sw_setup_wireless: true
-      sw_systemd_units_disable: ['mpd.service','rsync.service']
-      sw_systemd_units_enable: ['syncthing@{{ ansible_env.USER }}.service', 'iwd.service']
-      sw_systemd_units_masked: ['systemd-backlight@backlight:acpi_video0.service', 'mpd.service']
+      #
+      # Configure systemd units
+      #
+      sw_systemd_units_disable:
+        - 'mpd.service'
+        - 'rsync.service'
+      sw_systemd_units_enable:
+        - 'syncthing@{{ ansible_env.USER }}.service'
+        - 'fstrim.timer'
+        - 'iwd.service'
+      sw_systemd_units_masked:
+        - 'systemd-backlight@backlight:acpi_video0.service'
+        - 'mpd.service'
+      #
+      # Configure libvirt / virt-manager
+      #
       sw_virtio_install: true
       sw_virtio_network_autostart: true
       sw_virtio_use_default_network: true
       sw_virtio_user_addgroup: true
+      #
+      # Software lists
+      #
+      sw_list_deb: [] # .deb files added under `./roles/software/files/deb/`
+      sw_list_backports: ['testssl.sh','diffoscope'] # install from `bullseye-backports`
+      sw_list_clevis: ['clevis-initramfs','clevis-luks','clevis-systemd','clevis-tpm2']
+      sw_list_wireless: ['blueman','bluez-firmware','iwd','wavemon']
+      sw_list_fonts:
+        - fonts-ibm-plex
+        - fonts-powerline
+        - fonts-recommended
+        - fonts-terminus
+        - fonts-terminus-otb
+        - fonts-ubuntu
+      sw_list_fs:
+        - dosfstools
+        - fuse-zip
+        - fuse3
+        - exfatprogs
+        - fuseiso
+        - gocryptfs
+        - udisks2
+      sw_list_dev:
+        - bpython
+        - git
+        - git-sizer
+        - hexyl
+        - libxml2-utils # xmllint
+        - make
+        - pax-utils
+        - python3-pip
+        - python3-virtualenv
+        - strace
+      sw_list_office:
+        - antiword
+        - catdoc
+        - dbus-x11 # required by loffice even when running under Wayland
+        - dictionaries-common
+        - djvulibre-bin
+        - docx2txt
+        - html2text
+        - hunspell
+        - hunspell-en-au
+        - liblibreofficekitgtk # loffice menus
+        - libreoffice-gtk3
+        - libreoffice-l10n-en-gb
+        - libreoffice-style-sifr
+        - mythes-en-au
+        - odt2txt
+        - pandoc
+        - unrtf
+        - wordnet
+        - wordnet-sense-index
+        - wv
+      sw_list_internet:
+        - bind9-dnsutils
+        - filezilla
+        - firefox-esr
+        - firefox-esr-l10n-en-gb
+        - neomutt
+        - nmap
+        - syncthing
+        - weechat
+      sw_list_multimedia:
+        - atomicparsley # youtube-dl, merges covers into audio files
+        - ffmpeg
+        - id3v2
+        - imv
+        - libimage-exiftool-perl
+        - mpd
+        - mpv
+        - ncmpcpp
+        - youtube-dl
+      sw_list_audio:
+        - alsa-firmware-loaders
+        - alsa-topology-conf
+        - alsa-ucm-conf
+        - alsa-utils
+        - firmware-sof-signed
+      sw_list_virtio:
+        - virt-manager
+        - libvirt-daemon-config-network
+        - libvirt-daemon-config-nwfilter
+        - libvirt-daemon-system
+      sw_list_utils:
+        - ack
+        - apparmor-profiles
+        - apparmor-profiles-extra
+        - apparmor-utils
+        - aria2
+        - atool
+        - bat
+        - bc
+        - checksec
+        - curl
+        - mtr-tiny
+        - debian-goodies
+        - debian-security-support # check-support-status
+        - dfc
+        - entr
+        - fd-find
+        - fzf
+        - gawk
+        - git
+        - gnupg2
+        - grc
+        - hstr
+        - htop
+        - jq
+        - linux-cpupower
+        - ncal
+        - ncdu
+        - p7zip-full
+        - pinentry-tty
+        - powertop
+        - rar
+        - ripgrep
+        - rpl
+        - rsync
+        - silversearcher-ag
+        - sshfs
+        - tmux
+        - tree
+        - universal-ctags
+        - unzip
+        - wget
+        - whois
+      sw_list_wayland:
+        - adwaita-icon-theme
+        - adwaita-qt
+        - archivemount
+        - brotli
+        - colortest-python
+        - command-not-found
+        - foot
+        - foot-terminfo
+        - gcolor3
+        - gnome-icon-theme
+        - gnome-themes-standard
+        - grim
+        - keepassxc
+        - libglib2.0-bin # gsettings
+        - libplist-utils
+        - libsixel-bin
+        - light
+        - lz4
+        - mako-notifier
+        - physlock
+        - qt5ct
+        - qtwayland5
+        - rlwrap # cht.sh dependency
+        - scdaemon
+        - slurp # screen area selector
+        - socat
+        - sway
+        - swaybg
+        - swayidle
+        - undertime
+        - unicode-data
+        - waybar
+        - wdisplays
+        - wf-recorder
+        - wl-clipboard
+        - wofi
+        - xdg-utils # imv dependency
+        - yubioath-desktop
+        - zstd
 
 
   - name: Execute `dotfiles` role
@@ -149,7 +335,7 @@
       dots_setup_neovim: true
       dots_dotfiles_list:
         #
-        # Folders must end with '/'
+        # WARNING: Folders must end with '/'
         #
         # TODO:
         #   - Detect if src is a folder and append '/' automatically if it is not there.
@@ -189,6 +375,7 @@
         - { src: 'profile'              , dest: '.profile'              , state: 'link' }
         - { src: 'ripgreprc'            , dest: '.config/.ripgreprc'    , state: 'link' }
         - { src: 'ssh_config'           , dest: '.ssh/config'           , state: 'link' }
+        - { src: 'terminfo/'            , dest: '.terminfo'             , state: 'link' }
         - { src: 'themes/'              , dest: '.themes'               , state: 'link' }
         - { src: 'tmux.conf'            , dest: '.tmux.conf'            , state: 'link' }
         - { src: 'vimrc'                , dest: '.vimrc'                , state: 'link' }
@@ -201,12 +388,12 @@
       name: transfer_agent
     tags: role_transfer
     vars:
-      tag_add_rsync: true
+      tag_add_rsync: true             # Allow `rsync` in addition to sftp?
       tag_agent_group: agents
       tag_agent_name: xfer_agent
       tag_pubkey_from_current_user: true
       tag_pubkey_from_others: true
-      tag_remove_existing_user: true
+      tag_remove_existing_user: true  # Remove $HOME of the existing agent?
 
 
   - name: Execute Syncthing role
@@ -220,52 +407,52 @@
       st_reinstall: true
 
       st_client: {
-        'addr_use_wan': true,
-        'addr': '' ,
-        'port': '',
-        'announce_broadcast': true,
-        'min_free_space': 5,
-        'config_dir': '',
-        'nat': false,
+        'addr_use_wan': true,         # Overwrite `st_client.addr` with the discovered WAN ip?
+        'addr': '' ,                  # Address on which Client will listen, default: 127.0.0.1
+        'port': '',                   # Port on which Client's GUI/API will listen, default: 8384
+        'announce_broadcast': true,   # Enable "local discovery"?
+        'min_free_space': 5,          # Minimum free disk space to keep
+        'config_dir': '',             # Will be replaced with $XDG_CONFIG_HOME/syncthing if empty
+        'nat': false,                 # Uses upstream-controlled STUN
         'gui': true,
         'gui_tls': true,
-        'untrusted': true,
-        'recreate_certs': true,
-        'reconfigure': true,
+        'untrusted': true,            # Set device as "untrusted" by default?
+        'recreate_certs': true,       # Re-create certificates? Yields new ID.
+        'reconfigure': true,          # Overwrite existing config?
 
         'user': {
-          'name': '',
-          'home': '',
+          'name': '',                 # Defaults to SSH user
+          'home': '',                 # Will be replaced with $HOME if empty
           },
 
         'default_folder': {
-          'path': '~/sync/default',
-          'type': 'sendreceive',
+          'path': '~/sync/default',   # Will be created if does not exist
+          'type': 'sendreceive',      # `receiveencrypted` can't be set on the *default* folder
           'pause': True
           },
 
         'disco': {
-          'addr': '127.0.0.1',
-          'addr_overwrite': true,
-          'port': 8443,
-          'id': '',
-          'id_overwrite': true,
-          'enable': true
+          'addr': '127.0.0.1',        # Discovery-server to which Client will connect
+          'addr_overwrite': true,     # Overwrite Disco address with the server from this role?
+          'port': 8443,               # Port on which Client will try to find Disco, default: 8443
+          'id': '',                   # ID of Disco to which Client will connect
+          'id_overwrite': true,       # Overwrite `st_client.disco.id` with the `st_disco.id`?
+          'enable': true              # Use "global announcements" aka Discovery-server?
           },
 
         'relay': {
-          'enable': true,
+          'enable': true,             # Enable relaying?
           'addr': '',
-          'addr_overwrite': true,
+          'addr_overwrite': true,     # Overwrite Relay address with the server from this role?
           'port': 22067,
           'id': '',
-          'id_overwrite': true,
+          'id_overwrite': true,       # Overwrite `st_client.relay.id` with the `st_relay.id`?
           'reconnect_interval_minutes': 10
           },
 
-        'start': {
+        'start': {                    # Configure autostart via systemd
           'on_boot': true,
-          'on_role_completion': 'restarted'
+          'on_role_completion': 'restarted'   # Either: 'reloaded', 'restarted' or 'stopped'
         },
 
         'binary': {
@@ -275,24 +462,24 @@
         }
 
       st_disco: {
-        'addr': '127.0.0.1',
-        'addr_use_wan': true,
-        'port': '',
-        'id': '',
-        'recreate_certs': true,
-        'replicate': false,
+        'addr': '127.0.0.1',         # Address on which Disco listens itself
+        'addr_use_wan': true,        # Use discovered WAN IP instead of the provided address?
+        'port': '',                  # Port on which Disco will listen itself, default: 8443
+        'id': '',                    # Disco's own ID, *will* be overwritten during run
+        'recreate_certs': true,      # Re-create certificates? Yields new ID.
+        'replicate': false,          # Add `st_disco_replica` into the systemd config?
 
         'replica': {
-          'addr': '10.0.0.1',
-          'port': 19200,
-          'id': '',
-          'listen_addr': '10.0.0.2',
-          'listen_port': 19200,
+          'addr': '10.0.0.1',        # Address which Disco will use for replication
+          'port': 19200,             # Port which Disco will use for replication
+          'id': '',                  # ID of another replica instance
+          'listen_addr': '10.0.0.2', # Address for incoming replication connections
+          'listen_port': 19200,      # Port for incoming replication connections, default: 19200
           },
 
-        'start': {
+        'start': {                   # Configure autostart via systemd
           'on_boot': true,
-          'on_role_completion': 'restarted'
+          'on_role_completion': 'restarted'   # Either: 'reloaded', 'restarted' or 'stopped'
         },
 
         'binary': {
@@ -310,15 +497,15 @@
         'recreate_certs': true,
 
         'nat': {
-          'enabled': false,
+          'enabled': false,          # Use UPnP/NAT-PMP to acquire external port mapping?
           'lease_minutes': 60,
           'renewal_minutes': 30,
           'timeout_seconds': 10
         },
 
-        'start': {
+        'start': {                   # Configure autostart via systemd
           'on_boot': true,
-          'on_role_completion': 'restarted'
+          'on_role_completion': 'restarted'   # Either: 'reloaded', 'restarted' or 'stopped'
         },
 
         'binary': {
@@ -360,16 +547,16 @@
             ip: '10.3.1.20',
             keepalive: '90' }
       wg_autostart: true
-      wg_forward: true
+      wg_forward: true   # Forward between clients?
       wg_iface: wg8
-      wg_overwrite: true
+      wg_overwrite: true # Overwrite existing config?
       wg_peerkey: OIxcoXM0NaNtsSZM7aNGDeqpUiQxkZ4+eG9OmLSFe3k=
       wg_port: 12345
       wg_server_ip: 10.0.0.10
       wg_server_subnet: '10.0.0.0/8'
-      wg_ssh: true
-      wg_start: true
-      wg_systemd: true
+      wg_ssh: true       # Allow incoming tcp/22 from WG subnet?
+      wg_start: true     # Start WG at the end of play?
+      wg_systemd: true   # Enable systemd unit on startup?
 
 
   - name: Execute `nginx` role
@@ -377,11 +564,13 @@
       name: nginx
     tags: role_nginx
     vars:
-      ngx_cert_email: 'letsencrypt@example.com'
-      ngx_endpoints: ['example.com', 'example.net']
-      ngx_flavour: 'extras'
-      ngx_provision_https: True
-      ngx_resolver: '127.0.0.1'
+      ngx_cert_email: 'x@y.com' # LetsEncrypt notifications
+      ngx_endpoints:            # Lists of domains to provision
+        - 'example.com'
+        - 'example.net'
+      ngx_flavour: 'extras'     # `full`, `light` or `extras`?
+      ngx_provision_https: True # Install certs from LetsEncrypt?
+      ngx_resolver: '127.0.0.1' # Resolver to use for stapling
 
 
   - name: Execute `EteSync` role
@@ -389,7 +578,7 @@
       name: etesync
     tags: role_etesync
     vars:
-      esc_admin: ''
+      esc_admin: '' # Optional, will be auto-generated if empty
       esc_admin_email: 'admin@example.com'
       esc_cert_email: 'certs@example.com'
       esc_debug: False
@@ -401,4 +590,4 @@
       esc_rm_existing: True
       esc_rootdir: '/var/www/html/esc_server'
       esc_user: 'www-uvicorn'
-      esc_version: '43d5af32d72d5f59de7f31698076becf2430ccaa'
+      esc_version: 'd11504093c0dff22e5371fada9037e6436abf628'

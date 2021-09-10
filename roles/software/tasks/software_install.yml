@@ -1,6 +1,6 @@
 ---
-  # Utilities
-- block:
+- name: Utilities block
+  block:
 
   - name: Create Perl modules folder
     file:
@@ -91,8 +91,8 @@
     sw_list_global: '{{ sw_list_global | union(sw_list_internet) }}'
   when: sw_setup_internet
 
-  # Setup multimedia
-- block:
+- name: Setup multimedia block
+  block:
 
   - name: Merge multimedia into the global install list
     set_fact:
@@ -129,11 +129,6 @@
     sw_list_global: '{{ sw_list_global | union(["ddcutil"]) }}'
   when: sw_setup_i2c
 
-- name: Merge user supplied packages into the global install list
-  set_fact:
-    sw_list_global: '{{ sw_list_global | union(sw_setup_apt) }}'
-  when: sw_setup_apt | length > 0
-
 # -------------------------------
 
 - name: Install selected packages
@@ -155,8 +150,8 @@
 
 # -------------------------------
 
-  # Has to be after the install step as i2c group & i2c-dev do not exist yet
-- block:
+- name: This has to be after the install step as i2c group & i2c-dev do not exist yet
+  block:
 
   - name: Add user to i2c group
     user:
@@ -173,15 +168,16 @@
   when: sw_setup_i2c
   # block end (i2c)
 
-  # Install user-provided *.deb files if there are any
-- block:
+
+- name: Install user-provided *.deb files if there are any
+  block:
 
     - name: Check if user-supplied .DEBs are installed
       command: 'dpkg-query -W {{ item }}'
       register: dpkg_check
       failed_when: dpkg_check.rc > 1
       changed_when: dpkg_check.rc == 1
-      loop: '{{ sw_setup_deb }}'
+      loop: '{{ sw_list_deb }}'
 
     - name: Create directory to store .deb files
       file:
@@ -193,7 +189,7 @@
       copy:
         src: 'deb/{{ item }}'
         dest: '{{ lookup("env", "TMPDIR") }}/st_deb/{{ item }}'
-      loop: '{{ sw_setup_deb }}'
+      loop: '{{ sw_list_deb }}'
       register: debs_copy_status
       when: dpkg_check is changed
 
@@ -210,5 +206,5 @@
         state: absent
       when: dpkg_check is changed
 
-  when: sw_setup_deb | length > 0
+  when: sw_list_deb | length > 0
   # block end

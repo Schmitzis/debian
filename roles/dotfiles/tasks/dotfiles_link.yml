@@ -43,8 +43,8 @@
   shell: gpg -k
   when: not gpg_db_initialised
 
-  # When `dots_extract_dotfiles`...
-- block:
+- name: When `dots_extract_dotfiles`...
+  block:
 
   - name: Create ~/.local/etc/dotfiles on the remote
     file:
@@ -63,8 +63,8 @@
     with_items: '{{ dots_dotfiles_list }}'
     register: dotfiles_copied
 
-  # Link from ../dotfiles/
-  - block:
+  - name: Link from ../dotfiles/
+    block:
 
     - name: Attempt to link files, rescue errored paths by creating missing intermediary folders
       block:

@@ -25,7 +25,7 @@
   no_log: true
 
 - name: Check if EteBase service is present
-  command: systemctl status etebase_server.service
+  command: systemctl status etebase_server.service # noqa 303
   register: esc_etebase_status
   changed_when: esc_etebase_status.rc != 3
   failed_when: esc_etebase_status.rc | int > 5 # noqa 301

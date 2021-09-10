@@ -12,4 +12,4 @@
     state: restarted
     masked: False
     enabled: True
-  when: esc_uvicorn_systemd.changed
+  when: esc_uvicorn_systemd.changed # noqa 503

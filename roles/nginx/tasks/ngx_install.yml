@@ -12,8 +12,8 @@
       - certbot
     state: present
 
-  # >> If nginx isn't installed...
-- block:
+- name: If nginx isn't installed...
+  block:
 
     # Fails if ipv6 is disabled in kernel, #869799
   - name: Install nginx
@@ -21,7 +21,7 @@
       pkg:
         - 'nginx-{{ ngx_flavour }}'
         - python3-certbot-nginx
-      state: latest
+      state: present
     register: esc_nginx_installed
     failed_when: False
     when: esc_nginx_dpkg.rc != 0
@@ -33,4 +33,3 @@
 
   when: esc_nginx_dpkg.rc != 0
   # << Block end
-

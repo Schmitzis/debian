@@ -151,8 +151,8 @@
   when: base_hide_pid
   notify: 'reload systemd'
 
-  # noexec in fstab
-- block:
+- name: Enable noexec in fstab
+  block:
 
   - name: Mount /tmp with nodev, nosuid, and noexec
     lineinfile:
@@ -225,6 +225,7 @@
     content: 'ACTION=="add", SUBSYSTEM=="input", ATTR{name}=="TPPS/2 IBM TrackPoint", ATTR{device/drift_time}="{{ base_trackpoint_drift }}"'
     dest: /etc/udev/rules.d/10-trackpoint.rules
   become: True
+  become_user: root
   when: base_trackpoint_drift | int > 0
   notify: 'reload udev'
 
@@ -237,9 +238,14 @@
 
   # Executing directly to ensure it's up if run fails before the handlers are called
 - name: Single-shot systemd reload to pick-up the new service
-  shell:
-    cmd: 'systemctl daemon-reload'
-  when: ssh_cleanup.changed
+  systemd:
+    daemon_reexec: True
+    daemon_reload: True
+    state: reloaded
+    name: local-fs.target
+  become: True
+  become_user: root
+  when: ssh_cleanup.changed # noqa 503
 
 - name: Enable ssh-cleanup service
   systemd:
@@ -357,6 +363,7 @@
     line: '{{ base_sudo_user }} ALL=NOPASSWD:{{ base_sudo_cmd_nopwd }}'
     validate: '/usr/sbin/visudo -cf %s'
   become: True
+  become_user: root
   when:
     - base_sudo_cmd_nopwd | length > 6
     - base_sudo_user != 'root'

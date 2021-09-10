@@ -6,3 +6,5 @@
     masked: False
     enabled: True
   listen: 'restart nginx'
+  become: true
+  become_user: root

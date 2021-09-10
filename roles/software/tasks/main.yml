@@ -2,12 +2,12 @@
 - name: Install requested software packages
   import_tasks: software_install.yml
   become: True
+  become_user: root
   tags:
     - software_install
 
 - name: Configure audio
   import_tasks: software_audio.yml
-  become: False
   when: sw_setup_audio
   tags:
     - software_audio
@@ -15,6 +15,7 @@
 - name: Configure libvirt / KVM
   import_tasks: libvirt.yml
   become: True
+  become_user: root
   when: sw_virtio_install
   tags:
     - software_libvirt
@@ -22,6 +23,7 @@
 - name: Configure services
   import_tasks: services.yml
   become: True
+  become_user: root
   tags:
     - software_services
 

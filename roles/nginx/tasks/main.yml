@@ -2,12 +2,14 @@
 - name: Install nginx web-server
   import_tasks: ngx_install.yml
   become: True
+  become_user: root
   tags:
     - ngx_install
 
 - name: Configure nginx web-server
   import_tasks: ngx_configure.yml
   become: True
+  become_user: root
   tags:
     - ngx_install
 
@@ -15,6 +17,7 @@
   import_tasks: ngx_https.yml
   when: ngx_provision_https
   become: True
+  become_user: root
   tags:
     - ngx_https
 

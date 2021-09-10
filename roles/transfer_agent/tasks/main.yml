@@ -18,8 +18,8 @@
     msg: 'User "{{ tag_agent_name }}" and all its files will be deleted.'
   when: user_grep.rc | int == 1 and tag_remove_existing_user
 
-  # sudo
-- block:
+- name: Execute with `sudo`...
+  block:
 
   - name: Delete pre-existing user
     user:
@@ -35,6 +35,7 @@
       state: present
 
   become: True
+  become_user: root
   # block end (sudo)
 
 - name: Throw random seeds
@@ -60,10 +61,11 @@
     password: '{{ password_raw | password_hash("sha512", salt[:16]) }}'
     groups: agents
   become: True
+  become_user: root
   no_log: true
 
-# Delegate to localhost
-- block:
+- name: Delegate to localhost
+  block:
 
   - name: Register operator's username
     set_fact:
@@ -75,7 +77,8 @@
     register: user_ssh_path
     changed_when: False
 
-  - set_fact:
+  - name: Set location of id_rsa.pub
+    set_fact:
       user_ssh_pubfile: '{{ user_ssh_path.stdout }}/id_rsa.pub'
 
   - name: Check if current user has a pubkey file
@@ -99,8 +102,8 @@
   delegate_to: localhost
   # Block end
 
-  # sudo
-- block: 
+- name: Execute with `sudo`...
+  block:
 
   - name: Add pubkeys from the user executing this Playbook
     authorized_key:
@@ -219,6 +222,7 @@
       - ".profile"
 
   become: True
+  become_user: root
   # block end (sudo)
 
 - name: Run all relevant handlers

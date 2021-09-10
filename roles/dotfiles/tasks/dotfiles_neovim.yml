@@ -71,7 +71,8 @@
   when: 'dig_github.rc == 0 and "NOERROR" in dig_github.stdout'
   changed_when: false
 
-- debug:
+- name: DNS resolution failure
+  debug:
     msg: '\n-- !! --\nnVim plugins are not installed as "{{ inventory_hostname }}" was not able to resolve github.com\n-- !! --\n'
   when: dig_github.rc != 0
 

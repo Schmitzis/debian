@@ -6,7 +6,10 @@
   changed_when: False
   failed_when: dpkg_existing_overrides.stdout_lines | length < 2
   become: True
-- set_fact:
+  become_user: root
+
+- name: (1/1) Transform existing overrides into the digestible form...
+  set_fact:
     dpkg_existing_overrides: '{{ dpkg_existing_overrides.stdout_lines }}'
 
 - name: Register new permissions overrides
@@ -17,15 +20,21 @@
     strict: True
   register: dpkg_overrides
   delegate_to: localhost
-  become: False
-- set_fact:
+  become: True
+  become_user: '{{ lookup("env", "USER") }}'
+
+- name: (1/2) Transform new overrides into the digestible form...
+  set_fact:
     dpkg_overrides: '{{ dpkg_overrides | dict2items }}'
-- set_fact:
+
+- name: (2/2) Transform new overrides into the digestible form...
+  set_fact:
     dpkg_overrides: '{{ dpkg_overrides[1].value }}'
 
 - name: Update permissions overrides
   shell:
     cmd: '{{ "dpkg-statoverride --update --add " + item["user"] + " " + item["group"] + " " + item["chmod"] + " " + item["path"] }}'
   become: True
+  become_user: root
   with_items: '{{ dpkg_overrides }}'
   when: item['path'] not in dpkg_existing_overrides

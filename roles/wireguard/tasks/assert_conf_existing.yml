@@ -13,8 +13,8 @@
     wg_conflicting_configs: []
     wg_existing_conf: false
 
-  # When there are configs found
-- block:
+- name: When there are configs found
+  block:
 
   - name: Extract their paths
     set_fact:

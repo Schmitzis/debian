@@ -1,6 +1,6 @@
 ---
-  # Default virtual switch, NAT'ted network
-- block:
+- name: Default virtual switch, NAT'ted network
+  block:
 
   - name: Check if virtio default network is configured
     shell:
@@ -8,15 +8,16 @@
     register: virtio_network_check_out
     changed_when: False
 
-  - set_fact:
+  - name: VirtIO network is ready
+    set_fact:
       virtio_network_ready: true
     when: virtio_network_check_out.stdout | int == 2
 
-    # Default network isn't ready and operator requested it to be configured
-  - block:
+  - name: Default network isn't ready and operator requested it to be configured
+    block:
 
     - name: Start virtio "default" network automatically, on boot
-      shell:  virsh --connect=qemu:///system net-autostart default
+      shell: virsh --connect=qemu:///system net-autostart default
 
     - name: Start "default" virtio network once, now
       shell: virsh net-start default

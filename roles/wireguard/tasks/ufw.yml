@@ -23,11 +23,12 @@
   set_fact:
     wg_ufw_existing_rules_count: '{{ wg_ufw_existing_rules.stdout.split(" ") | reject("match", "^$") | list | length | int }}'
 
-- debug:
-    msg: 'Found {{ wg_ufw_existing_rules_count }} existing rules that match the description'
+- name: Found existing rules
+  debug:
+    msg: '{{ wg_ufw_existing_rules_count }} that match the description'
 
-# If existing rules are found and wg_overwrite is True
-- block:
+- name: If existing rules are found and wg_overwrite is True...
+  block:
 
   - name: Delete pre-existing Wireguard UFW rules
     shell:

@@ -1,20 +1,23 @@
 ---
 - name: Assert that provisioning logic is sane
   assert:
-    that:
-      - dots_extract_dotfiles == true
+    that: dots_extract_dotfiles
     fail_msg: |
       Symlinking files from the local filesystem to a remote host is impossible.
   when: ansible_connection != "local"
 
-- debug:
+- name: Symlink mode
+  debug:
     msg: 'Will symlink dotfiles from this role to {{ ansible_env.HOME }}'
   when:
     - ansible_connection == "local"
     - not dots_extract_dotfiles
 
-- debug:
-    msg: 'Will copy dotfiles under {{ ansible_env.HOME }}/.local/etc/dotfiles on {{ ansible_host }} and link from there'
+- name: Copy mode
+  debug:
+    msg: >
+      Will copy dotfiles under {{ ansible_env.HOME }}/.local/etc/dotfiles
+      on {{ ansible_host }} and link from there
   when: dots_extract_dotfiles
 
 - name: Hush login, setup terminfo and ~/.ssh
@@ -46,6 +49,7 @@
 - name: Setup fortunes
   import_tasks: dotfiles_fortunes.yml
   become: True
+  become_user: root
   when: dots_setup_fortunes
   tags:
     - dotfiles_fortunes
