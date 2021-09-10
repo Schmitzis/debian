@@ -14,22 +14,11 @@
     owner: root
     mode: 0644
 
-- name: Download information about latest versions
+- name: Upgrade system packages
   apt:
     update-cache: True
     cache_valid_time: 3600
-
-- name: Update all packages
-  apt:
-    name: '*'
-    state: latest
-
-- name: Dist-upgrade
-  apt:
-    upgrade: 'dist'
-
-- name: Run `apt autoremove`
-  apt:
+    upgrade: 'dist' # `apt-get dist-upgrade`
     autoremove: true
 
 - name: Merge basics into the global install list
