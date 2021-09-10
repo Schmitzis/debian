@@ -98,10 +98,11 @@
       fail_msg: 'ID length is incorrect, here is what we`ve got: {{ st_relay.id }}'
 
     # pids module is not in the core Ansible since 2.10
-  - name: Kill stray strelaysr process
+  - name: Kill stray strelaysrv process
     shell:
       cmd: |
-        procs=$(lsof -Pni4 | awk '{print $1,$2,$9}' | grep -E '{{ st_relay.port }}$')
+        procs=$(lsof -Pni4 | awk '{print $1,$2,$9}' | grep -E '{{ st_relay.port }}$' \
+        | grep -E '^strelay')
         p_name=$(echo $procs | cut -d' ' -f1)
         p_pid=$(echo $procs | cut -d' ' -f2)
         if [[ $p_name == 'strelaysr' ]]; then
@@ -111,6 +112,7 @@
         fi
       executable: '/bin/bash'
     become: true
+    become_user: root
 
   - name: Ensure that Relay service is started
     systemd:
