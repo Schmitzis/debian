@@ -22,11 +22,13 @@
   when: item.stat.exists
   with_items: '{{ esc_existing.results }}'
   register: esc_assert_rm
+  no_log: true
 
 - name: Check if EteBase service is present
   command: systemctl status etebase_server.service
   register: esc_etebase_status
-  failed_when: esc_etebase_status.rc | int > 5
+  changed_when: esc_etebase_status.rc != 3
+  failed_when: esc_etebase_status.rc | int > 5 # noqa 301
 
 - name: Ensure that EteBase is stopped
   systemd:

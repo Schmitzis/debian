@@ -23,8 +23,10 @@
       path: /etc/nginx/sites-enabled/default
       state: absent
 
-  when: esc_nginx_dpkg.rc != 0
-  # << Block end
+- name: Work around bug `#869799`
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
 
 - name: Install dependencies
   apt:
@@ -43,6 +45,13 @@
     dest: '{{ esc_path }}'
     version: '{{ esc_version }}'
 
+- name: 'Make {{ ansible_env.USER }} an owner of .venv'
+  file:
+    state: directory
+    path: '{{ esc_path }}/.venv'
+    owner: '{{ ansible_env.USER }}'
+    group: '{{ ansible_env.USER }}'
+
 - name: Pip-install requirements into virtualenv
   pip:
     requirements: '{{ esc_path }}/requirements.txt'
@@ -59,6 +68,14 @@
   become_flags: '--login'
   # open a new systemd session that goes through pam_systemd
   become_method: sudo
+
+- name: 'Make root an owner of .venv'
+  file:
+    state: directory
+    path: '{{ esc_path }}/.venv'
+    owner: 'root'
+    group: 'root'
+    recurse: True
 
 - name: Remove example configs
   file:

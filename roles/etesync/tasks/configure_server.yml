@@ -56,8 +56,10 @@
 
   - name: Generate list of possible names for the admin user
     shell:
-      # Don't ask why there is ^[^f]...
-      cmd: 'cat /usr/share/dict/words | iconv -t ASCII//TRANSLIT | grep -o -x "^[^f][a-z]\{2,6\}[^s,d,y]$" | dd status=none conv=lcase | sort -R 2> /dev/null | uniq -u 2> /dev/null | head -32'
+      cmd: >
+        cat /usr/share/dict/words | iconv -t ASCII//TRANSLIT
+        | grep -o -x "^[a-z]\{2,6\}[^s,d,y]$" | dd status=none conv=lcase
+        | sort -R 2> /dev/null | uniq -u 2> /dev/null | head -32
     no_log: True
     register: esc_admin_list
 

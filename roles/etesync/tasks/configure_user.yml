@@ -42,7 +42,8 @@
       move_home: False
       # The salt is roughly half of what rfc2898 requires due to the limitation in sha512_crypt
       password: '{{ password_raw | password_hash("sha512", salt[:16]) }}'
-      shell: /bin/sh
+      shell: /usr/sbin/nologin
+      password_lock: True
     no_log: true
 
   when: not esc_user_found
