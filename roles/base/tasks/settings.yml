@@ -132,6 +132,36 @@
     - "MD5_CRYPT_ENAB    no"
     - "SHA_CRYPT_MIN_ROUNDS    100000"
 
+- name: Create password-auth and system-auth PAM units
+  file:
+    path: '{{ item }}'
+    mode: 0644
+    owner: root
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+  with_items:
+    - /etc/pam.d/password-auth
+    - /etc/pam.d/system-auth
+
+- name: Configure number of password-auth rounds in pam_unix.so
+  lineinfile:
+    path: /etc/pam.d/password-auth
+    line: password sufficient pam_unix.so rounds=100000
+    state: present
+
+- name: Configure number of system-auth rounds in pam_unix.so
+  lineinfile:
+    path: /etc/pam.d/system-auth
+    line: password sufficient pam_unix.so rounds=100000
+    state: present
+
+- name: Include password-auth in passwd PAM
+  lineinfile:
+    path: /etc/pam.d/passwd
+    line: '@include password-auth'
+    state: present
+
   # Make sure you understand the consequences
 - name: Disable acces to /proc in /etc/fstab
   lineinfile:
