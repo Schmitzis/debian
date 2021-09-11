@@ -67,6 +67,7 @@ Ansible ≥2.10
 | base_operator_ip_whitelist     | Whitelist WAN IP of the Ansible controller?                              | False              |
 | base_pam_namespace             | Enable `pam_namespace.so`?                                               | False              |
 | base_pkg_remove                | List of packages to remove.                                              | ['rpcbind']        |
+| base_require_tty_pty           | Set `use_pty` & `requiretty` in `/etc/sudoers`.                          | False              |
 | base_set_capslock              | Set <kbd>CapsLock</kbd> as <kbd>Ctrl</kbd>.                              | False              |
 | base_set_dpkg_console          | Configure framebuffer/console: font size, encoding, etc.                 | True               |
 | base_set_dpkg_overrides        | Tighten various filesystem permissions. Use with care!                   | False              |

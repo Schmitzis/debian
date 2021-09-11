@@ -56,6 +56,7 @@
         - avahi-daemon
         - dnsmasq
         - ntp
+      base_require_tty_pty: False          # `use_pty` & `requiretty`
       base_kresd_blocklist: ""
       base_kresd_install: true             # Install and configure knot-resolver (`kresd`)
       base_kresd_listen_on_ip: 127.0.0.1

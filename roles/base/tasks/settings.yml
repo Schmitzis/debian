@@ -396,3 +396,23 @@
     - base_sudo_cmd_nopwd | length > 6
     - base_sudo_user != 'root'
     - base_sudo_set
+
+- name: Enforce TTY/PTY requirements
+  block:
+
+  - name: Enable requiretty in /etc/sudoers
+    lineinfile:
+      path: /etc/sudoers
+      regexp: '^[\s]*Defaults.*\brequiretty\b.*$'
+      line: 'Defaults requiretty'
+      validate: '/usr/sbin/visudo -cf %s'
+
+  - name: Ensure use_pty is enabled in /etc/sudoers
+    lineinfile:
+      path: /etc/sudoers
+      regexp: '^[\s]*Defaults.*\buse_pty\b.*$'
+      line: 'Defaults use_pty'
+      validate: '/usr/sbin/visudo -cf %s'
+
+  when: base_require_tty_pty
+  # block end
