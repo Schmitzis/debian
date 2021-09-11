@@ -47,6 +47,7 @@
       base_logind_powerbutton_action: poweroff
       base_nmi_watchdog: false
       base_operator_ip_whitelist: False    # Whitelist WAN IP of the Ansible Controller?
+      base_pam_namespace: false            # Private namespace with polyinstantiated directories
       base_pkg_remove:
         - wpasupplicant
         - rpcbind

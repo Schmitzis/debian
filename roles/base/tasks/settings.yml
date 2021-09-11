@@ -284,6 +284,34 @@
     dest: /etc/sysctl.d/suid_dumpable.conf
     content: 'fs.suid_dumpable=0'
 
+- name: Private namespace for a session with polyinstantiated directories
+  block:
+
+  - name: Enable pam_namespace
+    lineinfile:
+      path: /etc/pam.d/login
+      create: false
+      regexp: '^\s*session\s+required\s+pam_namespace.so\s*$'
+      line: 'session    required     pam_namespace.so'
+      state: present
+
+  - name: Create /tmp/instances directory
+    file:
+      path: /tmp/instances
+      state: directory
+      mode: '000'
+
+  - name: Make changes to /etc/security/namespace.conf
+    lineinfile:
+      path: /etc/security/namespace.conf
+      create: false
+      regexp: ^\s*/tmp\s+/tmp/instances/\s+level\s+root,adm$
+      line: /tmp     /tmp/instances/        level      root,adm
+      state: present
+
+  when: base_pam_namespace
+  # block end
+
 - name: Add 1s. delay if login fails
   copy:
     dest: /etc/pam.d/system-login

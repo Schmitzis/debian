@@ -36,6 +36,7 @@ base_logind_lid_action: suspend
 base_logind_powerbutton_action: poweroff
 base_nmi_watchdog: true
 base_operator_ip_whitelist: false
+base_pam_namespace: False
 base_pkg_remove: ['rpcbind']
 base_set_capslock: false
 base_set_dpkg_console: true
