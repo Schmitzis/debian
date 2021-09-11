@@ -68,14 +68,6 @@
     owner: root
     mode: 0644
 
-- name: Preserve TERMINFO in sudo session
-  lineinfile:
-    path: /etc/sudoers.d/preserve-terminfo
-    line: 'Defaults env_keep += "TERMINFO"'
-    state: present
-    create: True
-    mode: 0600
-
 - name: Change CapsLock to Ctrl
   lineinfile:
     path: /etc/default/keyboard
@@ -362,17 +354,27 @@
   notify:
     - rotate logs
 
-- name: Adjust sudo defaults
+- name: Enable env_reset in /etc/sudoers
   lineinfile:
     path: /etc/sudoers
-    line: '{{ item }}'
-    insertafter: '^Defaults.*'
-    validate: /usr/sbin/visudo -cf %s
-  with_items:
-    # TODO: Make these two optional:
-    # - 'Defaults        requiretty'
-    # - 'Defaults        use_pty'
-    - 'Defaults        lecture="never"'
+    regexp: '^[\s]*Defaults.*\benv_reset\b.*$'
+    line: 'Defaults env_reset'
+    validate: '/usr/sbin/visudo -cf %s'
+
+- name: Enable ignore_dot in /etc/sudoers
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^[\s]*Defaults.*\bignore_dot\b.*$'
+    line: 'Defaults ignore_dot'
+    validate: '/usr/sbin/visudo -cf %s'
+
+- name: Preserve TERMINFO in sudo session
+  lineinfile:
+    path: /etc/sudoers.d/preserve-terminfo
+    line: 'Defaults env_keep += "TERMINFO"'
+    state: present
+    create: True
+    mode: 0600
 
 - name: Add target user to `sudo` group
   user:
