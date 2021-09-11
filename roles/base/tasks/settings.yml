@@ -185,7 +185,7 @@
       state: present
     notify: 'reload systemd'
 
-  - name: Mount /var/tmp with nodev, nosuid, and noexec
+  - name: Mount /var/tmp with nodev, nosuid and noexec
     lineinfile:
       path: /etc/fstab
       line: '/tmp /var/tmp none rw,noexec,nosuid,nodev,bind 0 0'
@@ -194,7 +194,7 @@
       state: present
     notify: 'reload systemd'
 
-  - name: Mount /dev/shm with nodev, nosuid, and noexec
+  - name: Mount /dev/shm with nodev, nosuid and noexec
     lineinfile:
       path: /etc/fstab
       line: 'tmpfs /dev/shm tmpfs defaults,nosuid,nodev,noexec 0 0'

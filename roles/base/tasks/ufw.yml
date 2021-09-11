@@ -23,7 +23,7 @@
     rule: allow
     from_ip: '{{ base_operator_ip_wan }}'
     direction: in
-    comment: 'Whitelist {{ base_operator_ip_wan }}'
+    comment: 'Whitelist operator'
     insert: 1
   when: base_operator_ip_whitelist
 

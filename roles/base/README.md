@@ -34,7 +34,6 @@ Ansible ≥2.10
 | base_disable_firewire          | Similar to the above.                                                    | True               |
 | base_disable_hfs               | ...                                                                      | True               |
 | base_disable_nonsof            | Blacklist `snd_hda_intel` and `snd_soc_skl` kernel modules.              | False              |
-| base_install_recommends        | Install recommended packages by default?                                 | True               |
 | base_disable_speaker           | Internal "beeper" only, nothing to do with ALSA.                         | True               |
 | base_disable_thunderbolt       | Blacklist Thunderbolt kernel modules. [See why](https://thunderspy.io/). | True               |
 | base_enable_audit              | Enable kernel audit framework.                                           | False              |
@@ -47,6 +46,7 @@ Ansible ≥2.10
 | base_hda_options               | List of options that will be applied to `snd-hda-intel`.                 | []                 |
 | base_hide_pid                  | Mount /proc with `hidepid=2`. Not advised on desktops.                   | false              |
 | base_init_on_free              | wipe-on-free, see msg. `20190626121943.131390` for the explanation.      | False              |
+| base_install_recommends        | Install recommended packages by default?                                 | True               |
 | base_kresd_blocklist           | Optional path to the blocklist _in RPZ format_.                          | ""                 |
 | base_kresd_install             | Install Knot DNS resolver. Recommended to enable.                        | False              |
 | base_kresd_listen_on_ip        | Address on which Knot will listen.                                       | 127.0.0.1          |
