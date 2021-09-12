@@ -13,6 +13,7 @@
     tags: role_base
     vars:
       base_allow_reboot: false             # Allow system reboot when necessary?
+      base_debsecan: true                  # Report applicable CVEs via `debsecan`
       base_disable_bluetooth: false
       base_disable_bt_autosuspend: false   # Disable bluetooth autosuspend?
       base_disable_firewire: true
@@ -56,6 +57,7 @@
         - avahi-daemon
         - dnsmasq
         - ntp
+      base_reports_email: 'root'           # Mail reports to root user
       base_require_tty_pty: False          # `use_pty` & `requiretty`
       base_kresd_blocklist: ""
       base_kresd_install: true             # Install and configure knot-resolver (`kresd`)

@@ -1,5 +1,6 @@
 ---
 base_allow_reboot: true
+base_debsecan: True
 base_disable_bluetooth: true
 base_disable_bt_autosuspend: false
 base_disable_firewire: true
@@ -38,6 +39,7 @@ base_nmi_watchdog: true
 base_operator_ip_whitelist: false
 base_pam_namespace: False
 base_pkg_remove: ['rpcbind']
+base_reports_email: 'root'
 base_require_tty_pty: False
 base_set_capslock: false
 base_set_dpkg_console: true

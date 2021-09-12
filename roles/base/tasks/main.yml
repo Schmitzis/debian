@@ -26,6 +26,14 @@
   tags:
     - base_pkg_bootstrap
 
+- name: Install and configure debsecan
+  import_tasks: pkg_debsecan.yml
+  become: True
+  become_user: root
+  when: base_debsecan
+  tags:
+    - base_debsecan
+
 - name: Install and configure Knot-resolver
   import_tasks: pkg_resolver.yml
   become: True

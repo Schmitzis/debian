@@ -1,0 +1,17 @@
+---
+- name: Install debsecan
+  apt:
+    name: debsecan
+    state: present
+
+- name: Re-configure debsecan
+  debconf:
+    name: debsecan
+    question: '{{ item.q }}'
+    value: '{{ item.a }}'
+    vtype: select
+  with_items:
+    - { q: 'debsecan/report' , a: 'true' }
+    - { q: 'debsecan/suite'  , a: 'bullseye' }
+    - { q: 'debsecan/mailto' , a: '{{ base_reports_email }}' }
+    - { q: 'debsecan/source' , a: '' }

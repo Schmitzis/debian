@@ -29,6 +29,7 @@ Ansible ≥2.10
 | Variable                       | Description                                                              | Default            |
 |--------------------------------|--------------------------------------------------------------------------|--------------------|
 | base_allow_reboot              | Automatically reboot target machine if necessary.                        | False              |
+| base_debsecan                  | Install and configure `debsecan`?                                        | True               |
 | base_disable_bluetooth         | Likewise.                                                                | True               |
 | base_disable_bt_autosuspend    | Disable Bluetooth autosuspend. Useful with buggy handsfree devices.      | False              |
 | base_disable_firewire          | Similar to the above.                                                    | True               |
@@ -67,6 +68,7 @@ Ansible ≥2.10
 | base_operator_ip_whitelist     | Whitelist WAN IP of the Ansible controller?                              | False              |
 | base_pam_namespace             | Enable `pam_namespace.so`?                                               | False              |
 | base_pkg_remove                | List of packages to remove.                                              | ['rpcbind']        |
+| base_reports_email             | E-mail address for system reports                                        | 'root'             |
 | base_require_tty_pty           | Set `use_pty` & `requiretty` in `/etc/sudoers`.                          | False              |
 | base_set_capslock              | Set <kbd>CapsLock</kbd> as <kbd>Ctrl</kbd>.                              | False              |
 | base_set_dpkg_console          | Configure framebuffer/console: font size, encoding, etc.                 | True               |
