@@ -90,8 +90,6 @@
   systemd:
     daemon_reexec: True
     daemon_reload: True
-    state: restarted
-    name: local-fs.target
   become: True
   listen: 'reload systemd'
 
