@@ -24,22 +24,27 @@
     - inventory_hostname | string | length > 0
     - base_set_hostname
 
-- name: Check if user has an active sudo ticket
-  shell:
-    cmd: 'sudo whoami'
-  failed_when: False
-  changed_when: False
-  register: base_sudo_ticket
+- name: Check sudo
+  block:
 
-- name: Assert that sudo ticket is valid
-  assert:
-    that:
-      - base_sudo_ticket.rc == 0
-      - base_sudo_ticket.stdout == 'root'
-    success_msg: 'sudo ticket is valid, enjoy the show.'
-    fail_msg: |
-      Unable to obtain sudo rights, output:
-        {{ base_sudo_ticket | to_nice_yaml }}
+  - name: Check if user has an active sudo ticket
+    shell:
+      cmd: 'sudo whoami'
+    failed_when: False
+    changed_when: False
+    register: base_sudo_ticket
+
+  - name: Assert that sudo ticket is valid
+    assert:
+      that:
+        - base_sudo_ticket.rc == 0
+        - base_sudo_ticket.stdout == 'root'
+      success_msg: 'sudo ticket is valid, enjoy the show.'
+      fail_msg: |
+        Unable to obtain sudo rights, output:
+          {{ base_sudo_ticket | to_nice_yaml }}
+
+  when: ansible_facts.env.USER != 'root'
 
 - name: Register user's home folder status
   stat:
