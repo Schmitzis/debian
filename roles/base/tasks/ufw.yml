@@ -18,15 +18,6 @@
     regexp: '^LOGLEVEL'
     line: 'LOGLEVEL=off'
 
-- name: Whitelist operator's WAN IP before adding anything else
-  ufw:
-    rule: allow
-    from_ip: '{{ base_operator_ip_wan }}'
-    direction: in
-    comment: 'Whitelist operator'
-    insert: 1
-  when: base_operator_ip_whitelist
-
 - name: Limit SSH connections
   ufw:
     rule: limit
@@ -34,6 +25,17 @@
     proto: tcp
     comment: Limit SSH via Ansible
   when: base_limit_ssh
+
+  # This must be executed after ufw has at least one active rule,
+  # will fail to find the "position #1" otherwise.
+- name: Whitelist operator's WAN IP
+  ufw:
+    rule: allow
+    from_ip: '{{ base_operator_ip_wan }}'
+    direction: in
+    comment: 'Whitelist operator'
+    insert: 1
+  when: base_operator_ip_whitelist
 
 - name: Add UFW rules
   ufw:
