@@ -27,8 +27,15 @@
   vars:
     base_list_basics:
       - bash-completion
+      - bluez-firmware
       - ca-certificates
       - curl
+      - dialog
+      - firmware-atheros
+      - firmware-iwlwifi
+      - firmware-linux-free
+      - firmware-misc-nonfree
+      - firmware-realtek
       - gnupg2
       - libpam-passwdqc
       - libpam-tmpdir
@@ -37,14 +44,9 @@
       - net-tools
       - rng-tools5
       - rsync
+      - sudo
       - ufw
       - unattended-upgrades
-      - bluez-firmware
-      - firmware-atheros
-      - firmware-iwlwifi
-      - firmware-linux-free
-      - firmware-misc-nonfree
-      - firmware-realtek
 
 - name: Merge fwupd into the global install list
   set_fact:
