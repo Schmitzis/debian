@@ -1,5 +1,6 @@
 ---
 base_allow_reboot: true
+base_autoupgrade: false
 base_debsecan: True
 base_disable_bluetooth: true
 base_disable_bt_autosuspend: false

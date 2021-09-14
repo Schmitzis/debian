@@ -13,6 +13,7 @@
     tags: role_base
     vars:
       base_allow_reboot: false             # Allow system reboot when necessary?
+      base_autoupgrade: false              # Automatically upgrade from Buster to Bullsye?
       base_debsecan: true                  # Report applicable CVEs via `debsecan`
       base_disable_bluetooth: false
       base_disable_bt_autosuspend: false   # Disable bluetooth autosuspend?

@@ -29,6 +29,7 @@ Ansible ≥2.10
 | Variable                       | Description                                                              | Default            |
 |--------------------------------|--------------------------------------------------------------------------|--------------------|
 | base_allow_reboot              | Automatically reboot target machine if necessary.                        | False              |
+| base_autoupgrade               | Automatically upgrade from Buster to Bullsye?                            | False              |
 | base_debsecan                  | Install and configure `debsecan`?                                        | True               |
 | base_disable_bluetooth         | Likewise.                                                                | True               |
 | base_disable_bt_autosuspend    | Disable Bluetooth autosuspend. Useful with buggy handsfree devices.      | False              |

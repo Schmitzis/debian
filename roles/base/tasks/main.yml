@@ -1,4 +1,12 @@
 ---
+- name: Autoupgrade Buster to Bullseye
+  import_tasks: autoupgrade.yml
+  become: True
+  become_user: root
+  become_method: su
+  tags:
+    - base_autoupgrade
+
 - name: Run preflight checks
   import_tasks: preflight.yml
   become: True

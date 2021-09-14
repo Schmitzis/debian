@@ -1,0 +1,102 @@
+---
+- name: (Block) Upgrade Buster to Bullseye
+  block:
+
+  - name: Remove resume file
+    file:
+      path: /etc/initramfs-tools/conf.d/resume
+      state: absent
+
+  - name: Purge contradictory packages
+    apt:
+      pkg: '{{ base_pkg_remove }}'
+      state: absent
+      purge: True
+      autoremove: True
+    when: base_pkg_remove | length > 0
+
+  - name: Copy /etc/apt/sources.list
+    copy:
+      src: conf/sources.list
+      dest: /etc/apt/sources.list
+      owner: root
+      mode: 0644
+
+  - name: (Block) Upgrade from v10 to v11
+    block:
+
+    - name: Upgrade system packages
+      apt:
+        update-cache: True
+        cache_valid_time: 3600
+        upgrade: 'dist' # `apt-get dist-upgrade`
+        autoremove: true
+      register: _base_pkg_upgrade
+      notify: 'reboot host'
+
+    # Upgrade has failed. Hopefully, the reason is known...
+    rescue:
+
+        # Show this only when autoupgrading from Buster to Bullseye
+      - name: Warn about the GRUB update
+        fail:
+          msg: |
+            Warning!
+
+            Automatic update from Buster was successful.
+            However the installer was unable to auto-detect ID of `/boot`
+            You need to re-configure GRUB:
+
+            1. ssh {{ ansible_env.USER }}@{{ ansible_host }}
+            2. lsblk # determine where GRUB should be installed
+            3. DEBIAN_FRONTEND=dialog dpkg --configure grub-pc
+            4. dpkg --configure -a
+
+            Make sure to select the correct block-device.
+            Reboot the host and replay this playbook when done.
+            
+            Note:
+
+            You might need to refresh the cached ssh-key.
+        when: >
+          (
+          "You must correct your GRUB install devices before proceeding"
+          in _base_pkg_upgrade.stdout
+          or "dpkg was interrupted, you must manually run"
+          in _base_pkg_upgrade.msg
+          )
+          and _base_pkg_upgrade.rc == 100
+          and base_autoupgrade
+
+      - name: Flush handlers
+        meta: flush_handlers
+
+        # Required to reliably trigger the flush above
+      - name: Ending this play safely...
+        debug:
+          msg: '...now'
+
+      - meta: end_play
+
+  - name: Check if reboot is required
+    stat:
+      path: /var/run/reboot-required
+    register: reboot_required
+
+    # Safety...
+  - name: Reboot if system can't pick-up updated kernel and/or userland
+    debug:
+      msg: 'Rebooting {{ ansible_hostname | upper }} @ {{ ansible_all_ipv4_addresses[0] }}'
+    notify:
+      - reboot host
+    when: reboot_required.stat.exists
+
+  - name: Flush handlers
+    meta: flush_handlers
+
+  when:
+    - ansible_distribution == "Debian"
+    - ansible_distribution_file_variety == "Debian"
+    - ansible_distribution_release == "buster"
+    - ( ansible_distribution_major_version | int ) == 10
+    - base_autoupgrade
