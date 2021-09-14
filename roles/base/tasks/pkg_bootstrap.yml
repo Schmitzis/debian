@@ -27,15 +27,9 @@
   vars:
     base_list_basics:
       - bash-completion
-      - bluez-firmware
       - ca-certificates
       - curl
       - dialog
-      - firmware-atheros
-      - firmware-iwlwifi
-      - firmware-linux-free
-      - firmware-misc-nonfree
-      - firmware-realtek
       - gnupg2
       - libpam-passwdqc
       - libpam-tmpdir
@@ -47,6 +41,26 @@
       - sudo
       - ufw
       - unattended-upgrades
+
+- name: Merge cloud-kernel into the global install list
+  set_fact:
+    base_list_global: '{{ base_list_global | union(["linux-image-cloud-amd64"]) }}'
+  when: base_VM_guest
+  notify:
+    - 'reboot host'
+
+- name: Merge firmware into the global install list
+  set_fact:
+    base_list_global: '{{ base_list_global | union(base_list_firmware) }}'
+  vars:
+    base_list_firmware:
+      - bluez-firmware
+      - firmware-atheros
+      - firmware-iwlwifi
+      - firmware-linux-free
+      - firmware-misc-nonfree
+      - firmware-realtek
+  when: not base_VM_guest
 
 - name: Merge fwupd into the global install list
   set_fact:
@@ -61,7 +75,7 @@
       - amd64-microcode
       - firmware-amd-graphics
       - mesa-va-drivers
-  when: '"AMD" in cpu_vendor'
+  when: 'not base_VM_guest and "AMD" in cpu_vendor'
 
 - name: Merge Intel-specific packages
   set_fact:
@@ -72,7 +86,7 @@
       - intel-media-va-driver-non-free
       - intel-microcode
       - iucode-tool
-  when: '"Intel" in cpu_vendor'
+  when: 'not base_VM_guest and "Intel" in cpu_vendor'
 
 - name: Merge Terminus font into the global install list
   set_fact:
