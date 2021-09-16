@@ -42,6 +42,11 @@
       - ufw
       - unattended-upgrades
 
+- name: Merge irqbalance into the global install list
+  set_fact:
+    base_list_global: '{{ base_list_global | union(["irqbalance"]) }}'
+  when: not base_VM_guest
+
 - name: Merge cloud-kernel into the global install list
   set_fact:
     base_list_global: '{{ base_list_global | union(["linux-image-cloud-amd64"]) }}'

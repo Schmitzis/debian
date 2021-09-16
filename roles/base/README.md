@@ -159,16 +159,19 @@ base_fw_list:
 | ca-certificates     | Extensive set of certificates from Mozilla store. |
 | curl                | `curl`.                                           |
 | dialog              | Part of the base, missing in some "cloud" images. |
+| irqbalance          | `irqbalance`                                      |
 | libpam-passwdqc     | PAM module that QCs all user-provided passwords.  |
 | libpam-tmpdir       | Configures $TMPDIR and $TMP per each session.     |
 | lua5.4              | Required by Knot and others.                      |
 | needrestart         | Checks what needs to be restarted after upgrades. |
 | net-tools           | `arp`, `netstat`, etc.                            |
 | rng-tools5          | `rngd`                                            |
-| rsync               | `rsync`.                                          |
-| sudo                | `sudo`.                                           |
+| rsync               | `rsync`                                           |
+| sudo                | `sudo`                                            |
 | ufw                 | Handy interface for nftables.                     |
 | unattended-upgrades | Installs security updates automatically.          |
+
+`irqbalance` is installed only if target is not a VM.
 
 ### Common firmware
 
