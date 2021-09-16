@@ -1,0 +1,33 @@
+---
+u2d_existing_keys: []
+u2d_VM_guest: True
+u2d_snap: False
+u2d_gpg_keys:
+  - debian-archive-bullseye-automatic.gpg
+  - debian-archive-bullseye-security-automatic.gpg
+  - debian-archive-bullseye-stable.gpg
+u2d_pkg_remove:
+  - accountsservice
+  - apport
+  - linux-firmware
+  - multipath-tools
+  - open-iscsi
+  - packagekit
+  - plymouth
+  - policykit-1
+  - popularity-contest
+  - shim-signed
+  - snapd
+  - software-properties-common
+  - ubuntu-advantage-tools
+  - ubuntu-release-upgrader-core
+  - ubuntu-report
+  - udisks2
+  - update-manager-core
+  - update-notifier-common
+  - whoopsie
+u2d_pkg_install:
+  - apt-forktracer
+  - apt-utils
+  - aptitude
+  - dialog

@@ -177,7 +177,7 @@
         - gocryptfs
         - udisks2
       sw_list_dev:
-        - bpython
+        - ipython
         - git
         - git-sizer
         - hexyl
@@ -367,6 +367,7 @@
         - { src: 'config/vivid/'        , dest: '.config/vivid'         , state: 'link' }
         - { src: 'config/waybar/'       , dest: '.config/waybar'        , state: 'link' }
         - { src: 'config/wofi/'         , dest: '.config/wofi'          , state: 'link' }
+        - { src: 'config/zathura/'      , dest: '.config/zathura'       , state: 'link' }
         - { src: 'curlrc'               , dest: '.config/curl/.curlrc'  , state: 'link' }
         - { src: 'gitattributes'        , dest: '.gitattributes'        , state: 'link' }
         - { src: 'gitconfig'            , dest: '.gitconfig'            , state: 'link' }

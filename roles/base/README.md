@@ -4,6 +4,7 @@ Basic setup of a sensible Debian host.\
 Non-exhaustive summary, majority of these are optional:
 
 - Run preflights checks to assert the OS, hardware and user's choices.
+- Optionally upgrade Buster installation to Bullseye (v10 to v11).
 - Setup hostname, locale and timezone
 - Enforce kernel module signature verification if SecureBoot is configured.
 - Configure GRUB and `GRUB_CMDLINE_LINUX_DEFAULT`, enable vendor-specific IOMMU.

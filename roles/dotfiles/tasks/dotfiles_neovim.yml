@@ -90,6 +90,6 @@
       and nvim_plugins_installed.rc == 0
       and "fatal" not in nvim_plugins_installed.stdout
 
-  when: 
+  when:
     - nvim_plugins_installed is defined
     - dig_github.rc == 0

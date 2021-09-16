@@ -1,0 +1,160 @@
+---
+- name: Check if `snap` command is available
+  shell:
+    cmd: 'snap'
+  register: u2d_snapd_present
+  changed_when: u2d_snapd_present.rc not in [0,127]
+  failed_when: u2d_snapd_present.rc not in [0,127]
+
+- name: Set fact about the availability
+  set_fact:
+    u2d_snap: True
+  when: u2d_snapd_present.rc == 0
+  changed_when: u2d_snap
+
+- name: (Block) Snap!
+  block:
+
+  - name: Find all installed snaps
+    shell:
+      cmd: 'snap list | awk "NR!=1 {print $1}" | cut -d" " -f1'
+    register: u2d_snaps_installed
+    failed_when: u2d_snaps_installed.rc not in [0,1]
+    changed_when: u2d_snaps_installed.stdout_lines | length > 0
+
+  - name: Check if some snaps are silently autoupdating
+    shell:
+      cmd: >
+        snap changes | tr -s " " | grep -w "Doing"
+        | cut -b1-2 | grep -o -E "^[0-9]{1,2}"
+    register: u2d_snaps_autoupdating
+    failed_when: u2d_snaps_autoupdating.rc not in [0,1]
+    changed_when: u2d_snaps_autoupdating.stdout_lines | length > 0
+
+  - name: Stop autoupdating snaps one by one
+    shell:
+      cmd: 'snap abort {{ item }}'
+    with_items: '{{ u2d_snaps_autoupdating.stdout_lines }}'
+    register: u2d_snaps_stop_attempted
+    when: u2d_snaps_autoupdating.stdout_lines | length > 0
+
+  - name: Pause execution
+    pause:
+      prompt: "Give snapd some time to react..."
+      seconds: 10
+    when: u2d_snaps_stop_attempted is defined
+
+  - name: Wait for autoupdating snaps to either stop or fail
+    block:
+
+      # This is what happens
+      # when you use DSL
+      # instead of a proper language
+    - name: Repeat every 10 seconds...
+      shell:
+        cmd: >
+          snap abort "$(snap changes | tr -s ' '
+          | grep -w 'Doing' | cut -b1-2
+          | grep -o -E '^[0-9]{1,2} | head -n1' | xargs)"
+          && sleep 4 && snap changes | grep -E "Doing|Undoing"
+      register: u2d_snaps_status
+      changed_when: u2d_snaps_status.rc != 1
+      failed_when: u2d_snaps_status.rc not in [0,1]
+      until: >
+        (
+        u2d_snaps_status.stdout_lines | length == 0
+        and u2d_snaps_status.stderr_lines | length == 0
+        )
+        or u2d_snaps_status.stderr ==
+        "error: please provide change ID or type with --last=<type>"
+      retries: 10
+      delay: 6
+
+    rescue:
+
+      - debug:
+          msg: >
+            Perhaps Canonical have hired people who were
+            responsible for the Windows Update.
+
+            These autoupdating snaps can't be stopped:
+
+            {{ u2d_snaps_status }}
+
+            Please kill them manually, then replay this role.
+
+      - meta: end_play
+
+    when: u2d_snaps_autoupdating.stdout_lines | length > 0
+    # block end (wait to stop)
+
+  - name: Purge all installed snaps
+    shell:
+      cmd: 'snap remove --purge {{ item }}'
+    with_items: '{{ u2d_snaps_installed.stdout_lines }}'
+    register: u2d_snaps_purging
+    failed_when: u2d_snaps_purging.rc not in [0,10]
+    when: >
+      item not in ["core", "core18", "core20", "snapd"]
+      and u2d_snaps_installed.stdout_lines | length > 0
+    until: >
+      "change in progress" not in u2d_snaps_purging.stderr
+    retries: 10
+    delay: 6
+
+  when: u2d_snap
+  # block end (snaps global)
+
+# # "The module has a bit of identity crisis..." (c) sivel
+# # https://github.com/ansible/ansible/issues/72224#issuecomment-712948527
+# - name: Purge contradictory packages
+#   block:
+#
+#   - name: Attempt to purge via apt, failure is expected. Stay tuned.
+#     apt:
+#       name: '{{ u2d_pkg_remove }}'
+#       state: absent
+#       purge: True
+#       force_apt_get: true
+#       dpkg_options: 'allow-remove-essential'
+#       autoremove: True
+#
+#   # Turns out `dpkg_options` are silently ignored. Reverting to Bash.
+#   rescue:
+
+  # Inefficient loop due to `apt-get` failing unless *all*
+  # package names are valid.
+- name: Purge contradictory packages via shell-invoked `apt-get`
+  shell:
+    cmd: >
+      apt-get purge --ignore-missing --yes
+      --allow-remove-essential {{ item }}
+    warn: false
+  register: u2d_purge_apt
+  until: u2d_purge_apt.rc == 0
+  retries: 5
+  delay: 5
+  failed_when: u2d_purge_apt.rc not in [0,100]
+  changed_when: >
+    "The following packages will be REMOVED"
+    in u2d_purge_apt.stdout
+  with_items: '{{ u2d_pkg_remove }}'
+
+  # Inverting the logic to work around the bug in #72224
+- name: Confirm that packages are absent via `apt` module
+  apt:
+    name: '{{ u2d_pkg_remove }}'
+    state: absent
+    purge: True
+
+- name: Autoremove
+  apt:
+    autoremove: true
+
+- name: Remove unnecessary leftovers
+  file:
+    path: '{{ item }}'
+    state: absent
+  with_items:
+    - /etc/update-motd.d/10-help-text
+    - /etc/profile.d/01-locale-fix.sh

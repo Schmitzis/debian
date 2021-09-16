@@ -13,13 +13,13 @@ $ ansible-playbook playbook_local.yml --ask-become-pass --tags "role_base,role_s
 ## Roles
 
 ### [base](/roles/base/)
-Basic preparation of the target host. Unequivocally opinionated, make sure it is in line with your preferences.
+Basic preparation of a target host.
 
 ### [software](/roles/software/)
 Installation and configuration of various userland packages.
 
 ### [dotfiles](/roles/dotfiles/)
-Distributes dotfiles to the target host.
+Distributes dotfiles to a target host.
 
 ### [transfer_agent](/roles/transfer_agent/)
 Creates jailed user with rather limited `chroot`. Supports automatic propagation of SSH keys.
@@ -35,3 +35,6 @@ Configures Syncthing client, relay and discovery servers.
 
 ### [etesync](/roles/etesync/)
 EteBase server running on `uvicorn` and `nginx`, includes automatic HTTPs via `certbot`.
+
+### [ubuntu2debian](/roles/ubuntu2debian/)
+Automatically converts a host running Ubuntu 20.04 into Debian 11.

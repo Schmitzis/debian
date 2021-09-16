@@ -54,7 +54,7 @@
 
             Make sure to select the correct block-device.
             Reboot the host and replay this playbook when done.
-            
+
             Note:
 
             You might need to refresh the cached ssh-key.

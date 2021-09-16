@@ -1,0 +1,146 @@
+---
+- name: Merge regular amd64 kernel into the install list
+  set_fact:
+    u2d_pkg_install: '{{ u2d_pkg_install | union(["linux-image-amd64"]) }}'
+  when: not u2d_VM_guest
+
+- name: Merge cloud-kernel into the install list
+  set_fact:
+    u2d_pkg_install: '{{ u2d_pkg_install | union(["linux-image-cloud-amd64"]) }}'
+  when: u2d_VM_guest
+
+- name: Update apt cache
+  apt:
+    update_cache: True
+    cache_valid_time: 5
+
+- name: Install Debian necessitites
+  apt:
+    name: '{{ u2d_pkg_install }}'
+    force_apt_get: yes # no `aptitude` at this stage!
+  notify: 'reboot host' # to pickup a new kernel
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Find packages that can be re-installed from Debian archives
+  shell:
+    cmd: >
+      apt-forktracer | grep -E "Debian\:\s" | cut -d" " -f1
+  register: _u2d_pkg_reinstall
+  changed_when: _u2d_pkg_reinstall.stdout_lines | length > 0
+
+- name: Reinstallable packages
+  debug:
+    msg: >
+      Found {{ _u2d_pkg_reinstall.stdout_lines | length }} via forktracer
+  when: _u2d_pkg_reinstall.stdout_lines | length > 0
+
+- name: Reinstall non-Debian packages that exist in Debian
+  shell:
+    cmd: >
+      apt-forktracer | grep -E "Debian\:\s" | cut -d" " -f1
+      | awk '{print $1"/bullseye"}'
+      | xargs apt-get install --reinstall --allow-downgrades --yes
+  register: _u2d_pkg_reinstall_act
+  changed_when: >
+    "The following packages will be DOWNGRADED" in
+    _u2d_pkg_reinstall_act.stdout or
+    "The following packages will be REMOVED" in
+    _u2d_pkg_reinstall_act.stdout or
+    "The following NEW packages will be INSTALLED" in
+    _u2d_pkg_reinstall_act.stdout
+
+- name: Register non-Debian packages
+  shell:
+    cmd: >
+      aptitude search -F '%p' '?narrow(?installed, ?not(?origin(Debian)))'
+  register: _u2d_pkg_nondeb
+  changed_when: _u2d_pkg_nondeb.stdout_lines | length > 0
+
+- name: Foreign packages
+  debug:
+    msg: >
+      Found {{ _u2d_pkg_nondeb.stdout_lines | length }} via aptitude
+  when: _u2d_pkg_nondeb.stdout_lines | length > 0
+
+- name: Remove non-Debian packages
+  apt:
+    name: '{{ _u2d_pkg_nondeb.stdout_lines }}'
+    state: absent
+    purge: true
+  when: _u2d_pkg_nondeb.stdout_lines | length > 0
+
+- name: (1/2) Begin purging unused packages...
+  shell:
+    cmd: >
+      apt purge --yes $(dpkg -l | awk '/^rc/ { print $2 }')
+  register: _u2d_pkg_purge_dpkg
+  changed_when: >
+    "The following packages will be REMOVED" in
+    _u2d_pkg_purge_dpkg.stdout
+
+- name: (2/2) ...finish purging unused packages
+  shell:
+    cmd: 'yes | aptitude --purge-unused purge "~c"'
+  register: _u2d_pkg_purge_aptitude
+  changed_when: >
+    "The following packages will be REMOVED" in
+    _u2d_pkg_purge_aptitude.stdout
+
+- name: Remove obsolete packages
+  shell:
+    cmd: 'yes | aptitude purge "~o"'
+  register: _u2d_pkg_purge_obsolete
+  changed_when: >
+    "The following packages will be REMOVED" in
+    _u2d_pkg_purge_obsolete.stdout
+
+- name: Remove config leftovers
+  shell:
+    cmd: >
+      find /etc -name '*.dpkg-*' -o -name '*.ucf-*'
+      -o -name '*.merge-error' | xargs rm -v -f
+  register: _u2d_config_leftovers
+  changed_when: _u2d_config_leftovers.stdout_lines | length > 0
+
+- name: Register packages that are marked as broken in dpkg
+  shell:
+    cmd: >
+      dpkg -l | tail -n +6 | grep -v "^ii" | tr -s " " | cut -d" " -f2
+  register: _u2d_pkg_postbroken
+  changed_when: _u2d_pkg_postbroken.stdout_lines | length > 0
+  failed_when: false
+
+- name: Remove broken packages via apt
+  apt:
+    name: '{{ _u2d_pkg_postbroken.stdout_lines }}'
+    state: absent
+    purge: True
+  when: _u2d_pkg_postbroken.stdout_lines | length > 0
+
+- name: Fix residual packages
+  apt:
+    name: '*'
+    state: fixed
+
+- name: Autoremove
+  apt:
+    autoremove: true
+
+- name: Autoclean
+  apt:
+    autoclean: true
+
+- name: Reboot one last time
+  reboot:
+    msg: 'Rebooting {{ ansible_hostname | upper }} @ {{ ansible_host }}'
+    connect_timeout: 2
+    post_reboot_delay: 1
+  when: ansible_connection != "local"
+
+- name: Finale
+  debug:
+    msg: |
+      * UBUNTU-2-DEBIAN ROLE IS COMPLETED *
+      {{ ansible_host }} is now running Debian 11.

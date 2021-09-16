@@ -1,0 +1,112 @@
+---
+- name: Register content of the /etc/apt/trusted.gpg.d/
+  find:
+    paths: /etc/apt/trusted.gpg.d/
+  register: _gpg
+
+- name: Extract filenames
+  set_fact:
+    u2d_existing_keys: '{{ u2d_existing_keys + [item.path.split("/")[-1]] }}'
+  no_log: true
+  with_items: '{{ _gpg.files }}'
+
+- name: Make sure /etc/apt/trusted.gpg.d/ exists
+  file:
+    path: /etc/apt/trusted.gpg.d/
+    state: directory
+
+- name: Delete unneeded files
+  file:
+    path: '/etc/apt/trusted.gpg.d/{{ item }}'
+    state: absent
+  changed_when: False # dirty
+  with_items: '{{ u2d_existing_keys }}'
+  when: item not in u2d_gpg_keys
+
+- name: Copy Debian GPG keys
+  copy:
+    src: 'trusted.gpg.d/{{ item }}'
+    dest: '/etc/apt/trusted.gpg.d/{{ item }}'
+    mode: 0644
+    owner: root
+  with_items: '{{ u2d_gpg_keys }}'
+
+- name: Copy /etc/apt/sources.list
+  copy:
+    backup: true
+    src: sources.list
+    dest: /etc/apt/sources.list
+    owner: root
+    mode: 0644
+
+- name: (Block) Update
+  block:
+
+  - name: Upgrade system packages
+    apt:
+      update-cache: True
+      cache_valid_time: 1
+      upgrade: 'full'
+      autoremove: true
+    register: _u2d_pkg_upgrade
+    notify: 'reboot host'
+
+  - name: Run fix-broken-install routine
+    shell:
+      cmd: apt --fix-broken install --yes
+    register: _u2d_fix_broken
+    changed_when: >
+      "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
+      not in _u2d_fix_broken.stdout
+
+  rescue:
+
+    - name: Warn about the GRUB update
+      fail:
+        msg: |
+          Warning!
+
+          Opportunistic conversion from Ubuntu to Debian was successful.
+          However the installer was unable to auto-detect ID of `/boot`
+          You need to re-configure GRUB:
+
+          1. ssh {{ ansible_env.USER }}@{{ ansible_host }}
+          2. lsblk # determine where GRUB should be installed
+          3. DEBIAN_FRONTEND=dialog dpkg --configure grub-pc
+          4. dpkg --configure -a
+
+          Make sure to select the correct block-device.
+          Reboot the host and replay this playbook when done.
+      when: >
+        (
+        "You must correct your GRUB install"
+        in _u2d_pkg_upgrade.stdout
+        or "dpkg was interrupted, you must manually run"
+        in _u2d_pkg_upgrade.msg
+        )
+        and _u2d_pkg_upgrade.rc == 100
+
+    - name: Flush handlers
+      meta: flush_handlers
+
+      # Required to reliably trigger the flush above
+    - name: Ending this play safely...
+      debug:
+        msg: '...now'
+
+    - meta: end_play
+
+- name: Check if reboot is required
+  stat:
+    path: /var/run/reboot-required
+  register: reboot_required
+
+  # Safety...
+- name: Reboot if system can't pick-up updated kernel and/or userland
+  debug:
+    msg: 'Rebooting {{ ansible_hostname | upper }} @ {{ ansible_all_ipv4_addresses[0] }}'
+  notify: 'reboot host'
+  when: reboot_required.stat.exists
+
+- name: Flush handlers
+  meta: flush_handlers

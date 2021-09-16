@@ -1,0 +1,46 @@
+---
+- name: Assert that we are gambling in an approved venue...
+  assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+      - ansible_distribution_file_variety == "Debian"
+      - ansible_distribution_release == "focal"
+      - ( ansible_distribution_major_version | int ) == 20
+    success_msg: >
+      Will try to convert Ubuntu 20.04 into Debian 11.
+    fail_msg: |
+      It does not look like a valid Ubuntu 20.04 LTS
+
+      Detected distribution: {{ ansible_distribution }}
+      Release: {{ ansible_distribution_release }}
+      Major version: {{ ansible_distribution_major_version }}
+
+- name: Assert this is not a VM guest
+  set_fact:
+    u2d_VM_guest: False
+  when:
+    - "not 'Virtual Machine' in (ansible_board_name, ansible_facts.board_name)"
+    - "ansible_virtualization_role != 'guest'"
+
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: Stop and disable unattended-upgrades service
+  systemd:
+    name: unattended-upgrades.service
+    state: stopped
+    masked: False
+    enabled: False
+  when: >
+    ansible_facts.services["unattended-upgrades.service"]["state"]
+    == "running"
+
+- name: Stop and disable snapd service
+  systemd:
+    name: snapd.service
+    state: stopped
+    masked: False
+    enabled: False
+  when: >
+    ansible_facts.services["snapd.service"]["state"]
+    == "running"

@@ -1,0 +1,10 @@
+---
+- name: Reboot target host
+  reboot:
+    msg: 'Rebooting {{ ansible_hostname | upper }} @ {{ ansible_host }}'
+    connect_timeout: 2
+    post_reboot_delay: 1
+  become: True
+  become_user: root
+  when: ansible_connection != "local"
+  listen: 'reboot host'

@@ -1,6 +1,6 @@
 ---
 - name: Autoupgrade Buster to Bullseye
-  import_tasks: autoupgrade.yml
+  import_tasks: buster2bullseye.yml
   become: True
   become_user: root
   become_method: su
