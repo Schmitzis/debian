@@ -151,10 +151,21 @@
   apt:
     autoremove: true
 
+- name: Remove unneeded usernames
+  ansible.builtin.user:
+    name: '{{ item }}'
+    state: absent
+    remove: yes
+  with_items: '{{ u2d_remove_users }}'
+
 - name: Remove unnecessary leftovers
   file:
     path: '{{ item }}'
     state: absent
   with_items:
-    - /etc/update-motd.d/10-help-text
+    - /etc/ec2_version
+    - /etc/lsb-release
     - /etc/profile.d/01-locale-fix.sh
+    - /etc/update-motd.d/10-help-text
+    - /run/motd.dynamic
+    - /var/lib/update-manager

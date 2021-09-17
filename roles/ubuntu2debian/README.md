@@ -14,7 +14,9 @@ Do note that all Canonical-specific stuff will be removed, this includes telemet
 
 ## Role Variables
 
-None. Plug-n-play.
+| Variable         | Description             | Default |
+|------------------|-------------------------|---------|
+| u2d_remove_users | List of users to remove | []      |
 
 ## Example playbook
 
@@ -26,6 +28,8 @@ None. Plug-n-play.
   - name: Execute `ubuntu2debian` role
     import_role:
       name: ubuntu2debian
+    vars:
+      u2d_remove_users: ['grid','opc','oracle']
 ```
 
 ## Dependencies
