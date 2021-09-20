@@ -36,5 +36,8 @@ Configures Syncthing client, relay and discovery servers.
 ### [etesync](/roles/etesync/)
 EteBase server running on `uvicorn` and `nginx`, includes automatic HTTPs via `certbot`.
 
+### [users](/roles/users/)
+Handles users creation and removal as well as the SSH key management.
+
 ### [ubuntu2debian](/roles/ubuntu2debian/)
 Automatically converts a host running Ubuntu 20.04 into Debian 11.

@@ -1,0 +1,281 @@
+---
+- name: Remove users
+  ansible.builtin.user:
+    name: '{{ item }}'
+    state: absent
+    remove: True
+    force: True
+  with_items: '{{ users_remove }}'
+  when: users_remove | length > 0
+  become: True
+  become_user: root
+
+# Add users -------------------------------------------------------------------
+
+- name: (Block) Add users
+  block:
+
+  - name: Throw random seeds
+    set_fact:
+      rnd_a: '{{ 4096 | random }}'
+      rnd_b: '{{ 4096 | random }}'
+      rnd_c: '{{ 4096 | random }}'
+      rnd_d: '{{ 4096 | random }}'
+      rnd_e: '{{ 4096 | random }}'
+      rnd_f: '{{ 4096 | random }}'
+    no_log: True
+
+  - name: Create list of random salts
+    set_fact:
+      salt: >
+        {{ [rnd_a,rnd_b,rnd_c,rnd_d,rnd_e,rnd_f]
+        | ansible.builtin.permutations(6)
+        | list }}
+    no_log: True
+
+    # https://github.com/ansible/ansible/pull/70762
+  - name: Pre-hash passwords to prevent Ansible from passing asterisks to `adduser`
+    set_fact:
+      # The salt is roughly half of what rfc2898 requires due to the limitation
+      # in sha512_crypt. Still gives at least ("at least" due to the non-fixed
+      # length) 1 in 2,042,975 chance of repetition which is quite safe.
+      #
+      # Fields named `pwd, `pass` and `password` and replaced with asterisks
+      # automatically, hence the `pd` moniker.
+      #
+      # Password is removed to prevent exposure of cleartext.
+      users_add_cleaned: >
+        {{ users_add_cleaned + [item | combine ({ "pd": item.password
+        | ternary(item.password, password_rnd, password_rnd)
+        | password_hash("sha512", salt_user[:16]), "password": None,
+        "password_update": item.password_update
+        | ternary("always", "on_create", "on_create"),
+        "home": item.home | ternary(item.home, None, None)
+        | regex_replace("\/$")}, recursive=True)] }}
+    with_items: '{{ users_add }}'
+    when: item.name
+    no_log: True
+    vars:
+      salt_user: '{{ salt | random | join | string }}'
+      password_rnd: lookup('community.general.random_string', length=20)
+      users_add_cleaned: []
+
+  - name: Collect users that have no password defined
+    set_fact:
+      _rnd_pwd: '{{ _rnd_pwd + [item.name] }}'
+    with_items: '{{ users_add }}'
+    when: item.name and not item.password
+    no_log: True
+    vars:
+      _rnd_pwd: []
+
+  - name: Users that will be created with a new random password each
+    debug:
+      msg: '{{ _rnd_pwd }}'
+    when: _rnd_pwd is defined and _rnd_pwd
+
+  - name: Replace original variable containing plaintext passwords
+    set_fact:
+      users_add: '{{ users_add_cleaned }}'
+      users_add_cleaned: None
+    no_log: True
+
+  - name: (Block) sudo
+    block:
+
+    - name: Create home folders
+      file:
+        path: '{{ item.home }}'
+        state: directory
+      with_items: '{{ users_add }}'
+      loop_control:
+        label: '{{ item.home }}'
+      when: item.home
+
+    - name: Create requested groups
+      group:
+        name: '{{ item }}'
+        state: present
+      with_items: '{{ users_add | map(attribute="groups") | list }}'
+
+    - name: 'Create user accounts'
+      ansible.builtin.user:
+        append: True # append groups rather than overwriting existing ones
+        comment: 'Added via Debian Playbook'
+        home: >-
+          {{ item.home | ternary(item.home, "/nonexistent", "/nonexistent") }}
+        create_home: '{{ item.home | ternary(True, False, False) }}'
+        groups: '{{ item.groups }}'
+        name: '{{ item.name }}'
+        # >- removes newline at the end, will fail otherwise
+        shell: >-
+          {{ item.shell
+          | ternary(item.shell, "/usr/sbin/nologin", "/usr/sbin/nologin") }}
+        state: present
+        password: '{{ item.pd }}'
+        password_lock: '{{ item.password_lock | default(False) }}'
+        update_password: '{{ item.password_update }}'
+      with_items: '{{ users_add }}'
+      loop_control:
+        label: '{{ item.name }}'
+      vars:
+        salt_user: '{{ salt | random | join | string }}'
+        password_rnd: lookup('community.general.random_string', length=20)
+      when: item.name
+
+    - name: Set $HOME owners
+      file:
+        path: '{{ item.home }}'
+        owner: '{{ item.name }}'
+        mode: 0750
+      with_items: '{{ users_add }}'
+      loop_control:
+        label: '{{ item.home }}'
+      when: item.home_chown
+
+    become: True
+    become_user: root
+    # block end (sudo)
+
+  when: users_add | length > 0
+  # block end (add users)
+
+# Check it's safe to propagate SSH pubkeys ------------------------------------
+
+- name: Make sure $HOME/.ssh/ exists and permissions are correct
+  file:
+    path: '{{ item.home }}/.ssh'
+    state: directory
+    mode: 0700
+    owner: '{{ item.name }}'
+    group: '{{ item.name }}'
+  with_items: '{{ users_add }}'
+  when:
+    # Skip users with invalid $HOME
+    - (item.ssh_add_all or item.ssh_add_key) # TODO: Check this
+    - item.home
+  loop_control:
+    label: "{{ item.home }}/.ssh/"
+  become: True
+  become_user: root
+
+# All pubkeys -----------------------------------------------------------------
+
+- name: Validate all *.pub keys
+  shell:
+    cmd: 'ssh-keygen -lf {{ item }}'
+  with_fileglob:
+    - "~/.ssh/*.pub"
+  failed_when: False
+  register: _ssh_keys_all_validate
+  changed_when: _ssh_keys_all_validate.rc != 0
+  when: True in users_add | json_query( '[*].ssh_add_all' )
+  delegate_to: localhost
+
+- name: (Block) When there are validated keys...
+  block:
+
+  - name: Show invalid keys
+    debug:
+      msg: '{{ item.stderr }}'
+    when:
+      - True in users_add | json_query( '[*].ssh_add_all' )
+      - item.rc != 0 and _ssh_keys_all_validate.changed
+    with_items: '{{ _ssh_keys_all_validate.results }}'
+    loop_control:
+      # Ansible still evaluates this even if `when:` evaluates to False,
+      # either here or on the block level. Will fail without explicit default()
+      label: '{{ item.rc | default("") }}'
+
+  - name: Save valid keys
+    set_fact:
+      _ssh_keys_all_valid: >
+        {{ _ssh_keys_all_valid + [lookup("file", item.item)] }}
+    with_items: '{{ _ssh_keys_all_validate.results }}'
+    loop_control:
+      label: '{{ item.cmd | default("") }}'
+    when:
+      - True in users_add | json_query( '[*].ssh_add_all' )
+      - item.rc == 0
+    vars:
+      _ssh_keys_all_valid: []
+    delegate_to: localhost
+
+  - name: Add all valid *.pub keys from the controller
+    lineinfile:
+      backup: True
+      create: True
+      group: '{{ item[0].name }}'
+      line: '{{ item[1] }}'
+      mode: 0600
+      owner: '{{ item[0].name }}'
+      path: '{{ item[0].home }}/.ssh/authorized_keys'
+      firstmatch: True
+      insertbefore: BOF
+      state: present
+    with_nested:
+      - '{{ users_add }}'
+      - '{{ _ssh_keys_all_valid }}'
+    when:
+      - item[0].ssh_add_all
+      - item[0].home
+    loop_control:
+      label: '{{ item[0].home }}/.ssh/authorized_keys'
+    become: True
+    become_user: root
+
+  when: False in _ssh_keys_all_validate.results | map(attribute="changed")
+  # block end (all keys)
+
+# Specific key ----------------------------------------------------------------
+
+- name: Validate specific, per-user SSH keys
+  shell:
+    cmd: 'ssh-keygen -lf ~/.ssh/{{ item[1] }}'
+  failed_when: False
+  register: _ssh_keys_validate
+  changed_when: _ssh_keys_validate.rc != 0
+  with_nested:
+    - '{{ users_add }}'
+    - '{{ users_add | map(attribute="ssh_add_keys") | list | flatten }}'
+  loop_control:
+    # `label` will be avaluated if if `when` is False, hence it will
+    # fail without `| default()` filter if `item.home` is None
+    label: >-
+      {{ item[0].name }} =>
+      {{ item[0].home | default("/nonexistent") }}/.ssh/{{ item[1] }}
+  when:
+    - item[0].ssh_add_keys
+    - item[0].home
+    - item[1] and item[1] in item[0].ssh_add_keys
+  delegate_to: localhost
+
+- name: Show invalid keys
+  debug:
+    msg: '{{ item.stderr }}'
+  when:
+    - item.item[0].home
+    - item.changed
+  with_items: '{{ _ssh_keys_validate.results }}'
+  loop_control:
+    # Ansible still evaluates this even if `when:` evaluates to False,
+    # either here or on the block level. Will fail without explicit default()
+    label: '{{ item.rc | default("") }}'
+
+- name: Provision specific, per-user SSH keys
+  authorized_key:
+    user: '{{ item.item[0].name }}'
+    state: present
+    key: '{{ lookup("file","~/.ssh/" + item.item[1]) }}'
+  with_items:
+    - '{{ _ssh_keys_validate.results }}'
+  when:
+    - item.item[1] in item.item[0].ssh_add_keys
+    - item.item[0].home
+    - not item.changed
+  loop_control:
+    label: >-
+      ~/.ssh/{{ item.item[1] }} -->
+      {{ item.item[0].home | default("/nonexistent") }}/.ssh/{{ item.item[1] }}
+  become: True
+  become_user: root
