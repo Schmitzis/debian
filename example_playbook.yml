@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: all
   strategy: free
   tasks:
 
@@ -23,6 +23,7 @@
       base_disable_speaker: false          # Disable internal speaker?
       base_disable_thunderbolt: false
       base_enable_audit: false             # Enable AuditD?
+      base_fb_configure: true              # Configure framebuffer?
       base_fb_font_size: 10x18             # Framebuffer font size
       base_fstab_noexec: true
       base_hda_options: []                 # snd-hda-intel module options
@@ -69,7 +70,6 @@
       base_kresd_secondary_ip: 149.112.112.112
       base_kresd_tls: true
       base_set_capslock: true              # Set CapsLock as CTRL key?
-      base_set_dpkg_console: true          # Configure framebuffer?
       base_set_dpkg_overrides: true        # Tighten permissions via `dpkg-statoverride`
       base_set_hostname: false             # Set target hostname to the inventory name
       base_set_sigenforce: true            # Enable module signing verification
@@ -107,6 +107,27 @@
             from: '192.168.67.83',
             service: 'Yahoo' }
       base_vm_writeback: 1500              # vm.dirty_writeback_centisecs
+
+
+  - name: Execute `base` role
+    import_role:
+      name: users
+    tags: role_users
+    vars:
+      users_remove: ['john', 'mary']
+      users_add:
+        - { name: 'ben',                   # User is skipped if left empty
+            groups: ['new_group'],         # Groups are created if necessary
+            home: '/home/ben',             # Can be left empty
+            home_chown: True,              # Make $HOME owned by the user?
+            password: '',                  # Use `'!'' to disable the account
+            password_lock: False,          # `usermod -L` after creation?
+            password_update: False,        # Update password if user exists?
+            shell: '/bin/bash',            # Defaults to "/usr/sbin/nologin"
+            ssh_add_all: True,             # Add everything under ~/.ssh/*.pub?
+            ssh_add_keys: [                # Add specific keys from ~/.ssh/
+              'secret.k',
+              'id_rsa.pub'] }
 
 
   - name: Execute `software` role
@@ -177,7 +198,7 @@
         - gocryptfs
         - udisks2
       sw_list_dev:
-        - ipython
+        - ipython3
         - git
         - git-sizer
         - hexyl
@@ -357,7 +378,6 @@
         - { src: 'config/luakit/'       , dest: '.config/luakit'        , state: 'link' }
         - { src: 'config/mako/config'   , dest: '.config/mako/config'   , state: 'hard' }
         - { src: 'config/mpd/'          , dest: '.config/mpd'           , state: 'link' }
-        - { src: 'config/mpd/mpd.conf'  , dest: '.mpd/mpd.conf'         , state: 'link' }
         - { src: 'config/mpv/'          , dest: '.config/mpv'           , state: 'link' }
         - { src: 'config/ncmpcpp/'      , dest: '.config/ncmpcpp'       , state: 'link' }
         - { src: 'config/qt5ct/'        , dest: '.config/qt5ct'         , state: 'link' }

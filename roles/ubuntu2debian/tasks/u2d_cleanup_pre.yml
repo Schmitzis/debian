@@ -155,7 +155,8 @@
   ansible.builtin.user:
     name: '{{ item }}'
     state: absent
-    remove: yes
+    remove: true
+    force: true
   with_items: '{{ u2d_remove_users }}'
 
 - name: Remove unnecessary leftovers

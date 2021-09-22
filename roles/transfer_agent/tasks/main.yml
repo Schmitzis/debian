@@ -50,14 +50,18 @@
 - name: Create random password and salt
   set_fact:
     password_raw: '{{ lookup("password", "/dev/null") }}'
-    salt: '{{ rnd_a+rnd_b+rnd_c+rnd_d+rnd_e }}'
+    salt: >
+      {{ [rnd_a,rnd_b,rnd_c,rnd_d,rnd_e] | ansible.builtin.permutations(5)
+      | list | random | join}}
   no_log: true
 
 - name: 'Create "{{ tag_agent_name }}" user with random password'
   user:
     name: '{{ tag_agent_name }}'
     shell: /bin/sh
-    # The salt is roughly half of what rfc2898 requires due to the limitation in sha512_crypt
+    # The salt is roughly half of what rfc2898 requires due to the limitation
+    # in sha512_crypt. Still gives at least ("at least" due to the non-fixed
+    # size) 1 in 2,042,975 chance of repetition which is quite safe.
     password: '{{ password_raw | password_hash("sha512", salt[:16]) }}'
     groups: agents
   become: True

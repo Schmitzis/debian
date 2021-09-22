@@ -23,6 +23,7 @@
   apt:
     pkg: '{{ st_install_list }}'
     state: present
+    update-cache: True
   delay: 3
   retries: 3
 

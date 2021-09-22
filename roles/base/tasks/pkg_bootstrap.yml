@@ -26,6 +26,7 @@
     base_list_global: '{{ base_list_global | union(base_list_basics) }}'
   vars:
     base_list_basics:
+      - acl
       - bash-completion
       - ca-certificates
       - curl
@@ -51,8 +52,6 @@
   set_fact:
     base_list_global: '{{ base_list_global | union(["linux-image-cloud-amd64"]) }}'
   when: base_VM_guest
-  notify:
-    - 'reboot host'
 
 - name: Merge firmware into the global install list
   set_fact:
@@ -96,7 +95,7 @@
 - name: Merge Terminus font into the global install list
   set_fact:
     base_list_global: '{{ base_list_global | union(["fonts-terminus-otb"]) }}'
-  when: base_set_dpkg_console
+  when: base_fb_configure
 
 - name: Merge KresD and openresolv into the global install list
   set_fact:
@@ -118,6 +117,7 @@
   apt:
     pkg: '{{ base_list_global }}'
     state: present
+    update-cache: True
   delay: 3
   retries: 3
 

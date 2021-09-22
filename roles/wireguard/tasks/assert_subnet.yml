@@ -19,6 +19,8 @@
     wg_addr_individual: "{{ wg_addr_individual\
                           + [item['address'] | string] }}"
   with_items: '{{ wg_existing_ifaces_mini }}'
+  loop_control:
+    label: '{{ item.address | default("") }}, {{ item.netmask | default("") }}'
   vars:
     wg_addr_plus_netmask: []
     wg_addr_individual: []
@@ -49,20 +51,21 @@
     wg_overlap_networks: "{{ wg_overlap_networks\
                           | difference(wg_null) }}"
   vars:
-    - wg_null: ['null', None]
+    wg_null: ['null', None]
 
 - name: Separate addresses
   set_fact:
     wg_addresses: "{{ lookup('flattened', wg_overlap_networks\
                     | zip_longest(wg_addr_incl_netmask_ready,wg_addr_individual)\
-                    | list) | ipaddr('address') | unique\
+                    | list) | select('string') | ipaddr('address') | unique\
                     | difference(['127.0.0.1'])}}"
 
 - name: Filter addresses
   set_fact:
     wg_addresses_filtered: '{{ wg_addresses_filtered + [item] }}'
   with_items: '{{ wg_addresses }}'
-  when: item | ipaddr(wg_server_subnet) | ipaddr('bool')
+  when: >
+    item | ipaddr(wg_server_subnet) | select('string') | ipaddr('bool')
   vars:
     wg_addresses_filtered: []
 
@@ -70,7 +73,7 @@
   set_fact:
     wg_networks: "{{ lookup('flattened', wg_overlap_networks\
                   | zip_longest(wg_addr_incl_netmask_ready)\
-                  | list) | ipaddr('net') | unique }}"
+                  | list) | select('string') | ipaddr('net') | unique }}"
   when: wg_addresses_filtered is defined
 
 - name: Create dictionary to correlate all the findings about network
@@ -87,7 +90,7 @@
                           + [item.1 | ipaddr(item.0.key)] }}"
   when:
       - wg_combodict is defined
-      - item.1 | ipaddr(item.0.key) | ipaddr('bool')
+      - item.1 | ipaddr(item.0.key) | select('string') | ipaddr('bool')
   loop: '{{ wg_combodict | dict2items | subelements("value") }}'
   vars:
     wg_ips_to_correlate: []
@@ -112,6 +115,8 @@
     wg_affected_ifaces: '{{ wg_affected_ifaces + [item.interface | string] }}'
     wg_affected_addresses: '{{ wg_affected_addresses + [item.item] }}'
   with_items: '{{ wg_overlap_ifaces.results }}'
+  loop_control:
+    label: '{{ item.interface | default(None) }}'
   when:
     - wg_overlap_ifaces.results is defined
     - item.interface != None

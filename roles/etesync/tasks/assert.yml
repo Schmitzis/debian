@@ -19,10 +19,12 @@
     that: esc_rm_existing
     success_msg: 'Will proceed with deleting existing EteSync...'
     fail_msg: 'Existing EteSync detected, but "esc_rm_existing" is set to False'
+    quiet: True
   when: item.stat.exists
   with_items: '{{ esc_existing.results }}'
+  loop_control:
+    label: '{{ item.item | default("") }}'
   register: esc_assert_rm
-  no_log: true
 
 - name: Check if EteBase service is present
   command: systemctl status etebase_server.service # noqa 303
@@ -45,3 +47,5 @@
     - esc_rm_existing
     - item.stat.exists
   with_items: '{{ esc_existing.results }}'
+  loop_control:
+    label: '{{ item.item }}'

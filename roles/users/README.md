@@ -33,7 +33,7 @@ Add or remove users to a target host. Written after experiencing barrage of issu
             home_chown: True,          # Make $HOME owned by the user?
             password: '',              # Use `'!'' to disable the account
             password_lock: False,      # `usermod -L` after creation?
-            password_update: False     # Update password if user exists?
+            password_update: False,    # Update password if user exists?
             shell: '/bin/bash',        # Defaults to "/usr/sbin/nologin"
             ssh_add_all: True,         # Add everything under ~/.ssh/*.pub?
             ssh_add_keys: [            # Add specific keys from ~/.ssh/

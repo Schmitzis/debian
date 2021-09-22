@@ -43,7 +43,7 @@ base_pkg_remove: ['rpcbind']
 base_reports_email: 'root'
 base_require_tty_pty: False
 base_set_capslock: false
-base_set_dpkg_console: true
+base_fb_configure: true
 base_set_dpkg_overrides: false
 base_set_hostname: false
 base_set_sigenforce: true

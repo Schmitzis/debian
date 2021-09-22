@@ -34,9 +34,11 @@
   - name: Assert that we are not overwriting config with the same interface name without permission
     assert:
       that: not wg_existing_conf
-      fail_msg: "Config /etc/wireguard/{{ wg_iface }}.conf exists and \
-                'wg_overwrite' is set to False"
-      success_msg: '/etc/wireguard/{{ wg_iface }}.conf not found, continuing...'
+      fail_msg: >
+        Config /etc/wireguard/{{ wg_iface }}.conf exists
+        and 'wg_overwrite' is set to False
+      success_msg: >
+        /etc/wireguard/{{ wg_iface }}.conf not found, continuing...
     when: wg_overwrite is false
 
   - name: Save their content

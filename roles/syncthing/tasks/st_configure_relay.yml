@@ -99,16 +99,27 @@
   - name: Kill stray strelaysrv process
     shell:
       cmd: |
-        procs=$(lsof -Pni4 | awk '{print $1,$2,$9}' | grep -E '{{ st_relay.port }}$' \
-        | grep -E '^strelay')
-        p_name=$(echo $procs | cut -d' ' -f1)
-        p_pid=$(echo $procs | cut -d' ' -f2)
-        if [[ $p_name == 'strelaysr' ]]; then
-          kill -s SIGTERM $p_pid;
+        #!/usr/bin/env bash
+
+        procs=$(lsof -Pni4 | awk '{print $1,$2,$9}' \
+          | grep -E '{{ st_relay.port }}$' \
+          | grep -E '^strelay')
+
+        if [[ -n "$procs" ]]; then
+          p_name=$(echo "$procs" | cut -d' ' -f1)
+          p_pid=$(echo "$procs" | cut -d' ' -f2)
+          if [[ $p_name == 'strelaysr' ]]; then
+            kill -s SIGTERM "$p_pid";
+          else
+            exit 126;
+          fi
         else
-          exit 126;
+          exit 66
         fi
       executable: '/bin/bash'
+    register: st_kill_relay
+    failed_when: st_kill_relay.rc not in (0,66)
+    changed_when: st_kill_relay.rc == 0
     become: true
     become_user: root
 

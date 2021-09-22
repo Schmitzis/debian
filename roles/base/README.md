@@ -73,7 +73,7 @@ Ansible ≥2.10
 | base_reports_email             | E-mail address for system reports                                        | 'root'             |
 | base_require_tty_pty           | Set `use_pty` & `requiretty` in `/etc/sudoers`.                          | False              |
 | base_set_capslock              | Set <kbd>CapsLock</kbd> as <kbd>Ctrl</kbd>.                              | False              |
-| base_set_dpkg_console          | Configure framebuffer/console: font size, encoding, etc.                 | True               |
+| base_fb_configure              | Configure framebuffer/console: font size, encoding, etc.                 | True               |
 | base_set_dpkg_overrides        | Tighten various filesystem permissions. Use with care!                   | False              |
 | base_set_hostname              | Set target's hostname to the `inventory_hostname`                        | False              |
 | base_set_sigenforce            | Enforce kernel modules signature verification, only with SecureBoot.     | True               |
@@ -156,6 +156,7 @@ base_fw_list:
 
 | Name                | Reason                                            |
 |---------------------|---------------------------------------------------|
+| acl                 | ACL utilities.                                    |
 | bash-completion     | Self-explanatory.                                 |
 | ca-certificates     | Extensive set of certificates from Mozilla store. |
 | curl                | `curl`.                                           |

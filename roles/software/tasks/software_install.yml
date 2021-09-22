@@ -135,6 +135,7 @@
   apt:
     pkg: '{{ sw_list_global }}'
     state: present
+    update-cache: True
   delay: 3
   retries: 3
 

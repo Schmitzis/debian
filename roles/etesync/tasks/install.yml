@@ -19,7 +19,9 @@
   vars:
     pkg:
       - certbot
+      - clang
       - python3-certbot-nginx
+      - python3-dev
       - python3-virtualenv
       - uvicorn
 

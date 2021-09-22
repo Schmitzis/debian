@@ -30,6 +30,7 @@
   - name: Check if user has an active sudo ticket
     shell:
       cmd: 'sudo whoami'
+      warn: False
     failed_when: False
     changed_when: False
     register: base_sudo_ticket

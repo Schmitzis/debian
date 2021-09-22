@@ -152,7 +152,7 @@
   with_items: '{{ users_add }}'
   when:
     # Skip users with invalid $HOME
-    - (item.ssh_add_all or item.ssh_add_key) # TODO: Check this
+    - (item.ssh_add_all or item.ssh_add_key)
     - item.home
   loop_control:
     label: "{{ item.home }}/.ssh/"

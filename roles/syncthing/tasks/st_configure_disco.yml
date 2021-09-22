@@ -15,7 +15,7 @@
 # $ stdiscosrv -replicate=I6K...H76 <other options>
 #
 
-# Extraneous "when" statements are kept as `flush_handlers` won't work 
+# Extraneous "when" statements are kept as `flush_handlers` won't work
 # with the conditionals on the top level.
 # https://github.com/ansible/ansible/issues/41313
 

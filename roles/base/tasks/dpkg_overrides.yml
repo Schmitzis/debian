@@ -37,4 +37,6 @@
   become: True
   become_user: root
   with_items: '{{ dpkg_overrides }}'
+  loop_control:
+    label: '{{ item.user }}:{{ item.group }} {{ item.chmod }} {{ item.path }}'
   when: item['path'] not in dpkg_existing_overrides

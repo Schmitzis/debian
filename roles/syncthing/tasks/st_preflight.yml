@@ -55,6 +55,8 @@
     - { install: '{{ st_install_relay }}' ,
         present: '{{ st_query_relay.rc }}' ,
         name: 'Relay Server'}
+  loop_control:
+    label: '{{ item.name }}'
 
 - name: 'Provided username is empty, falling back to SSH user "{{ ansible_env.USER }}"'
   set_fact:
@@ -322,6 +324,8 @@
       - { 'install': st_install_disco, 'overwrite': st_client.disco.id_overwrite }
       - { 'install': st_install_relay, 'overwrite': st_client.relay.addr_overwrite }
       - { 'install': st_install_relay, 'overwrite': st_client.relay.id_overwrite }
+    loop_control:
+      label: '{{ item.overwrite }}'
 
 # Relay -------------------------------------------------------------------------------------------
 

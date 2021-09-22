@@ -28,11 +28,12 @@
   register: gpg_stat
 
 - name: Set intermediate fact about our findings...
-  no_log: true
   set_fact:
     gpg_files_found: '{{ gpg_files_found + [item.stat.exists] }}'
   with_items:
     - '{{ gpg_stat.results }}'
+  loop_control:
+    label: '{{ item.stat.exists }}'
 
 - name: Create single 'GPG-result' variable...
   set_fact:
@@ -61,6 +62,8 @@
       rsync_opts: ['--relative']
       mode: 'push'
     with_items: '{{ dots_dotfiles_list }}'
+    loop_control:
+      label: '{{ item.src }} --> {{ item.dest }}'
     register: dotfiles_copied
 
   - name: Link from ../dotfiles/
@@ -78,6 +81,8 @@
         become: True
         become_user: '{{ ansible_env.USER }}'
         with_items: '{{ dots_dotfiles_list }}'
+        loop_control:
+          label: '{{ item.src }} --> {{ item.dest }}'
         notify: rebuild bat cache
         register: dotfiles_linked
 
@@ -92,6 +97,8 @@
               state: directory
               recurse: True
             loop: '{{ dotfiles_linked.results }}'
+            loop_control:
+              label: '{{ item.path | default("") }}'
             when: item.failed
 
           - name: Try to link again
@@ -103,6 +110,8 @@
             become: True
             become_user: '{{ ansible_env.USER }}'
             with_items: '{{ dots_dotfiles_list }}'
+            loop_control:
+              label: '{{ item.src }} --> {{ item.dest }}'
             register: dotfiles_linked_2nd
 
           - name: Ensure that dotfiles are linked in full
@@ -121,6 +130,8 @@
     state: '{{ item.state }}'
     force: True
   with_items: '{{ dots_dotfiles_list }}'
+  loop_control:
+    label: '{{ item.src }} --> {{ item.dest }}'
   when: not dots_extract_dotfiles
   notify: rebuild bat cache
   register: dotfiles_linked

@@ -64,6 +64,8 @@
   import_tasks: modules.yml
   become: True
   become_user: root
+  notify:
+    - reboot host
   tags:
     - base_settings
 
@@ -78,6 +80,8 @@
   import_tasks: grub.yml
   become: True
   become_user: root
+  notify:
+    - reboot host
   tags:
     - base_grub
 
@@ -104,7 +108,7 @@
   import_tasks: dpkg_console.yml
   become: True
   become_user: root
-  when: base_set_dpkg_console
+  when: base_fb_configure
   tags:
     - base_dpkg_console
 
@@ -125,13 +129,6 @@
 
 - name: Run all relevant handlers
   meta: flush_handlers
-
-- name: Reboot if system can't pick-up updated kernel and/or userland
-  debug:
-    msg: 'Rebooting {{ ansible_hostname | upper }} @ {{ ansible_host }}'
-  notify:
-    - reboot host
-  when: reboot_required.results | json_query( '[*].stat.exists' ) | string == "[True]"
 
 - name: Finale
   debug:

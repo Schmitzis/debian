@@ -91,12 +91,12 @@
       - reboot host
     when: reboot_required.stat.exists
 
-  - name: Flush handlers
-    meta: flush_handlers
-
   when:
     - ansible_distribution == "Debian"
     - ansible_distribution_file_variety == "Debian"
     - ansible_distribution_release == "buster"
     - ( ansible_distribution_major_version | int ) == 10
     - base_autoupgrade
+
+- name: Flush handlers
+  meta: flush_handlers

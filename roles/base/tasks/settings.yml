@@ -96,6 +96,8 @@
     path: '{{ item.path }}'
     mode: 0750
   with_items: '{{ home_dirs.files }}'
+  loop_control:
+    label: '{{ item.path }}'
 
   # CIS 5.1.2 - CIS 5.1.7
 - name: Find existing cron files and directories
@@ -119,18 +121,20 @@
     group: root
     mode: og-rwx
   with_items: '{{ cron_directories.files }}'
+  loop_control:
+    label: '{{ item.path }}'
 
-  # Average modern GPU does ~1500Mh/s of SHA512, therefore...
+  # Commonplace modern GPU does ~1500Mh/s of SHA512, therefore...
 - name: Use SHA-512 for password hashing, increase number of rounds
   lineinfile:
     path: /etc/login.defs
     line: '{{ item }}'
     state: present
   with_items:
-    # john does ~100 p/s with 100000 rounds on i5-1145g7
+    # john does ~20 p/s with 500000 rounds on i5-1145g7
     - "ENCRYPT_METHOD    SHA512"
     - "MD5_CRYPT_ENAB    no"
-    - "SHA_CRYPT_MIN_ROUNDS    100000"
+    - "SHA_CRYPT_MIN_ROUNDS    500000"
 
 - name: Create password-auth and system-auth PAM units
   file:
@@ -147,13 +151,13 @@
 - name: Configure number of password-auth rounds in pam_unix.so
   lineinfile:
     path: /etc/pam.d/password-auth
-    line: password sufficient pam_unix.so rounds=100000
+    line: password sufficient pam_unix.so rounds=500000
     state: present
 
 - name: Configure number of system-auth rounds in pam_unix.so
   lineinfile:
     path: /etc/pam.d/system-auth
-    line: password sufficient pam_unix.so rounds=100000
+    line: password sufficient pam_unix.so rounds=500000
     state: present
 
 - name: Include password-auth in passwd PAM
@@ -386,6 +390,8 @@
     - { src: 'logrotate.d/ufw'                , dest: '/etc/logrotate.d/ufw' }
     - { src: 'logrotate.d/unattended-upgrades', dest: '/etc/logrotate.d/unattended-upgrades' }
     - { src: 'logrotate.d/wtmp'               , dest: '/etc/logrotate.d/wtmp' }
+  loop_control:
+    label: '{{ item.dest }}'
   notify:
     - rotate logs
 

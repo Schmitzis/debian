@@ -100,13 +100,7 @@
   stat:
     path: /var/run/reboot-required
   register: reboot_required
-
-  # Safety...
-- name: Reboot if system can't pick-up updated kernel and/or userland
-  debug:
-    msg: 'Rebooting {{ ansible_hostname | upper }} @ {{ ansible_all_ipv4_addresses[0] }}'
   notify: 'reboot host'
-  when: reboot_required.stat.exists
 
 - name: Flush handlers
   meta: flush_handlers
