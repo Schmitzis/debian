@@ -11,6 +11,10 @@ modules = {
   'predict'
 }
 
+-- Accept only from localhost
+view:addr('127.0.0.1/8', function (req, qry) return policy.PASS end)
+view:addr('0.0.0.0/0', function (req, qry) return policy.DROP end)
+
 {% if base_kresd_blocklist %}
 -- Add blocked hosts, reload on file change
 -- MUST be in a special .RPZ format
