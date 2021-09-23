@@ -1,4 +1,11 @@
 ---
+- name: Allow root user to login via SSH
+  replace:
+    path: /root/.ssh/authorized_keys
+    regexp: ^no-port-forwardin.+exit\ 142\.\s*
+    replace: ''
+  when: u2d_allow_root_ssh
+
 - name: Check if `snap` command is available
   shell:
     cmd: 'snap'
@@ -170,3 +177,4 @@
     - /etc/update-motd.d/10-help-text
     - /run/motd.dynamic
     - /var/lib/update-manager
+    - /root/snap

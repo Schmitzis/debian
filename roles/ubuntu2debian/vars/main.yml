@@ -1,2 +1,3 @@
 ---
-u2d_remove_users: []
+u2d_remove_users: ['snap_daemon', 'gnats', 'pollinate']
+u2d_allow_root_ssh: False

@@ -109,7 +109,7 @@
       base_vm_writeback: 1500              # vm.dirty_writeback_centisecs
 
 
-  - name: Execute `base` role
+  - name: Execute `users` role
     import_role:
       name: users
     tags: role_users

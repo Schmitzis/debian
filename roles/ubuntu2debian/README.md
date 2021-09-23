@@ -14,9 +14,10 @@ Do note that all Canonical-specific stuff will be removed, this includes telemet
 
 ## Role Variables
 
-| Variable         | Description             | Default |
-|------------------|-------------------------|---------|
-| u2d_remove_users | List of users to remove | []      |
+| Variable           | Description            | Default                               |
+|--------------------|------------------------|---------------------------------------|
+| u2d_remove_users   | Users to remove        | ['snap_daemon', 'gnats', 'pollinate'] |
+| u2d_allow_root_ssh | Allow `root` to login? | False                                 |
 
 ## Example playbook
 
@@ -29,7 +30,8 @@ Do note that all Canonical-specific stuff will be removed, this includes telemet
     import_role:
       name: ubuntu2debian
     vars:
-      u2d_remove_users: ['grid','opc','oracle']
+      u2d_remove_users: ['snap_daemon', 'gnats', 'pollinate']
+      u2d_allow_root_ssh: True
 ```
 
 ## Dependencies
