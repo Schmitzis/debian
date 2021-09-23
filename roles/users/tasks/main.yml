@@ -155,9 +155,18 @@
     - (item.ssh_add_all or item.ssh_add_key)
     - item.home
   loop_control:
-    label: "{{ item.home }}/.ssh/"
+    label: '{{ item.home }}/.ssh/'
   become: True
   become_user: root
+
+- name: Remove all existing SSH keys
+  file:
+    path: '{{ item.home }}/.ssh/authorized_keys'
+    state: absent
+  with_items: '{{ users_add }}'
+  when: item.ssh_add_clear
+  loop_control:
+    label: '{{ item.home }}/.ssh/authorized_keys'
 
 # All pubkeys -----------------------------------------------------------------
 

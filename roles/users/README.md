@@ -36,6 +36,7 @@ Add or remove users to a target host. Written after experiencing barrage of issu
             password_update: False,    # Update password if user exists?
             shell: '/bin/bash',        # Defaults to "/usr/sbin/nologin"
             ssh_add_all: True,         # Add everything under ~/.ssh/*.pub?
+            ssh_add_clear: True,       # Remove existing authorised keys?
             ssh_add_keys: [            # Add specific keys from ~/.ssh/
               'secret.k',
               'id_rsa.pub'] }
