@@ -11,7 +11,7 @@ st_reinstall: False
 st_client: {
   'addr_use_wan': true,         # Overwrite `st_client.addr` with the discovered WAN ip?
   'addr': '' ,                  # Address on which Client will listen, default: 127.0.0.1
-  'port': '',                   # Port on which Client's GUI/API will listen, default: 8384
+  'port': 8384,                 # Port on which Client's GUI/API will listen, default: 8384
   'announce_broadcast': true,   # Enable "local discovery"?
   'min_free_space': 5,          # Minimum free disk space to keep
   'config_dir': '',             # Will be replaced with $XDG_CONFIG_HOME/syncthing if empty
@@ -68,7 +68,7 @@ st_client: {
 st_disco: {
   'addr': '127.0.0.1',         # Address on which Disco listens itself
   'addr_use_wan': true,        # Use discovered WAN IP instead of the provided address?
-  'port': '',                  # Port on which Disco will listen itself, default: 8443
+  'port': 8443,                # Port on which Disco will listen itself, default: 8443
   'id': '',                    # Disco's own ID, *will* be overwritten during run
   'recreate_certs': true,      # Re-create certificates? Yields new ID.
   'replicate': false,          # Add `st_disco_replica` into the systemd config?
