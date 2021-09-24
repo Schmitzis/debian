@@ -1,4 +1,7 @@
 ---
+#
+# Unexposed
+#
 u2d_existing_keys: []
 u2d_VM_guest: True
 u2d_snap: False
@@ -31,3 +34,8 @@ u2d_pkg_install:
   - apt-utils
   - aptitude
   - dialog
+#
+# Exposed to a user
+#
+u2d_remove_users: ['snap_daemon', 'gnats', 'pollinate']
+u2d_allow_root_ssh: False

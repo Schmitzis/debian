@@ -1,36 +1,6 @@
 ---
-sw_alsa_out_card: 0
-sw_alsa_out_device: 0
-sw_list_audio: []
-sw_list_backports: []
-sw_list_clevis: []
-sw_list_deb: []
-sw_list_dev: []
-sw_list_fonts: []
-sw_list_fs: []
-sw_list_internet: []
-sw_list_multimedia: []
-sw_list_office: []
-sw_list_utils: []
-sw_list_virtio: []
-sw_list_wayland: []
-sw_list_wireless: []
-sw_setup_audio: false
-sw_setup_clevis: false
-sw_setup_dev: false
-sw_setup_fonts: false
-sw_setup_fs: false
-sw_setup_i2c: false
-sw_setup_internet: false
-sw_setup_multimedia: false
-sw_setup_office: false
-sw_setup_utils: false
-sw_setup_wayland: false
-sw_setup_wireless: false
-sw_systemd_units_disable: []
-sw_systemd_units_enable: []
-sw_systemd_units_masked: []
-sw_virtio_install: false
-sw_virtio_network_autostart: false
-sw_virtio_use_default_network: false
-sw_virtio_user_addgroup: false
+#
+# Normally, user-modifiable varibles are here.
+# However, due to the peculiar variable precedence in Ansible
+# everything is declared in ../defaults/main.yml
+#

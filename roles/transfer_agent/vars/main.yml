@@ -1,7 +1,6 @@
 ---
-tag_agent_group: 'agents'
-tag_agent_name: 'xfer'
-tag_pubkey_from_current_user: true
-tag_pubkey_from_others: true
-tag_remove_existing_user: false
-tag_add_rsync: true
+#
+# Normally, user-modifiable varibles are here.
+# However, due to the peculiar variable precedence in Ansible
+# everything is declared in ../defaults/main.yml
+#

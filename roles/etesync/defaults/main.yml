@@ -1,3 +1,22 @@
 ---
+#
+# Unexposed
+#
 esc_admin_random: False
 esc_admins_num: 0
+#
+# Exposed to a user
+#
+esc_admin: ''
+esc_admin_email: ''
+esc_cert_email: ''
+esc_debug: False
+esc_provision_https: True
+esc_hosts: ['127.0.0.1']
+esc_path: '/var/www/esc_server'
+esc_port: 80
+esc_repository: 'https://github.com/etesync/server'
+esc_rm_existing: False
+esc_rootdir: '/var/www/html/esc_server'
+esc_user: www-uvicorn
+esc_version: 'd11504093c0dff22e5371fada9037e6436abf628'

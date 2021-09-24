@@ -1,3 +1,6 @@
 ---
-u2d_remove_users: ['snap_daemon', 'gnats', 'pollinate']
-u2d_allow_root_ssh: False
+#
+# Normally, user-modifiable varibles are here.
+# However, due to the peculiar variable precedence in Ansible
+# everything is declared in ../defaults/main.yml
+#

@@ -1,4 +1,7 @@
 ---
+#
+# Unexposed
+#
 dotfiles_backup: '{{ dots_dotfiles_list }}'
 gpg_files_found: []
 tmux_remove_lines:
@@ -9,3 +12,13 @@ tmux_remove_lines:
   - "bind -n C-right next"
   - "bind > swap-pane -D"
   - "bind < swap-pane -U"
+#
+# Exposed to a user
+#
+dots_extract_dotfiles: true
+dots_change_tmux_prefix: true
+dots_bash_emacs_mode: false
+dots_remote_gitconfig: true
+dots_setup_fortunes: false
+dots_setup_neovim: false
+dots_dotfiles_list: []
