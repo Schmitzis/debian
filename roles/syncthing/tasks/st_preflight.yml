@@ -476,7 +476,8 @@
     fail_msg: >
       Client won't be able to connect with the Discovery-server while the latter
       is listening on {{ st_disco.addr }} and NAT-traversal is disabled.
-  when: not st_disco.addr | ansible.netcommon.ipaddr("public")
+  when: st_install_client and
+        not st_disco.addr | ansible.netcommon.ipaddr("public")
         and not st_client.disco.addr | ansible.netcommon.ipaddr("public")
 
 - name: Collate defined ports

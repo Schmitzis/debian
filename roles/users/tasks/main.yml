@@ -153,7 +153,7 @@
   with_items: '{{ users_add }}'
   when:
     # Skip users with invalid $HOME
-    - (item.ssh_add_all or item.ssh_add_key)
+    - (item.ssh_add_all or item.ssh_add_keys)
     - item.home
   loop_control:
     label: '{{ item.home }}/.ssh/'
@@ -225,7 +225,7 @@
       state: present
     with_nested:
       - '{{ users_add }}'
-      - '{{ _ssh_keys_all_valid }}'
+      - '{{ _ssh_keys_all_valid | default("") }}'
     when:
       - item[0].ssh_add_all
       - item[0].home
