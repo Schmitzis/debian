@@ -166,6 +166,7 @@
     # Removes home-folders!
     force: true
   with_items: '{{ u2d_remove_users }}'
+  failed_when: false
 
 - name: Remove unnecessary leftovers
   file:

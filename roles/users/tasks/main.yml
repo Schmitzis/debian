@@ -8,6 +8,7 @@
     force: False
   with_items: '{{ users_remove }}'
   when: users_remove | length > 0
+  failed_when: false
   become: True
   become_user: root
 
