@@ -4,7 +4,8 @@
     name: '{{ item }}'
     state: absent
     remove: True
-    force: True
+    # Do not remove home-folder by default
+    force: False
   with_items: '{{ users_remove }}'
   when: users_remove | length > 0
   become: True

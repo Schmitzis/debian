@@ -163,6 +163,7 @@
     name: '{{ item }}'
     state: absent
     remove: true
+    # Removes home-folders!
     force: true
   with_items: '{{ u2d_remove_users }}'
 

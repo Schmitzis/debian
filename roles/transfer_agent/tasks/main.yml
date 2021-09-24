@@ -26,7 +26,7 @@
       name: '{{ tag_agent_name }}'
       state: absent
       remove: True
-      force: true
+      force: True
     when: user_grep.rc | int == 0 and tag_remove_existing_user
 
   - name: Ensure agents group is present
