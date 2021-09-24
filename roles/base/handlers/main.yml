@@ -37,6 +37,13 @@
   become_user: root
   listen: 'restart timesyncd'
 
+- name: Reconfigure SSHd
+  shell:
+    cmd: dpkg-reconfigure -f noninteractive openssh-server
+  become: True
+  become_user: root
+  listen: 'reconfigure sshd'
+
 - name: reconfigure keyboard settings
   shell: dpkg-reconfigure -f noninteractive keyboard-configuration
   become: True
