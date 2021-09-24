@@ -85,6 +85,7 @@
       This is insecure and installation _will_ break. Aborting.
     success_msg: >
       {{ st_client.user.name }} has UID {{ st_user_stat.uid }}
+  when: st_install_client
 
 - name: Register user`s homedir
   set_fact:
