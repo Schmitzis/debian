@@ -20,7 +20,7 @@ Client:
 {% if st_install_disco %}
 Discovery-server:
 
-- Configured for the user "syncthing", UID {{ st_syncthing_user_stat.uid }}
+- Configured for the user "syncthing", UID {{ st_syncthing_user_stat_disco.uid }}
 - Listening on {{ st_disco.addr }}:{{ st_disco.port }}
 - Discovery-server replication is {% if st_disco.replicate %}set to listen on {{ st_disco.replica.listen_addr }}:{{ st_disco.replica.listen_port }} and connect to {{ st_disco.replica.addr }}:{{ st_disco.replica.port }} {% else %}disabled.{% endif %}
 
@@ -32,7 +32,7 @@ Discovery-server:
 {% if st_install_relay %}
 Relay-server:
 
-- Configured for the user "syncthing", UID {{ st_syncthing_user_stat.uid }}
+- Configured for the user "syncthing", UID {{ st_syncthing_user_stat_relay.uid }}
 - Listening on {{ st_relay.addr }}:{{ st_relay.port }}
 - {% if st_relay.nat.enabled %}Using UPnP/NAT-PMP to acquire external port mapping.{% else %}UPnP/NAT-PMP is disabled.{% endif %}
 
