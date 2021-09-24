@@ -12,7 +12,7 @@
     state: link
   register: esc_nginx_enable
 
-- name: Ensure nginx is enabled and running
+- name: Restart and enable nginx
   systemd:
     name: nginx.service
     state: restarted

@@ -291,7 +291,7 @@
     insertafter: '[Journal]'
     state: present
 
-- name: Ensure /etc/systemd/coredump.conf.d exists
+- name: Create `/etc/systemd/coredump.conf.d` directory
   file:
     path: /etc/systemd/coredump.conf.d
     state: directory
@@ -450,7 +450,7 @@
       line: 'Defaults requiretty'
       validate: '/usr/sbin/visudo -cf %s'
 
-  - name: Ensure use_pty is enabled in /etc/sudoers
+  - name: Enable use_pty in /etc/sudoers
     lineinfile:
       path: /etc/sudoers
       regexp: '^[\s]*Defaults.*\buse_pty\b.*$'

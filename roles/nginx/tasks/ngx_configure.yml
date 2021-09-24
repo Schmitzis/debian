@@ -44,7 +44,7 @@
     register: ngx_tpl_endpoint
     with_items: '{{ ngx_endpoints }}'
 
-  - name: Ensure endpoint root-directories exist
+  - name: Create endpoint directories
     file:
       path: '/var/www/html/{{ item | regex_replace("\.", "-") }}'
       state: directory

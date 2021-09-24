@@ -65,7 +65,7 @@
     direction: incoming
     logging: 'off'
 
-- name: Ensure UFW is up and running
+- name: Restart UFW
   service:
     name: ufw
     state: restarted

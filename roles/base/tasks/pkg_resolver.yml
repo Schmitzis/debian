@@ -5,7 +5,7 @@
     state: directory
     recurse: True
 
-- name: Ensure NetworkManager won't override resolv.conf
+- name: Prevent NetworkManager from overriding resolv.conf
   copy:
     dest: /etc/NetworkManager/conf.d/no-dns.conf
     content: '[main]\ndns=none\n'
@@ -15,7 +15,7 @@
     dest: /etc/resolvconf.conf
     content: 'name_servers=127.0.0.1'
 
-- name: Ensure `dhclient` won't override resolv.conf
+- name: Prevent `dhclient` from overriding resolv.conf
   copy:
     dest: /etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone
     content: 'make_resolv_conf() { :; }'

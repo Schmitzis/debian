@@ -74,7 +74,7 @@
 - name: Discovery-server block
   block:
 
-  - name: Ensure that Discovery service is running
+  - name: Start Discovery service
     systemd:
       name: 'syncthing-discosrv.service'
       enabled: True

@@ -32,7 +32,7 @@
   changed_when: esc_etebase_status.rc != 3
   failed_when: esc_etebase_status.rc | int > 5 # noqa 301
 
-- name: Ensure that EteBase is stopped
+- name: Stop EteBase
   systemd:
     name: etebase_server.service
     state: stopped

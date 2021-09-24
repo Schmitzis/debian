@@ -39,7 +39,7 @@
   changed_when: false
   register: st_query_relay
 
-- name: Ensure we are allowed to overwrite executable binaries
+- name: Assert that overwriting executables is allowed
   assert:
     that: '{{ not item.install }}'
     fail_msg: >

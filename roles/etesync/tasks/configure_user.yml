@@ -1,5 +1,5 @@
 ---
-- name: Ensure www-data group is present
+- name: Create `www-data` group
   group:
     name: www-data
     state: present

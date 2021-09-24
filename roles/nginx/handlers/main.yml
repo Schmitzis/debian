@@ -1,5 +1,5 @@
 ---
-- name: Ensure nginx systemd unit is enabled and running
+- name: Restart and enable nginx
   systemd:
     name: nginx.service
     state: restarted

@@ -114,7 +114,7 @@
               label: '{{ item.src }} --> {{ item.dest }}'
             register: dotfiles_linked_2nd
 
-          - name: Ensure that dotfiles are linked in full
+          - name: Assert that dotfiles are linked in full
             assert:
               that: dotfiles_linked_2nd.msg == 'All items completed'
       # Block end (link dotfiles)

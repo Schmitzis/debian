@@ -29,7 +29,7 @@
     value: 'en_US.UTF-8 UTF-8, {{ base_locale }} UTF-8'
     vtype: multiselect
 
-- name: Ensure that desirable locale is present
+- name: Generate locale
   locale_gen:
     name: '{{ base_locale }}'
     state: present

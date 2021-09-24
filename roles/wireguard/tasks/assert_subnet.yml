@@ -148,7 +148,7 @@
   when:
     - wg_affected_ifaces is defined
 
-- name: Ensure that subnet from Wireguard config overlaps with the detected IP
+- name: Assert that subnet from Wireguard config overlaps with the detected IP
   assert:
     that:
       - wg_affected_addresses[0] | ipaddr(wg_existing_config_ip.stdout | string)
@@ -165,7 +165,7 @@
     - wg_affected_ifaces is defined
     - wg_affected_addresses is defined
 
-- name: Ensure that found interface is managed by Wireguard _now_
+- name: Check if found interface is managed by Wireguard _now_
   shell:
     cmd: 'wg show {{ wg_affected_ifaces[0] }}'
   register: wg_affected_shellcheck

@@ -31,7 +31,7 @@
 # Enable and stop systemd services
 # --------------------------------------------------------------------------------------------------
 
-- name: Ensure Syncthing-Client service is enabled and stopped
+- name: Enable and stop Syncthing-Client service
   systemd:
     name: 'syncthing@{{ st_client.user.name }}.service'
     enabled: True
@@ -39,7 +39,7 @@
     state: stopped
   when: st_install_client
 
-- name: Ensure Discovery-Server service is enabled and stopped
+- name: Enable and stop Discovery-Server service
   systemd:
     name: 'syncthing-discosrv.service'
     enabled: True
@@ -47,7 +47,7 @@
     state: stopped
   when: st_install_disco
 
-- name: Ensure Relay-Server service is enabled and stopped
+- name: Enable and stop Relay-Server service
   systemd:
     name: 'syncthing-relaysrv.service'
     enabled: True
