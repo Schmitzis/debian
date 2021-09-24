@@ -2,3 +2,4 @@
 - name: Rebuild bat cache
   shell: bat cache --clear && bat cache --build
   listen: 'rebuild bat cache'
+  failed_when: false
