@@ -12,12 +12,22 @@ u2d_gpg_keys:
 u2d_pkg_remove:
   - accountsservice
   - apport
+  - byobu
+  - cloud-guest-utils
+  - cloud-init
+  - cloud-initramfs-copymods
+  - cloud-initramfs-dyn-netconf
+  - landscape-common
   - linux-firmware
+  - lxd-agent-loader
+  - motd-news-config
   - multipath-tools
   - open-iscsi
+  - open-vm-tools
   - packagekit
   - plymouth
   - policykit-1
+  - pollinate
   - popularity-contest
   - shim-signed
   - snapd

@@ -173,10 +173,15 @@
     path: '{{ item }}'
     state: absent
   with_items:
+    - /etc/cloud
     - /etc/ec2_version
+    - /etc/iptables/rules.v4
+    - /etc/iptables/rules.v6
     - /etc/lsb-release
+    - /etc/pollinate
     - /etc/profile.d/01-locale-fix.sh
     - /etc/update-motd.d/10-help-text
-    - /run/motd.dynamic
-    - /var/lib/update-manager
     - /root/snap
+    - /run/motd.dynamic
+    - /var/lib/cloud
+    - /var/lib/update-manager
