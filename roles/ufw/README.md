@@ -15,6 +15,7 @@ Ansible ≥2.10
 | ufw_logging               | Enable logging?                         | False   |
 | ufw_operator_ip_whitelist | Whitelist IP of the current controller? | False   |
 | ufw_policy                | Default policy                          | 'deny'  |
+| ufw_reset                 | Remove all pre-existing rules?          | False   |
 | ufw_rule                  | Template for a UFW rule.                | []      |
 | ufw_service               | Template for a UFW service.             | []      |
 

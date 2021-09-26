@@ -56,6 +56,11 @@
     when: not ufw_logging
     notify: 'restart ufw'
 
+  - name: Reset UFW
+    shell:
+      cmd: 'yes | ufw reset'
+    when: ufw_reset
+
   - name: Whitelist operator's WAN IP
     ufw:
       rule: allow

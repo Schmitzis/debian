@@ -7,5 +7,6 @@ ufw_limit_ssh: False
 ufw_logging: False
 ufw_operator_ip_whitelist: False
 ufw_policy: 'deny'
+ufw_reset: False
 ufw_rule: []
 ufw_service: []

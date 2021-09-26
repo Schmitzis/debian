@@ -99,6 +99,7 @@
       ufw_logging: False
       ufw_operator_ip_whitelist: False
       ufw_policy: 'deny'
+      ufw_reset: True                     # Remove all pre-existing rules
       ufw_rule:
         - { comment: 'Drop incoming TCP traffic from 172.16.17.92 to port 22',
             direction: 'in',
