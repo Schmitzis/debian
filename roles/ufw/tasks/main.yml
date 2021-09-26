@@ -52,8 +52,7 @@
     lineinfile:
       path: /etc/ufw/ufw.conf
       regexp: '^LOGLEVEL'
-      line: 'LOGLEVEL=off'
-    when: not ufw_logging
+      line: 'LOGLEVEL={{ ufw_logging | ternary("low", "off", "off") }}'
     notify: 'restart ufw'
 
   - name: Reset UFW
