@@ -1,0 +1,6 @@
+---
+#
+# Normally, user-modifiable varibles are here.
+# However, due to the peculiar variable precedence in Ansible
+# everything is declared in ../defaults/main.yml
+#

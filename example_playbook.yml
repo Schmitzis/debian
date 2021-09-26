@@ -40,7 +40,6 @@
       base_hide_pid: false                 # Disable acces to /proc in /etc/fstab
       base_init_on_free: false             # init_on_free=? kernel parameter
       base_install_recommends: true        # Install from APT-Recommends by default?
-      base_limit_ssh: false                # `ufw limit ssh`
       base_locale: en_AU.UTF-8
       base_locale_singular: true           # Do not fetch other locales
       base_logind_configure: false
@@ -49,7 +48,6 @@
       base_logind_lid_action: suspend
       base_logind_powerbutton_action: poweroff
       base_nmi_watchdog: false
-      base_operator_ip_whitelist: False    # Whitelist WAN IP of the Ansible Controller?
       base_pam_namespace: false            # Private namespace with polyinstantiated directories
       base_pkg_remove:
         - wpasupplicant
@@ -88,7 +86,20 @@
         - thermal-conf.xml.auto
       base_timezone: Australia/Adelaide
       base_trackpoint_drift: 25            # Fix drifting trackpoint cursor
-      base_ufw_rule:
+      base_vm_writeback: 1500              # vm.dirty_writeback_centisecs
+
+
+  - name: Execute `ufw` role
+    import_role:
+      name: ufw
+    tags: role_ufw
+    vars:
+      ufw_enable: True
+      ufw_limit_ssh: False
+      ufw_logging: False
+      ufw_operator_ip_whitelist: False
+      ufw_policy: 'deny'
+      ufw_rule:
         - { comment: 'Drop incoming TCP traffic from 172.16.17.92 to port 22',
             direction: 'in',
             from: '172.16.17.92',
@@ -101,12 +112,11 @@
             port: '1:65000',
             proto: 'tcp',
             rule: 'allow' }
-      base_ufw_service:
+      ufw_service:
         - { comment: 'Reject Yahoo messenger from 192.168.67.83',
             rule: 'deny',
             from: '192.168.67.83',
             service: 'Yahoo' }
-      base_vm_writeback: 1500              # vm.dirty_writeback_centisecs
 
 
   - name: Execute `users` role

@@ -97,13 +97,6 @@
   tags:
     - base_openssh
 
-- name: Configure UFW
-  import_tasks: ufw.yml
-  become: True
-  become_user: root
-  tags:
-    - base_ufw
-
 - name: Reconfigure console via dpkg
   import_tasks: dpkg_console.yml
   become: True

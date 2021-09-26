@@ -1,0 +1,108 @@
+---
+- name: (Block) UFW
+  block:
+
+  - name: Whitelist op's WAN IP
+    block:
+
+    - name: Get operator`s WAN IP
+      shell:
+        cmd: >
+          curl -s https://www.zx2c4.com/ip | cut -b1-15
+          | head -n1 | grep -o -P "^\d+\.\d+\.\d+\.\d+" | xargs
+        warn: false
+      changed_when: False
+      delegate_to: localhost
+      register: ufw_operator_ip_wan
+
+    - name: Cleanup operator`s WAN IP
+      set_fact:
+        ufw_operator_ip_wan: >
+          {{ ufw_operator_ip_wan.stdout
+          | ansible.netcommon.ipv4("address")
+          | ansible.netcommon.ipaddr("public") }}
+
+    - name: Assert that operator`s IP refers to /32
+      assert:
+        that:
+          ufw_operator_ip_wan: >
+            ufw_operator_ip_wan
+            | ansible.netcommon.ipaddr("size") == 1
+
+    when: ufw_operator_ip_whitelist
+    # block end (op whitelist)
+
+  - name: Disable ipv6
+    lineinfile:
+      path: /etc/ufw/ufw.conf
+      line: 'IPV6=no'
+      state: present
+      insertafter: EOF
+    notify: 'restart ufw'
+
+    # Note: single-quoted for a reason
+  - name: Don't autoconfigure ipv6
+    replace:
+      path: /etc/ufw/sysctl.conf
+      regexp: '^#(net\/ipv6\/conf\/\w*\/autoconf\=0)'
+      replace: '\1'
+    notify: 'restart ufw'
+
+  - name: Disable logging in config
+    lineinfile:
+      path: /etc/ufw/ufw.conf
+      regexp: '^LOGLEVEL'
+      line: 'LOGLEVEL=off'
+    when: not ufw_logging
+    notify: 'restart ufw'
+
+  - name: Whitelist operator's WAN IP
+    ufw:
+      rule: allow
+      from_ip: '{{ ufw_operator_ip_wan }}'
+      direction: in
+      comment: 'Whitelist operator'
+      insert_relative_to: first-ipv4
+      insert: 1
+    when: ufw_operator_ip_whitelist
+
+  - name: Limit SSH connections
+    ufw:
+      rule: limit
+      port: ssh
+      proto: tcp
+      comment: Limit SSH via Ansible
+    when: ufw_limit_ssh
+
+  - name: Add UFW rules
+    ufw:
+      comment: '{{ item.comment | default(omit) }}'
+      direction: '{{ item.direction | default("in") }}'  # in/out/router
+      from_ip: '{{ item.from | default("any") }}'        # defaults to "any"
+      port: '{{ item.port | default("any") }}'           # destination port
+      proto: '{{ item.proto | default("tcp") }}'         # protocol, TCP by default
+      rule: '{{ item.rule }}'                            # allow/deny/limit/reject
+      to_ip: '{{ item.to | default("any") }}'            # defaults to "any"
+    with_items: '{{ ufw_rule }}'
+    when: ufw_rule | length > 0
+
+  - name: Add UFW service
+    ufw:
+      comment: '{{ item.comment | default(omit) }}'
+      from_ip: '{{ item.from | default("any") }}'        # defaults to "any"
+      rule: '{{ item.rule }}'                            # allow/deny/limit/reject
+      to_ip: '{{ item.to | default("any") }}'            # defaults to "any"
+      name: '{{ item.service }}'                         # /etc/ufw/applications.d
+    with_items: '{{ ufw_service }}'
+    when: ufw_service | length > 0
+
+  - name: Enable UFW
+    ufw:
+      state: '{{ ufw_enable | ternary("enabled", "disabled", "disabled") }}'
+      policy: '{{ ufw_policy | default("deny") }}'
+      direction: incoming
+      logging: '{{ ufw_logging | ternary("on", "off", "off") }}'
+
+  become: True
+  become_user: root
+  # block end

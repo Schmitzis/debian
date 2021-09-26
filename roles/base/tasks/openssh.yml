@@ -47,7 +47,7 @@
   with_items:
     - "{{ ansible_env.HOME }}/moduli.in"
     - "{{ ansible_env.HOME }}/moduli.out"
-  when: primes_are_copied.changed
+  when: primes_are_copied.changed # noqa 503
 
 - name: Copy /etc/ssh/sshd_config
   copy:

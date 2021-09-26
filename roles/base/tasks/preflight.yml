@@ -116,26 +116,3 @@
     cmd: '[ -d /sys/firmware/efi ] && echo True || echo False'
   register: base_bootmode
   changed_when: false
-
-- name: Whitelist op's WAN IP
-  block:
-
-  - name: Get operator`s WAN IP
-    shell:
-      cmd: 'curl -s https://www.zx2c4.com/ip | cut -b1-15 | head -n1 | grep -o -P "^\d+\.\d+\.\d+\.\d+" | xargs'
-      warn: false
-    changed_when: False
-    delegate_to: localhost
-    register: base_operator_ip_wan
-
-  - name: Cleanup operator`s WAN IP
-    set_fact:
-      base_operator_ip_wan: '{{ base_operator_ip_wan.stdout | ansible.netcommon.ipv4("address") | ansible.netcommon.ipaddr("public") }}'
-
-  - name: Assert that operator`s IP refers to /32
-    assert:
-      that:
-        base_operator_ip_wan: base_operator_ip_wan | ansible.netcommon.ipaddr("size") == 1
-
-  when: base_operator_ip_whitelist
-  # block end (op whitelist)
