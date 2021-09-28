@@ -132,6 +132,23 @@
   apt:
     autoclean: true
 
+- name: (Block) root login
+  block:
+
+  - name: (1/2) Allow root user to login via SSH
+    replace:
+      path: /root/.ssh/authorized_keys
+      regexp: '^no-port-forward.+\s142.\s*'
+      replace: ''
+
+  - name: (2/2) Allow root user to login via SSH
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      line: PermitRootLogin prohibit-password
+      state: present
+
+  when: u2d_allow_root_ssh
+
 - name: Reboot one last time
   reboot:
     msg: 'Rebooting {{ ansible_hostname | upper }} @ {{ ansible_host }}'
