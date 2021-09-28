@@ -44,6 +44,7 @@ u2d_pkg_install:
   - apt-utils
   - aptitude
   - dialog
+  - ifupdown
 #
 # Exposed to a user
 #
