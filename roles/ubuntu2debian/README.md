@@ -14,10 +14,10 @@ Do note that all Canonical-specific stuff will be removed, this includes telemet
 
 ## Role Variables
 
-| Variable           | Description            | Default                               |
-|--------------------|------------------------|---------------------------------------|
-| u2d_remove_users   | Users to remove        | ['snap_daemon', 'gnats', 'pollinate'] |
-| u2d_allow_root_ssh | Allow `root` to login? | False                                 |
+| Variable           | Description            | Default                      |
+|--------------------|------------------------|------------------------------|
+| u2d_remove_users   | Users to remove        | ['snap_daemon', 'pollinate'] |
+| u2d_allow_root_ssh | Allow `root` to login? | False                        |
 
 ## Example playbook
 

@@ -47,5 +47,5 @@ u2d_pkg_install:
 #
 # Exposed to a user
 #
-u2d_remove_users: ['snap_daemon', 'gnats', 'pollinate']
+u2d_remove_users: ['snap_daemon', 'pollinate']
 u2d_allow_root_ssh: False
