@@ -8,7 +8,9 @@
 - name: Prevent NetworkManager from overriding resolv.conf
   copy:
     dest: /etc/NetworkManager/conf.d/no-dns.conf
-    content: '[main]\ndns=none\n'
+    content: |
+      [main]
+      dns=none
 
 - name: Configure resolvconf
   copy:
