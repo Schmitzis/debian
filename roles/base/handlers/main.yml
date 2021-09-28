@@ -83,7 +83,7 @@
   listen: 'restart unattended-upgrades'
 
 - name: Update GRUB
-  command: grub-mkconfig -o /boot/grub/grub.cfg && update-grub
+  command: grub-mkconfig -o /boot/grub/grub.cfg
   listen: 'grub_update'
   become: True
   become_user: root
