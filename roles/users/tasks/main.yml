@@ -36,7 +36,8 @@
     no_log: True
 
     # https://github.com/ansible/ansible/pull/70762
-  - name: Pre-hash passwords to prevent Ansible from passing asterisks to `adduser`
+    # ...to prevent Ansible from passing asterisks to `adduser`
+  - name: Pre-hash passwords
     set_fact:
       # The salt is roughly half of what rfc2898 requires due to the limitation
       # in sha512_crypt. Still gives at least ("at least" due to the non-fixed
@@ -52,7 +53,7 @@
         | password_hash("sha512", salt_user[:16]), "password": None,
         "password_update": item.password_update
         | ternary("always", "on_create", "on_create"),
-        "home": item.home | ternary(item.home, None, None)
+        "home": item.home | ternary(item.home, "", "")
         | regex_replace("\/$")}, recursive=True)] }}
     with_items: '{{ users_add }}'
     when: item.name
@@ -71,7 +72,7 @@
     vars:
       _rnd_pwd: []
 
-  - name: Users that will be created with a new random password each
+  - name: Users that will have their password set to a random value
     debug:
       msg: '{{ _rnd_pwd }}'
     when: _rnd_pwd is defined and _rnd_pwd
@@ -92,7 +93,9 @@
       with_items: '{{ users_add }}'
       loop_control:
         label: '{{ item.home }}'
-      when: item.home
+      when:
+        - item.home
+        - item.home | length > 1
 
     - name: Create requested groups
       group:
@@ -100,7 +103,7 @@
         state: present
       with_items: '{{ users_add | map(attribute="groups") | list }}'
 
-    - name: 'Create user accounts'
+    - name: Create or modify user accounts
       ansible.builtin.user:
         append: True # append groups rather than overwriting existing ones
         comment: 'Added via Debian Playbook'
@@ -133,7 +136,9 @@
       with_items: '{{ users_add }}'
       loop_control:
         label: '{{ item.home }}'
-      when: item.home_chown
+      when:
+        - item.home
+        - item.home_chown
 
     become: True
     become_user: root
