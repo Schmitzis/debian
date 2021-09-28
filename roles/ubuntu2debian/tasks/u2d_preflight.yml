@@ -32,6 +32,7 @@
     masked: False
     enabled: False
   when: >
+    "unattended-upgrades.service" in ansible_facts.services and
     ansible_facts.services["unattended-upgrades.service"]["state"]
     == "running"
 
@@ -42,5 +43,6 @@
     masked: False
     enabled: False
   when: >
+    "snapd.service" in ansible_facts.services and
     ansible_facts.services["snapd.service"]["state"]
     == "running"
