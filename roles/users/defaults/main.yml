@@ -2,5 +2,17 @@
 #
 # Exposed to a user
 #
-users_add: []
+users_add:
+  - { name: '',
+      groups: [],
+      home: '',
+      home_chown: True,
+      password: '',
+      password_lock: False,
+      password_update: True,
+      shell: '/usr/sbin/nologin',
+      ssh_add_all: False,
+      ssh_add_clear: False,
+      ssh_add_keys: [] }
+
 users_remove: []

@@ -46,7 +46,8 @@
       # Fields named `pwd, `pass` and `password` and replaced with asterisks
       # automatically, hence the `pd` moniker.
       #
-      # Password is removed to prevent exposure of cleartext.
+      # Password is removed to prevent exposure of cleartext. Explicit casting
+      # as I've been observing concat errors happening seemingly at random.
       users_add_cleaned: >
         {{ users_add_cleaned + [item | combine ({ "pd": item.password
         | ternary(item.password, password_rnd, password_rnd)
@@ -60,7 +61,7 @@
     no_log: True
     vars:
       salt_user: '{{ salt | random | join | string }}'
-      password_rnd: lookup('community.general.random_string', length=20)
+      password_rnd: '{{ lookup("community.general.random_string", length=20) | string }}'
       users_add_cleaned: []
 
   - name: Collect users that have no password defined

@@ -12,13 +12,15 @@
         - '{{ hostvars[inventory_hostname]["ansible_host"] }}'
         - '{{ inventory_hostname }}'
       when: item != 'localhost'
+      until: ssh_keygen_remove.rc in [0,1]
       loop_control:
         label: |-
           {{ item | default("...") }} =>
           {{ ssh_keygen_remove.stdout | default("...") }}
       # Retries are warranted as Ansible can't always cope with the modern NVMEs
       retries: 3
-      delay: 2
+      delay: 1
+      throttle: 1
 
     - name: Login into each host to save their SSH fingerprints
       shell:
@@ -30,6 +32,8 @@
         - '{{ hostvars[inventory_hostname]["ansible_host"] }}'
         - '{{ inventory_hostname }}'
       when: item != 'localhost'
+      register: ssh_keygen_remove
+      until: ssh_keygen_remove.rc in [0,1]
       loop_control:
         label: '{{ item | default("...") }}'
       retries: 3
