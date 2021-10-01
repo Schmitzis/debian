@@ -42,5 +42,8 @@ Handles users creation and removal as well as the SSH key management.
 ### [hosts](/roles/hosts)
 Flexible management of `/etc/hosts`.
 
+### [known_hosts](/roles/known_hosts)
+Handy autoupdater of the `known_hosts` fingerprints.
+
 ### [ubuntu2debian](/roles/ubuntu2debian/)
 Automatically converts a host running Ubuntu 20.04 into Debian 11.
