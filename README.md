@@ -22,7 +22,7 @@ Installation and configuration of various userland packages.
 Distributes dotfiles to a target host.
 
 ### [transfer_agent](/roles/transfer_agent/)
-Creates jailed user with rather limited `chroot`. Supports automatic propagation of SSH keys.
+Creates jailed user with a limited `chroot`. Supports automatic propagation of SSH keys.
 
 ### [wireguard](/roles/wireguard/)
 Provisions Wireguard in any mode imaginable.
@@ -38,6 +38,9 @@ EteBase server running on `uvicorn` and `nginx`, includes automatic HTTPs via `c
 
 ### [users](/roles/users/)
 Handles users creation and removal as well as the SSH key management.
+
+### [hosts](/roles/hosts)
+Flexible management of `/etc/hosts`.
 
 ### [ubuntu2debian](/roles/ubuntu2debian/)
 Automatically converts a host running Ubuntu 20.04 into Debian 11.

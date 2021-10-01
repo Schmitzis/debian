@@ -1,0 +1,17 @@
+---
+#
+# Unexposed
+#
+hosts_combined: []
+hosts_data: {}
+#
+# Exposed to a user
+#
+hosts_local_all: False
+hosts_local_groups: []
+hosts_local_rewrite: False
+hosts_remote_all: False
+hosts_remote_groups: []
+hosts_remote_rewrite: False
+hosts_remote_same_group: False
+hosts_remote_self: False
