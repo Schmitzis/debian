@@ -102,5 +102,35 @@
   register: reboot_required
   notify: 'reboot host'
 
+- name: (Block) Update local SSH authorized keys
+  block:
+
+  - name: Remove cached keys which are outdated by now
+    shell:
+      cmd: >
+        ssh-keygen -R {{ item }}
+        -f "{{ lookup("env", "HOME") }}/.ssh/known_hosts"
+    register: ssh_keygen_remove
+    with_items:
+      - '{{ inventory_hostname }}'
+      - '{{ hostvars[inventory_hostname]["ansible_host"] }}'
+    loop_control:
+      label: |-
+        {{ item | default("...") }} =>
+        {{ ssh_keygen_remove.stdout | default("...") }}
+
+  - name: Login into each host to save their SSH fingerprints
+    shell:
+      cmd: 'ssh root@{{ item }} "hostname; exit"'
+    with_items:
+      - '{{ inventory_hostname }}'
+      - '{{ hostvars[inventory_hostname]["ansible_host"] }}'
+    loop_control:
+      label: '{{ item | default("...") }}'
+
+  delegate_to: localhost
+  become: True
+  become_user: '{{ lookup("env", "USER") }}'
+
 - name: Flush handlers
   meta: flush_handlers
