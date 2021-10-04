@@ -33,6 +33,7 @@
         {{ [rnd_a,rnd_b,rnd_c,rnd_d,rnd_e,rnd_f]
         | ansible.builtin.permutations(6)
         | list }}
+      users_add_cleaned: []
     no_log: True
 
     # https://github.com/ansible/ansible/pull/70762
@@ -54,15 +55,15 @@
         | password_hash("sha512", salt_user[:16]), "password": None,
         "password_update": item.password_update
         | ternary("always", "on_create", "on_create"),
+        "groups": item.groups | ternary(item.groups, [item.name], [item.name]),
         "home": item.home | ternary(item.home, "", "")
         | regex_replace("\/$")}, recursive=True)] }}
     with_items: '{{ users_add }}'
-    when: item.name
+    when: item.name | default(False)
     no_log: True
     vars:
       salt_user: '{{ salt | random | join | string }}'
       password_rnd: '{{ lookup("community.general.random_string", length=20) | string }}'
-      users_add_cleaned: []
 
   - name: Collect users that have no password defined
     set_fact:
