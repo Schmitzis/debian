@@ -396,15 +396,13 @@
                    | combine( { "disco":{"addr":st_disco.addr} }, recursive=True) }}'
     when: st_client.disco.addr_overwrite
 
+    # Allow for a private address
   - name: Assert that provided Discovery-server address is valid
     assert:
       that:
         - st_client.disco.addr
           | ansible.netcommon.ipv4("address")
           | ansible.netcommon.ipaddr("size") == 1
-        - st_client.disco.addr
-          | ansible.netcommon.ipv4("address")
-          | ansible.netcommon.ipaddr("public")
       success_msg: >
         'Syncthing client will connect to Discovery-server at
         {{ st_client.disco.addr }}:{{ st_client.disco.port }}'
