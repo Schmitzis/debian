@@ -1,5 +1,5 @@
 ---
-- name: 'Set hostname to {{ inventory_hostname }}'
+- name: 'Set hostname to inventory_hostname'
   hostname:
     name: '{{ inventory_hostname }}'
   when: ansible_connection != "local" and base_set_hostname

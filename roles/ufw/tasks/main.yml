@@ -88,6 +88,15 @@
       rule: '{{ item.rule }}'                            # allow/deny/limit/reject
       to_ip: '{{ item.to | default("any") }}'            # defaults to "any"
     with_items: '{{ ufw_rule }}'
+    loop_control:
+      label: >-
+
+
+        {{ item.comment }}
+
+        {{ item.rule }} {{ item.direction | default("in") }}
+        from {{ item.from | default("any") }}:{{ item.port | default("any") }}
+        to {{ item.to | default("any") }}/{{ item.proto | default("tcp") | upper }}
     when: ufw_rule | length > 0
 
   - name: Add UFW service

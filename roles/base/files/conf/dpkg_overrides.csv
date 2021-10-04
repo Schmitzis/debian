@@ -156,5 +156,6 @@ root,root,700,/var/log/usbguard
 root,root,700,/var/spool/apt-listbugs
 root,root,700,/var/spool/libreoffice
 root,root,700,/var/srv
+root,root,0744,/var/lib/command-not-found
 root,root,0644,/var/lib/command-not-found/commands.db
 root,root,0644,/var/lib/command-not-found/commands.db.metadata
