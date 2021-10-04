@@ -77,11 +77,24 @@
     checksum: 'sha256:{{ st_disco.binary.shasum }}'
   when: st_install_disco
 
-- name: Download client
+- name: Download amd64 client
   get_url:
     url: '{{ st_client.binary.url }}'
     dest: /usr/bin/syncthing
     mode: '0755'
     owner: root
     checksum: 'sha256:{{ st_client.binary.shasum }}'
-  when: st_install_client
+  when:
+    - st_install_client
+    - ansible_architecture == 'x86_64'
+
+- name: Download arm64 client
+  get_url:
+    url: '{{ st_client.binary_arm64.url }}'
+    dest: /usr/bin/syncthing
+    mode: '0755'
+    owner: root
+    checksum: 'sha256:{{ st_client.binary_arm64.shasum }}'
+  when:
+    - st_install_client
+    - ansible_architecture == 'aarch64'

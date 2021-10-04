@@ -438,10 +438,27 @@
 
 # General -----------------------------------------------------------------------------------------
 
-  - name: Check the provided Client update URL
+  - name: Check the provided amd64 Client update URL
     uri:
       url: '{{ st_client.binary.url }}'
-    register: st_client_url_check
+    register: st_client_url_check_amd64
+    when: ansible_architecture == 'x86_64'
+
+  - name: Check the provided arm64 Client update URL
+    uri:
+      url: '{{ st_client.binary.url }}'
+    register: st_client_url_check_arm64
+    when: ansible_architecture == 'aarch64'
+
+  - name: (X86_64) Register return code
+    set_fact:
+      st_client_url_check: '{{ st_client_url_check_amd64 }}'
+    when: ansible_architecture == 'x86_64'
+
+  - name: (AARCH64) Register return code
+    set_fact:
+      st_client_url_check: '{{ st_client_url_check_arm64 }}'
+    when: ansible_architecture == 'aarch64'
 
   - name: Assert that Client binary download URL returns 200
     assert:

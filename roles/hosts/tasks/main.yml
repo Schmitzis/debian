@@ -167,7 +167,7 @@
       | intersect(hostvars[_host]["group_names"])
       | length > 0 and _host != ansible_hostname and
       _host != hostvars["localhost"]["ansible_hostname"]
-      and _host != "localhost"'
+      and _host != "localhost" and hosts_remote_same_group'
     become: True
     become_user: root
     vars:

@@ -68,6 +68,11 @@ st_client: {
   'binary': {
     'shasum': '03ba1fb7326d0893fc5664602694144bbdf7717a895fb554fe89fb996f116433',
     'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2/syncthing',
+    },
+
+  'binary_arm64': {
+    'shasum': '7024810891ca014b18948ab672d4d9f5006278bd55c957b5a44aa2a08a751f1b',
+    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2_arm64/syncthing',
     }
 }
 

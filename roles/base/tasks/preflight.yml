@@ -17,7 +17,7 @@
 
 - name: Assert that architecture is supported
   assert:
-    that: ansible_architecture in ['amd64', 'aarch64']
+    that: ansible_architecture in ['amd64', 'aarch64', 'x86_64']
     success_msg: >
       {{ ansible_architecture }} detected.
     fail_msg: >
@@ -111,7 +111,7 @@
 
 - name: Set facts about CPU
   set_fact:
-    cpu_vendor: '{{ cpu_model.stdout_lines[0] | string }}'
+    cpu_vendor: '{{ cpu_model.stdout_lines[0] | default("") | string }}'
     cpu_iommu: ""
 
 - name: Register IOMMU GRUB parameter for Intel

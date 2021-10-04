@@ -24,7 +24,7 @@
 
 - name: Assert that architecture is supported
   assert:
-    that: ansible_architecture in ['amd64', 'aarch64']
+    that: ansible_architecture in ['amd64', 'aarch64', 'x86_64']
     success_msg: >
       {{ ansible_architecture }} detected.
     fail_msg: >

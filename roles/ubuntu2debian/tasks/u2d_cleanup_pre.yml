@@ -1,9 +1,15 @@
 ---
+- name: Check if cloud-init is present
+  stat:
+    path: /etc/cloud
+  register: u2d_etc_cloud
+
 - name: Prevent `cloud-init` from overriding network settings
   copy:
     dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
     content: 'network: {config: disabled}'
     mode: 0755
+  when: u2d_etc_cloud.stat['exists']
 
 - name: Check if `snap` command is available
   shell:
