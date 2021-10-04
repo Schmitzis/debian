@@ -6,10 +6,10 @@
 
 - name: Set config folder to the default one
   set_fact:
-    st_client: '{{ st_client | combine({"config_dir": path}) }}'
+    st_client: '{{ st_client | combine({"config_dir": _path}) }}'
   when: not st_client.config_dir is defined or not st_client.config_dir
   vars:
-    path: '{{ lookup("env","XDG_CONFIG_HOME") }}/syncthing'
+    _path: '{{ st_client.user.home }}/.config/syncthing'
 
 - name: Create config directory if it doesn't exist
   file:
