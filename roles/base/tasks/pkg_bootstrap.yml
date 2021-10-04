@@ -50,7 +50,7 @@
 
 - name: Merge cloud-kernel into the global install list
   set_fact:
-    base_list_global: '{{ base_list_global | union(["linux-image-cloud-amd64"]) }}'
+    base_list_global: '{{ base_list_global | union(["linux-image-cloud-{{ arch }}"]) }}'
   when: base_VM_guest
 
 - name: Merge firmware into the global install list
@@ -69,7 +69,7 @@
 - name: Merge fwupd into the global install list
   set_fact:
     base_list_global: '{{ base_list_global | union(["fwupd-amd64-signed"]) }}'
-  when: not base_VM_guest
+  when: not base_VM_guest and arch == 'amd64'
 
 - name: Merge AMD-specific packages
   set_fact:

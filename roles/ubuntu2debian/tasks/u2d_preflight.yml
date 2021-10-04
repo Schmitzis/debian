@@ -22,6 +22,19 @@
     - "not 'Virtual Machine' in (ansible_board_name, ansible_facts.board_name)"
     - "ansible_virtualization_role != 'guest'"
 
+- name: Assert that architecture is supported
+  assert:
+    that: ansible_architecture in ['amd64', 'aarch64']
+    success_msg: >
+      {{ ansible_architecture }} detected.
+    fail_msg: >
+      {{ ansible_architecture }} is not supported. Aborting.
+
+- name: Set architecture to AARCH64/ARM64
+  set_fact:
+    arch: 'arm64'
+  when: ansible_architecture == 'aarch64'
+
 - name: Populate service facts
   ansible.builtin.service_facts:
 

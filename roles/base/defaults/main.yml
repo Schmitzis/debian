@@ -2,6 +2,7 @@
 #
 # Unexposed
 #
+arch: amd64
 base_VM_guest: True
 base_list_global: []
 gpg_files_found: []

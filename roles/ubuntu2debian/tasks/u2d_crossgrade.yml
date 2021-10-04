@@ -51,6 +51,13 @@
     register: _u2d_pkg_upgrade
     notify: 'reboot host'
 
+  - name: Install latest Debian kernel
+    apt:
+      pkg: 
+        - 'linux-image-cloud-{{ arch }}'
+      state: latest
+    when: u2d_VM_guest
+
   - name: Run fix-broken-install routine
     shell:
       cmd: apt --fix-broken install --yes

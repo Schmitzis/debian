@@ -15,6 +15,19 @@
     success_msg: 'Detected 5.10 LTS kernel'
     fail_msg: 'Unsupported kernel version, aborting.'
 
+- name: Assert that architecture is supported
+  assert:
+    that: ansible_architecture in ['amd64', 'aarch64']
+    success_msg: >
+      {{ ansible_architecture }} detected.
+    fail_msg: >
+      {{ ansible_architecture }} is not supported. Aborting.
+
+- name: Set architecture to AARCH64/ARM64
+  set_fact:
+    arch: 'arm64'
+  when: ansible_architecture == 'aarch64'
+
 - name: Assert that desirable hostname is valid
   assert:
     that: inventory_hostname is regex('^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$')

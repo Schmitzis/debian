@@ -1,12 +1,12 @@
 ---
-- name: Merge regular amd64 kernel into the install list
+- name: Merge regular kernel into the install list
   set_fact:
-    u2d_pkg_install: '{{ u2d_pkg_install | union(["linux-image-amd64"]) }}'
+    u2d_pkg_install: '{{ u2d_pkg_install | union(["linux-image-{{ arch }}"]) }}'
   when: not u2d_VM_guest
 
 - name: Merge cloud-kernel into the install list
   set_fact:
-    u2d_pkg_install: '{{ u2d_pkg_install | union(["linux-image-cloud-amd64"]) }}'
+    u2d_pkg_install: '{{ u2d_pkg_install | union(["linux-image-cloud-{{ arch }}"]) }}'
   when: u2d_VM_guest
 
 - name: Update apt cache
