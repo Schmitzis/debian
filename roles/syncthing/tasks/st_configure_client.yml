@@ -273,7 +273,7 @@
     xpath: '/configuration/gui/password'
     value: >
       {{ st_client.gui_user_password
-      | password_hash('bcrypt') }}
+      | password_hash('bcrypt', rounds=12) }}
   when: st_client.gui_user_password
 
 # --------------------------------------------------------------------------------------------------
