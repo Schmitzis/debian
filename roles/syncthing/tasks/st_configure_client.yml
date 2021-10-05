@@ -257,6 +257,22 @@
     value: '{{ st_client.addr }}:{{ st_client.port }}'
   when: st_client.gui
 
+- name: Set GUI user
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/gui/user'
+    value: '{{ st_client.gui_user }}'
+  when: st_client.gui_user
+
+- name: Set GUI user password
+  community.general.xml:
+    path: '{{ st_client.config_dir }}/config.xml'
+    xpath: '/configuration/gui/password'
+    value: >
+      {{ st_client.gui_user_password
+      | password_hash('bcrypt') }}
+  when: st_client.gui_user_password
+
 # --------------------------------------------------------------------------------------------------
 # Default folder section
 # --------------------------------------------------------------------------------------------------

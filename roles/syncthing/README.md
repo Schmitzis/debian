@@ -39,6 +39,8 @@ st_client: {
   'nat': false,                 # Uses upstream-provided STUN servers, list below.
   'gui': true,
   'gui_tls': true,
+  'gui_user': '',               # GUI/API username
+  'gui_user_password', '',      # GUI user password, will be hashed using BCrypt
   'untrusted': true,            # Set device as "untrusted" by default?
   'recreate_certs': true,       # Re-create certificates? Yields new ID.
   'reconfigure': true,          # Overwrite existing config?
