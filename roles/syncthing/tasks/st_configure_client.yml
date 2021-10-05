@@ -70,19 +70,22 @@
 
 - name: Create `listenAddress` variable
   set_fact:
-    st_client_listenAddress: 'tcp4://0.0.0.0:22000'
+    st_client_listenAddress: ['tcp4://0.0.0.0:22000']
 
 - name: Add relay to the `listenAddress`
   set_fact:
-    st_client_listenAddress: "{{ st_client_listenAddress }},relay://{{ st_client.relay.addr }}\
-                             :{{ st_client.relay.port }}/?id={{ st_client.relay.id }}"
+    st_client_listenAddress: >
+      {{ st_client_listenAddress + ['relay://' + st_client.relay.addr
+      + ':' + st_client.relay.port | string + '/?id=' + st_client.relay.id] }}
   when: st_client.relay.enable
 
 - name: Set `listenAddress` in XML config
   community.general.xml:
     path: '{{ st_client.config_dir }}/config.xml'
-    xpath: '/configuration/options/listenAddress'
-    value: '{{ st_client_listenAddress }}'
+    xpath: '/configuration/options'
+    add_children:
+      - listenAddress: '{{ item }}'
+  with_items: '{{ st_client_listenAddress }}'
 
   # Broadcast == "local"
 - name: 'Set local announcements to {{ st_client.announce_broadcast }}'
