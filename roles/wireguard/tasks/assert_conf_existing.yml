@@ -31,7 +31,7 @@
     when: item.endswith(wg_iface + '.conf')
     with_items: '{{ wg_existing_config_paths }}'
 
-  - name: Assert that we are not overwriting config with the same interface name without permission
+  - name: Assert we are not overwriting config with the same interface name
     assert:
       that: not wg_existing_conf
       fail_msg: >

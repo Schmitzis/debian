@@ -1,4 +1,11 @@
 ---
+- name: Install required python3 modules
+  apt:
+    pkg: 
+      - python3-netaddr
+      - python3-netifaces
+    state: present
+
 - name: Load "listen_ports_facts" module
   listen_ports_facts:
 

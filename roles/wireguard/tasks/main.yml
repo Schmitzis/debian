@@ -27,7 +27,7 @@
   import_tasks: genkeys.yml
   become: True
   become_user: root
-  when: not wg_peerkey | bool
+  when: not wg_peerkey_test.rc == 0
   tags:
     - wg_genkeys
 
