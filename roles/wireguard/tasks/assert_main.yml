@@ -32,7 +32,7 @@
   tags:
     - wg_assert_port
 
-- name: Tear-down the existing Wireguard interface
+- name: Tear-down an existing Wireguard interface
   shell:
     cmd: 'wg-quick down {{ wg_iface }}'
   when:

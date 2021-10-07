@@ -1,5 +1,5 @@
 ---
-- name: Lookup definitions of server's IP and subnet
+- name: Assert that host is a server
   set_fact:
     wg_srv: true
   when:
@@ -7,6 +7,13 @@
     - wg_server_subnet is defined
     - wg_server_ip | length > 6
     - wg_server_subnet | length > 8
+
+- name: Assert that host is a client
+  set_fact:
+    wg_client: true
+  when:
+    - wg_client_ip is defined
+    - wg_client_ip | ansible.netcommon.ipv4("address")
 
 - name: No valid server IP provided
   set_fact:

@@ -69,7 +69,8 @@ wg_endpoints:
   - { name: 'MyEndpoint',
       pubkey: '...xxxxxxx=',
       psk: '...xxxxxxx=',
-      endpoint: '10.0.0.1:1234',
+      ip: '10.0.0.1',
+      port: '1234'
       keepalive: '25',
       allowedips: '10.0.0.0/24' }
 ```

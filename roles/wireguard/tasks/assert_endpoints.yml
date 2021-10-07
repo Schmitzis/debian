@@ -63,10 +63,10 @@
   assert:
     that:
       - item.keepalive | int >= 0
-      - item.keepalive | int < 31536000
+      - item.keepalive | int < 65536
     quiet: True
     success_msg: 'Keepalive value of "{{ item.keepalive }}" is OK'
-    fail_msg: 'Keepalive value of "{{ item.keepalive }}" is outside of the 0..31536000 range'
+    fail_msg: 'Keepalive value of "{{ item.keepalive }}" is outside of the 0..65535 range'
   loop: '{{ wg_endpoints }}'
   loop_control:
       label: '{{ item.name }}'
