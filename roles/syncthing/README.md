@@ -12,38 +12,48 @@ Configures [Minisync](https://github.com/savchenko/minisync) on the target host.
 
 ## Role Variables
 
-| Variable                 | Description                           | Default            |
-|--------------------------|---------------------------------------|--------------------|
-| st_client                | Hash of client's parameters.          | {}                 |
-| st_disco                 | Hash of discovery server parameters.  | {}                 |
-| st_install_client        | Install client?                       | False              |
-| st_install_disco         | Install discovery server?             | False              |
-| st_install_relay         | Install relay server?                 | False              |
-| st_relay                 | Hash of relay server parameters.      | {}                 |
-| st_reinstall             | Re-write existing setup?              | False              |
+| Variable          | Description                          | Default               |
+|-------------------|--------------------------------------|-----------------------|
+| st_certs_path     | Certificates store                   | '../files/certs/host' |
+| st_client         | Hash of client's parameters.         | {}                    |
+| st_disco          | Hash of discovery server parameters. | {}                    |
+| st_install_client | Install client?                      | False                 |
+| st_install_disco  | Install discovery server?            | False                 |
+| st_install_relay  | Install relay server?                | False                 |
+| st_reinstall      | Re-write existing setup?             | False                 |
+| st_relay          | Hash of relay server parameters.     | {}                    |
 
+### Certificates storage
+
+Role allows Syncthing certificate keypais to be:
+
+- Downloaded from the remote to localhost for future use
+- Uploaded to the remote so that fingerprints don't change
+- Re-generated on the remote without involvement of localhost
+
+`st_certs_path` is set to `{{ role_path }}/files/certs/{{ inventory_hostname }}` by default.
 
 ### Parameter structs
-
 
 #### Syncthing client
 
 ```yaml
 st_client: {
-  'addr_use_wan': true,         # Overwrite `st_client.addr` with the discovered WAN ip?
   'addr': '' ,                  # Address on which Client will listen, default: 127.0.0.1
-  'port': '',                   # Port on which Client's GUI/API will listen, default: 8384
+  'addr_use_wan': true,         # Overwrite `st_client.addr` with the discovered WAN ip?
   'announce_broadcast': true,   # Enable "local discovery"?
-  'min_free_space': 5,          # Minimum free disk space to keep
+  'certs_import': false,         # Save existing certificates?
+  'certs_recreate': true,       # Re-create certificates? Yields new ID.
   'config_dir': '',             # Will be replaced with $XDG_CONFIG_HOME/syncthing if empty
-  'nat': false,                 # Uses upstream-provided STUN servers, list below.
   'gui': true,
   'gui_tls': true,
   'gui_user': '',               # GUI/API username
   'gui_user_password', '',      # GUI user password, will be hashed using BCrypt
-  'untrusted': true,            # Set device as "untrusted" by default?
-  'recreate_certs': true,       # Re-create certificates? Yields new ID.
+  'min_free_space': 5,          # Minimum free disk space to keep
+  'nat': false,                 # Uses upstream-provided STUN servers, list below.
+  'port': '',                   # Port on which Client's GUI/API will listen, default: 8384
   'reconfigure': true,          # Overwrite existing config?
+  'untrusted': true,            # Set device as "untrusted" by default?
 
   'user': {
     'name': '',                 # Defaults to SSH user
@@ -93,9 +103,10 @@ st_client: {
 st_disco: {
   'addr': '127.0.0.1',         # Address on which Disco listens itself
   'addr_use_wan': true,        # Use discovered WAN IP instead of the provided address?
-  'port': '',                  # Port on which Disco will listen itself, default: 8443
+  'certs_import': false,        # Save existing certificates?
+  'certs_recreate': true,      # Re-create certificates? Yields new ID.
   'id': '',                    # Disco's own ID, *will* be overwritten during run
-  'recreate_certs': true,      # Re-create certificates? Yields new ID.
+  'port': '',                  # Port on which Disco will listen itself, default: 8443
   'replicate': false,          # Add `st_disco_replica` into the systemd config?
 
   'replica': {
@@ -125,10 +136,12 @@ st_disco: {
 st_relay: {
   'addr': '',
   'addr_use_wan': true,
-  'port': 22067,
+  'certs_export': false,       # Upload existing certificates?
+  'certs_import': false,         # Save existing certificates?
+  'certs_recreate': true,
   'network_timeout_string': '2m0s',
   'ping_interval_string': '1m0s',
-  'recreate_certs': true,
+  'port': 22067,
 
   'nat': {
     'enabled': false,          # Use UPnP/NAT-PMP to acquire external port mapping?

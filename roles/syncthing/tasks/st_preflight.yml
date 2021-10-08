@@ -207,7 +207,7 @@
       that:
         - st_relay.port | int > 1
         - st_relay.port | int < 65535
-      success_msg: 'Syncthing relay`s GUI and API will listen on port `{{ st_relay.port }}`'
+      success_msg: 'Syncthing Relay-server will listen on port `{{ st_relay.port }}`'
 
   - name: Check the provided Relay binary URL
     uri:
@@ -222,6 +222,91 @@
       success_msg: >
         Status {{ st_relay_url_check.status }}, served by {{ st_relay_url_check.server }}
         with message {{ st_relay_url_check.msg }}
+
+  - name: (Block) Import certificates from remote
+    block:
+
+    - name: Register there are existing certificates on the remote
+      stat:
+        path: '{{ item }}'
+      register: st_relay_certs_remote_stat
+      with_items:
+        - '/var/lib/syncthing/relaysrv/cert.pem'
+        - '/var/lib/syncthing/relaysrv/key.pem'
+
+    - name: Set fact about the remote certificates existance
+      set_fact:
+        st_relay_remote_certs_exist: True
+      when:
+        - _certs | length == 1
+        - _certs | first | bool
+      vars:
+        _certs: >
+          {{ st_relay_certs_remote_stat.results
+          | map(attribute='stat')
+          | map(attribute='exists') | unique }}
+
+    - name: Assert that importable certificates exist
+      assert:
+        that: st_relay_remote_certs_exist
+        fail_msg: |
+          Unable to import certificates that don't exist.
+          Check these files:
+          /var/lib/syncthing/relaysrv/cert.pem'
+          /var/lib/syncthing/relaysrv/key.pem'
+        success_msg: |
+          Will import existing certificates from {{ inventory_hostname }}:
+          /var/lib/syncthing/relaysrv/cert.pem
+          /var/lib/syncthing/relaysrv/key.pem
+      when: st_relay.certs_import
+
+    tags: 
+      - st_certs
+      - st_certs_import
+      # block_end (import certs)
+
+  - name: (Block) Import certificates from remote
+    block:
+
+    - name: Register there are existing certificates on the localhost
+      stat:
+        path: '{{ item }}'
+      register: st_relay_certs_local_stat
+      with_items:
+        - '{{ st_certs_path }}/relay/cert.pem'
+        - '{{ st_certs_path }}/relay/key.pem'
+
+    - name: Set fact about the local certificates existance
+      set_fact:
+        st_relay_local_certs_exist: True
+      when:
+        - _certs | length == 1
+        - _certs | first | bool
+      vars:
+        _certs: >
+          {{ st_relay_certs_local_stat.results
+          | map(attribute='stat')
+          | map(attribute='exists') | unique }}
+
+    - name: Assert that exportable certificates exist
+      assert:
+        that: st_relay_local_certs_exist
+        fail_msg: |
+          Unable to export certificates that don't exist.
+          Check these files:
+          {{ st_certs_path }}/relay/cert.pem
+          {{ st_certs_path }}/relay/key.pem
+        success_msg: |
+          Will export existing certificates from localhost:
+          {{ st_certs_path }}/relay/cert.pem
+          {{ st_certs_path }}/relay/key.pem
+      when: st_relay.certs_export
+
+    delegate_to: localhost
+    tags: 
+      - st_certs
+      - st_certs_export
+      # block_end (export certs)
 
   when: st_install_relay
 

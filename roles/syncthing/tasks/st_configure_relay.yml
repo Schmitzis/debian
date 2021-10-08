@@ -20,6 +20,33 @@
     success_msg: >
       User "syncthing" has UID {{ st_syncthing_user_stat_relay.uid }}
 
+- name: (Block) Save certificates
+  block:
+
+  - name: Create certs folder
+    file:
+      path: '{{ st_certs_path }}/relay' 
+      state: directory
+    delegate_to: localhost
+    become: True
+    become_user: '{{ lookup("env", "USER") }}'
+
+  - name: Fetch existing certificates
+    fetch:
+      src: '{{ item }}' 
+      dest: '{{ st_certs_path }}/relay/' 
+      flat: True
+      fail_on_missing: False
+    with_items:
+      - '/var/lib/syncthing/relaysrv/cert.pem'
+      - '/var/lib/syncthing/relaysrv/key.pem'
+
+  when: st_relay.certs_import and st_relay_remote_certs_exist
+  tags: 
+    - st_certs
+    - st_certs_import
+  # block_end (save certs)
+
 - name: Remove existing Relay certificates
   file:
     path: '{{ item }}'
@@ -27,7 +54,7 @@
   with_items:
     - '/var/lib/syncthing/relaysrv/cert.pem'
     - '/var/lib/syncthing/relaysrv/key.pem'
-  when: st_relay.recreate_certs
+  when: st_relay.certs_recreate and st_relay_remote_certs_exist
 
 - name: Provision Relay-server template
   template:
@@ -60,6 +87,20 @@
       enabled: True
       masked: False
       state: stopped
+
+  - name: Export locally saved certificates
+    copy:
+      src: '{{ st_certs_path }}/{{ item.src }}'
+      dest: '{{ item.dest }}'
+    with_items:
+      - { 'src': 'relay/cert.pem',
+          'dest': '/var/lib/syncthing/relaysrv/cert.pem' }
+      - { 'src': 'relay/key.pem', 
+          'dest': '/var/lib/syncthing/relaysrv/key.pem' }
+    when: st_relay.certs_export
+    tags: 
+      - st_certs
+      - st_certs_export
 
     # The same parameters as in the J2 template.
   - name: Register device ID of the Relay-server

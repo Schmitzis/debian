@@ -47,7 +47,7 @@
   with_items:
     - '/var/lib/syncthing/discosrv/cert.pem'
     - '/var/lib/syncthing/discosrv/key.pem'
-  when: st_disco.recreate_certs
+  when: st_disco.certs_recreate
 
 - name: Provision discovery server template
   template:

@@ -29,7 +29,7 @@
   with_items:
     - '{{ st_client.config_dir }}/cert.pem'
     - '{{ st_client.config_dir }}/key.pem'
-  when: st_client.recreate_certs
+  when: st_client.certs_recreate
 
 - name: Generate config
   shell:

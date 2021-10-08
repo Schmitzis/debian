@@ -4,33 +4,36 @@
 #
 st_install_list: ["python3-lxml"]
 st_wan_ip: '127.0.0.1'
+st_relay_remote_certs_exist: False
+st_relay_local_certs_exist: False
+
 #
 # Exposed to a user
 #
-# Global variables --------------------------------------------------------------------------------
-
 st_install_client: False
 st_install_disco: False
 st_install_relay: False
 st_reinstall: False
+st_certs_path: '{{ role_path }}/files/certs/{{ inventory_hostname }}'
 
 # Syncthing client --------------------------------------------------------------------------------
 
 st_client: {
-  'addr_use_wan': true,         # Overwrite `st_client.addr` with the discovered WAN ip?
   'addr': '' ,                  # Address on which Client will listen, default: 127.0.0.1
-  'port': 8384,                 # Port on which Client's GUI/API will listen, default: 8384
+  'addr_use_wan': true,         # Overwrite `st_client.addr` with the discovered WAN ip?
   'announce_broadcast': true,   # Enable "local discovery"?
-  'min_free_space': 5,          # Minimum free disk space to keep
+  'certs_import': false,         # Save existing certificates?
+  'certs_recreate': true,       # Re-create certificates? Yields new ID.
   'config_dir': '',             # Will be replaced with $XDG_CONFIG_HOME/syncthing if empty
-  'nat': false,                 # Uses upstream-controlled STUN
   'gui': true,
   'gui_tls': true,
   'gui_user': '',               # GUI/API username
   'gui_user_password': '',      # GUI user password, will be hashed using BCrypt
-  'untrusted': true,            # Set device as "untrusted" by default?
-  'recreate_certs': true,       # Re-create certificates? Yields new ID.
+  'min_free_space': 5,          # Minimum free disk space to keep
+  'nat': false,                 # Uses upstream-controlled STUN
+  'port': 8384,                 # Port on which Client's GUI/API will listen, default: 8384
   'reconfigure': true,          # Overwrite existing config?
+  'untrusted': true,            # Set device as "untrusted" by default?
 
   'user': {
     'name': '',                 # Defaults to SSH user
@@ -53,12 +56,12 @@ st_client: {
     },
 
   'relay': {
-    'enable': true,             # Enable relaying?
     'addr': '',
     'addr_overwrite': true,     # Overwrite Relay address with the server from this role?
-    'port': 22067,
+    'enable': true,             # Enable relaying?
     'id': '',
     'id_overwrite': true,       # Overwrite `st_client.relay.id` with the `st_relay.id`?
+    'port': 22067,
     'reconnect_interval_minutes': 10
     },
 
@@ -83,9 +86,10 @@ st_client: {
 st_disco: {
   'addr': '127.0.0.1',         # Address on which Disco listens itself
   'addr_use_wan': true,        # Use discovered WAN IP instead of the provided address?
-  'port': 8443,                # Port on which Disco will listen itself, default: 8443
+  'certs_import': false,        # Save existing certificates?
+  'certs_recreate': true,      # Re-create certificates? Yields new ID.
   'id': '',                    # Disco's own ID, *will* be overwritten during run
-  'recreate_certs': true,      # Re-create certificates? Yields new ID.
+  'port': 8443,                # Port on which Disco will listen itself, default: 8443
   'replicate': false,          # Add `st_disco_replica` into the systemd config?
 
   'replica': {
@@ -112,10 +116,12 @@ st_disco: {
 st_relay: {
   'addr': '',
   'addr_use_wan': true,
-  'port': 22067,
+  'certs_export': false,       # Upload existing certificates?
+  'certs_import': false,       # Save existing certificates?
+  'certs_recreate': true,
   'network_timeout_string': '2m0s',
   'ping_interval_string': '1m0s',
-  'recreate_certs': true,
+  'port': 22067,
 
   'nat': {
     'enabled': false,          # Use UPnP/NAT-PMP to acquire external port mapping?
