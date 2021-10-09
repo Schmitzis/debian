@@ -31,15 +31,73 @@
     become: True
     become_user: '{{ lookup("env", "USER") }}'
 
-  - name: Fetch existing certificates
-    fetch:
+  - name: Slurp existing certificates
+    slurp:
       src: '{{ item }}' 
-      dest: '{{ st_certs_path }}/relay/' 
-      flat: True
-      fail_on_missing: False
     with_items:
       - '/var/lib/syncthing/relaysrv/cert.pem'
       - '/var/lib/syncthing/relaysrv/key.pem'
+    register: st_relay_certs_slurped
+    no_log: true
+
+  - name: Cleanup slurped content
+    set_fact:
+      st_relay_certs_slurped_decoded: >
+        {{ st_relay_certs_slurped_decoded | default([])
+        + [item['content'] | b64decode] }}
+    with_items: '{{ st_relay_certs_slurped.results }}'
+    no_log: true
+
+  - name: (Block) Execute on localhost
+    block: 
+
+    - name: Encipher certificate content
+      shell:
+        # The following won't work:
+        # --output {{ st_certs_path }}/relay/cert.pem "{{ var }}"
+        # ref. https://github.com/ansible/ansible/issues/75101
+        cmd: >
+          ansible-vault encrypt_string
+          --vault-password-file {{ vault_pass_file }}
+          --output - "{{ st_relay_certs_slurped_decoded[0] }}"
+        chdir: '{{ playbook_dir }}'
+      register: st_relay_cert_encrypted
+      no_log: true
+
+    - name: Encipher key content
+      shell:
+        cmd: >
+          ansible-vault encrypt_string
+          --vault-password-file {{ vault_pass_file }}
+          --output - "{{ st_relay_certs_slurped_decoded[1] }}"
+        chdir: '{{ playbook_dir }}'
+      register: st_relay_key_encrypted
+      no_log: true
+    
+    - name: Save certificate to disk
+      copy:
+        dest: '{{ st_certs_path }}/relay/cert.pem' 
+        decrypt: False
+        content: >
+          {{ st_relay_cert_encrypted.stdout_lines[1:]
+          | join('')
+          | regex_replace('^\s+\$', '$')
+          | regex_replace('\s{10}', '\n') }}
+
+    - name: Save key to disk
+      copy:
+        dest: '{{ st_certs_path }}/relay/key.pem' 
+        decrypt: False
+        content: >
+          {{ st_relay_key_encrypted.stdout_lines[1:]
+          | join('')
+          | regex_replace('^\s+\$', '$')
+          | regex_replace('\s{10}', '\n') }}
+
+    delegate_to: localhost
+    become: True
+    become_user: '{{ lookup("env", "USER") }}'
+    # block_end (localhost / local user)
 
   when: st_relay.certs_import and st_relay_remote_certs_exist
   tags: 
@@ -92,12 +150,14 @@
     copy:
       src: '{{ st_certs_path }}/{{ item.src }}'
       dest: '{{ item.dest }}'
+      decrypt: True
     with_items:
       - { 'src': 'relay/cert.pem',
           'dest': '/var/lib/syncthing/relaysrv/cert.pem' }
       - { 'src': 'relay/key.pem', 
           'dest': '/var/lib/syncthing/relaysrv/key.pem' }
     when: st_relay.certs_export
+    no_log: true
     tags: 
       - st_certs
       - st_certs_export
