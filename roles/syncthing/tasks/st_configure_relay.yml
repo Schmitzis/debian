@@ -25,7 +25,7 @@
 
   - name: Create certs folder
     file:
-      path: '{{ st_certs_path }}/relay' 
+      path: '{{ st_certs_path }}/relay'
       state: directory
     delegate_to: localhost
     become: True
@@ -33,7 +33,7 @@
 
   - name: Slurp existing certificates
     slurp:
-      src: '{{ item }}' 
+      src: '{{ item }}'
     with_items:
       - '/var/lib/syncthing/relaysrv/cert.pem'
       - '/var/lib/syncthing/relaysrv/key.pem'
@@ -49,7 +49,7 @@
     no_log: true
 
   - name: (Block) Execute on localhost
-    block: 
+    block:
 
     - name: Encipher certificate content
       shell:
@@ -73,10 +73,10 @@
         chdir: '{{ playbook_dir }}'
       register: st_relay_key_encrypted
       no_log: true
-    
+
     - name: Save certificate to disk
       copy:
-        dest: '{{ st_certs_path }}/relay/cert.pem' 
+        dest: '{{ st_certs_path }}/relay/cert.pem'
         decrypt: False
         content: >
           {{ st_relay_cert_encrypted.stdout_lines[1:]
@@ -86,7 +86,7 @@
 
     - name: Save key to disk
       copy:
-        dest: '{{ st_certs_path }}/relay/key.pem' 
+        dest: '{{ st_certs_path }}/relay/key.pem'
         decrypt: False
         content: >
           {{ st_relay_key_encrypted.stdout_lines[1:]
@@ -100,7 +100,7 @@
     # block_end (localhost / local user)
 
   when: st_relay.certs_import and st_relay_remote_certs_exist
-  tags: 
+  tags:
     - st_certs
     - st_certs_import
   # block_end (save certs)
@@ -136,99 +136,94 @@
   become: True
   become_user: root
 
-- name: Relay-server block
-  block:
+- name: Stop Relay service
+  systemd:
+    name: 'syncthing-relaysrv.service'
+    enabled: True
+    masked: False
+    state: stopped
 
-  - name: Stop Relay service
-    systemd:
-      name: 'syncthing-relaysrv.service'
-      enabled: True
-      masked: False
-      state: stopped
+- name: Export locally saved certificates
+  copy:
+    src: '{{ st_certs_path }}/{{ item.src }}'
+    dest: '{{ item.dest }}'
+    decrypt: True
+  with_items:
+    - { 'src': 'relay/cert.pem',
+        'dest': '/var/lib/syncthing/relaysrv/cert.pem' }
+    - { 'src': 'relay/key.pem',
+        'dest': '/var/lib/syncthing/relaysrv/key.pem' }
+  when: st_relay.certs_export
+  no_log: true
+  tags:
+    - st_certs
+    - st_certs_export
 
-  - name: Export locally saved certificates
-    copy:
-      src: '{{ st_certs_path }}/{{ item.src }}'
-      dest: '{{ item.dest }}'
-      decrypt: True
-    with_items:
-      - { 'src': 'relay/cert.pem',
-          'dest': '/var/lib/syncthing/relaysrv/cert.pem' }
-      - { 'src': 'relay/key.pem', 
-          'dest': '/var/lib/syncthing/relaysrv/key.pem' }
-    when: st_relay.certs_export
-    no_log: true
-    tags: 
-      - st_certs
-      - st_certs_export
+  # The same parameters as in the J2 template.
+- name: Register device ID of the Relay-server
+  shell:
+    cmd: >
+      strelaysrv -debug -pools="" -protocol="tcp4"
+      -listen={{ st_relay.addr }}:{{ st_relay.port }}
+      -nat={{ st_relay.nat.enabled }}
+      -nat-lease={{ st_relay.nat.lease_minutes }}
+      -nat-renewal={{ st_relay.nat.renewal_minutes }}
+      -nat-timeout={{ st_relay.nat.timeout_seconds }}
+      -network-timeout={{ st_relay.network_timeout_string }}
+      -ping-interval={{ st_relay.ping_interval_string }} &
+    chdir: /var/lib/syncthing/relaysrv
+  become_user: syncthing
+  become: true
+  register: st_relay_out
+  failed_when: '" ID: " not in st_relay_out.stderr'
+  changed_when: False
 
-    # The same parameters as in the J2 template.
-  - name: Register device ID of the Relay-server
-    shell:
-      cmd: >
-        strelaysrv -debug -pools="" -protocol="tcp4"
-        -listen={{ st_relay.addr }}:{{ st_relay.port }}
-        -nat={{ st_relay.nat.enabled }}
-        -nat-lease={{ st_relay.nat.lease_minutes }}
-        -nat-renewal={{ st_relay.nat.renewal_minutes }}
-        -nat-timeout={{ st_relay.nat.timeout_seconds }}
-        -network-timeout={{ st_relay.network_timeout_string }}
-        -ping-interval={{ st_relay.ping_interval_string }} &
-      chdir: /var/lib/syncthing/relaysrv
-    become_user: syncthing
-    become: true
-    register: st_relay_out
-    failed_when: '" ID: " not in st_relay_out.stderr'
-    changed_when: False
+  # No error here, Relay-server dumps output in stderr. Go figure.
+- name: Extract ID
+  set_fact:
+    st_relay: '{{ st_relay | combine({"id":st_relay_out.stderr
+                | regex_search("\sID:\s(\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7})",
+                "\1", multiline=True)
+                | join("")}) }}'
 
-    # No error here, Relay-server dumps output in stderr. Go figure.
-  - name: Extract ID
-    set_fact:
-      st_relay: '{{ st_relay | combine({"id":st_relay_out.stderr
-                  | regex_search("\sID:\s(\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7})",
-                  "\1", multiline=True)
-                  | join("")}) }}'
+- name: Assert ID length
+  assert:
+    that:
+      - st_relay.id | length == 63
+    success_msg: 'ID is OK: {{ st_relay.id }}'
+    fail_msg: 'ID length is incorrect, here is what we`ve got: {{ st_relay.id }}'
 
-  - name: Assert ID length
-    assert:
-      that:
-        - st_relay.id | length == 63
-      success_msg: 'ID is OK: {{ st_relay.id }}'
-      fail_msg: 'ID length is incorrect, here is what we`ve got: {{ st_relay.id }}'
+  # pids module is not in the core Ansible since 2.10
+- name: Kill stray strelaysrv process
+  shell:
+    cmd: |
+      #!/usr/bin/env bash
 
-    # pids module is not in the core Ansible since 2.10
-  - name: Kill stray strelaysrv process
-    shell:
-      cmd: |
-        #!/usr/bin/env bash
+      procs=$(lsof -Pni4 | awk '{print $1,$2,$9}' \
+        | grep -E '{{ st_relay.port }}$' \
+        | grep -E '^strelay')
 
-        procs=$(lsof -Pni4 | awk '{print $1,$2,$9}' \
-          | grep -E '{{ st_relay.port }}$' \
-          | grep -E '^strelay')
-
-        if [[ -n "$procs" ]]; then
-          p_name=$(echo "$procs" | cut -d' ' -f1)
-          p_pid=$(echo "$procs" | cut -d' ' -f2)
-          if [[ $p_name == 'strelaysr' ]]; then
-            kill -s SIGTERM "$p_pid";
-          else
-            exit 126;
-          fi
+      if [[ -n "$procs" ]]; then
+        p_name=$(echo "$procs" | cut -d' ' -f1)
+        p_pid=$(echo "$procs" | cut -d' ' -f2)
+        if [[ $p_name == 'strelaysr' ]]; then
+          kill -s SIGTERM "$p_pid";
         else
-          exit 66
+          exit 126;
         fi
-      executable: '/bin/bash'
-    register: st_kill_relay
-    failed_when: st_kill_relay.rc not in (0,66)
-    changed_when: st_kill_relay.rc == 0
-    become: true
-    become_user: root
+      else
+        exit 66
+      fi
+    executable: '/bin/bash'
+  register: st_kill_relay
+  failed_when: st_kill_relay.rc not in (0,66)
+  changed_when: st_kill_relay.rc == 0
+  become: true
+  become_user: root
 
-  - name: Start Relay service
-    systemd:
-      name: 'syncthing-relaysrv.service'
-      enabled: True
-      masked: False
-      state: started
-
-  when: st_install_relay
+- name: Start Relay service
+  systemd:
+    name: 'syncthing-relaysrv.service'
+    enabled: True
+    masked: False
+    state: started

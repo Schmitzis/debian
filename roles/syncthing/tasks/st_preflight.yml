@@ -171,6 +171,91 @@
         Status {{ st_disco_url_check.status }}, served by {{ st_disco_url_check.server }}
         with message {{ st_disco_url_check.msg }}
 
+  - name: (Block) Import disco certificates from remote
+    block:
+
+    - name: Register there are existing certificates on the remote
+      stat:
+        path: '{{ item }}'
+      register: st_disco_certs_remote_stat
+      with_items:
+        - '/var/lib/syncthing/discosrv/cert.pem'
+        - '/var/lib/syncthing/discosrv/key.pem'
+
+    - name: Set fact about the remote certificates existance
+      set_fact:
+        st_disco_remote_certs_exist: True
+      when:
+        - _certs | length == 1
+        - _certs | first | bool
+      vars:
+        _certs: >
+          {{ st_disco_certs_remote_stat.results
+          | map(attribute='stat')
+          | map(attribute='exists') | unique }}
+
+    - name: Assert that importable certificates exist
+      assert:
+        that: st_disco_remote_certs_exist
+        fail_msg: |
+          Unable to import certificates that don't exist.
+          Check these files:
+          /var/lib/syncthing/discosrv/cert.pem'
+          /var/lib/syncthing/discosrv/key.pem'
+        success_msg: |
+          Will import existing certificates from {{ inventory_hostname }}:
+          /var/lib/syncthing/discosrv/cert.pem
+          /var/lib/syncthing/discosrv/key.pem
+      when: st_disco.certs_import
+
+    tags:
+      - st_certs
+      - st_certs_import
+      # block_end (import certs)
+
+  - name: (Block) Export certificates from localhost
+    block:
+
+    - name: Register there are existing certificates on the localhost
+      stat:
+        path: '{{ item }}'
+      register: st_disco_certs_local_stat
+      with_items:
+        - '{{ st_certs_path }}/disco/cert.pem'
+        - '{{ st_certs_path }}/disco/key.pem'
+
+    - name: Set fact about the local certificates existance
+      set_fact:
+        st_disco_local_certs_exist: True
+      when:
+        - _certs | length == 1
+        - _certs | first | bool
+      vars:
+        _certs: >
+          {{ st_disco_certs_local_stat.results
+          | map(attribute='stat')
+          | map(attribute='exists') | unique }}
+
+    - name: Assert that exportable certificates exist
+      assert:
+        that: st_disco_local_certs_exist
+        fail_msg: |
+          Unable to export certificates that don't exist.
+          Check these files:
+          {{ st_certs_path }}/disco/cert.pem
+          {{ st_certs_path }}/disco/key.pem
+        success_msg: |
+          Will export existing certificates from localhost:
+          {{ st_certs_path }}/disco/cert.pem
+          {{ st_certs_path }}/disco/key.pem
+      when: st_disco.certs_export
+
+    delegate_to: localhost
+    tags:
+      - st_certs
+      - st_certs_export
+      # block_end (export certs)
+
   when: st_install_disco
 
 # -------------------------------------------------------------------------------------------------
@@ -223,7 +308,7 @@
         Status {{ st_relay_url_check.status }}, served by {{ st_relay_url_check.server }}
         with message {{ st_relay_url_check.msg }}
 
-  - name: (Block) Import certificates from remote
+  - name: (Block) Import relay certificates from remote
     block:
 
     - name: Register there are existing certificates on the remote
@@ -260,12 +345,12 @@
           /var/lib/syncthing/relaysrv/key.pem
       when: st_relay.certs_import
 
-    tags: 
+    tags:
       - st_certs
       - st_certs_import
       # block_end (import certs)
 
-  - name: (Block) Import certificates from remote
+  - name: (Block) Export certificates from localhost
     block:
 
     - name: Register there are existing certificates on the localhost
@@ -303,7 +388,7 @@
       when: st_relay.certs_export
 
     delegate_to: localhost
-    tags: 
+    tags:
       - st_certs
       - st_certs_export
       # block_end (export certs)

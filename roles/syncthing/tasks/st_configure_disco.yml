@@ -40,6 +40,91 @@
     success_msg: >
       User "syncthing" has UID {{ st_syncthing_user_stat_disco.uid }}
 
+- name: (Block) Save certificates
+  block:
+
+  - name: Create certs folder
+    file:
+      path: '{{ st_certs_path }}/disco'
+      state: directory
+    delegate_to: localhost
+    become: True
+    become_user: '{{ lookup("env", "USER") }}'
+
+  - name: Slurp existing certificates
+    slurp:
+      src: '{{ item }}'
+    with_items:
+      - '/var/lib/syncthing/discosrv/cert.pem'
+      - '/var/lib/syncthing/discosrv/key.pem'
+    register: st_disco_certs_slurped
+    no_log: true
+
+  - name: Cleanup slurped content
+    set_fact:
+      st_disco_certs_slurped_decoded: >
+        {{ st_disco_certs_slurped_decoded | default([])
+        + [item['content'] | b64decode] }}
+    with_items: '{{ st_disco_certs_slurped.results }}'
+    no_log: true
+
+  - name: (Block) Execute on localhost
+    block:
+
+    - name: Encipher certificate content
+      shell:
+        # The following won't work:
+        # --output {{ st_certs_path }}/disco/cert.pem "{{ var }}"
+        # ref. https://github.com/ansible/ansible/issues/75101
+        cmd: >
+          ansible-vault encrypt_string
+          --vault-password-file {{ vault_pass_file }}
+          --output - "{{ st_disco_certs_slurped_decoded[0] }}"
+        chdir: '{{ playbook_dir }}'
+      register: st_disco_cert_encrypted
+      no_log: true
+
+    - name: Encipher key content
+      shell:
+        cmd: >
+          ansible-vault encrypt_string
+          --vault-password-file {{ vault_pass_file }}
+          --output - "{{ st_disco_certs_slurped_decoded[1] }}"
+        chdir: '{{ playbook_dir }}'
+      register: st_disco_key_encrypted
+      no_log: true
+
+    - name: Save certificate to disk
+      copy:
+        dest: '{{ st_certs_path }}/disco/cert.pem'
+        decrypt: False
+        content: >
+          {{ st_disco_cert_encrypted.stdout_lines[1:]
+          | join('')
+          | regex_replace('^\s+\$', '$')
+          | regex_replace('\s{10}', '\n') }}
+
+    - name: Save key to disk
+      copy:
+        dest: '{{ st_certs_path }}/disco/key.pem'
+        decrypt: False
+        content: >
+          {{ st_disco_key_encrypted.stdout_lines[1:]
+          | join('')
+          | regex_replace('^\s+\$', '$')
+          | regex_replace('\s{10}', '\n') }}
+
+    delegate_to: localhost
+    become: True
+    become_user: '{{ lookup("env", "USER") }}'
+    # block_end (localhost / local user)
+
+  when: st_disco.certs_import and st_disco_remote_certs_exist
+  tags:
+    - st_certs
+    - st_certs_import
+  # block_end (save certs)
+
 - name: Remove existing Disco certificates
   file:
     path: '{{ item }}'
@@ -62,6 +147,22 @@
     - 'restart disco'
   when: st_install_disco
 
+- name: Export locally saved certificates
+  copy:
+    src: '{{ st_certs_path }}/{{ item.src }}'
+    dest: '{{ item.dest }}'
+    decrypt: True
+  with_items:
+    - { 'src': 'disco/cert.pem',
+        'dest': '/var/lib/syncthing/discosrv/cert.pem' }
+    - { 'src': 'disco/key.pem',
+        'dest': '/var/lib/syncthing/discosrv/key.pem' }
+  when: st_disco.certs_export
+  no_log: true
+  tags:
+    - st_certs
+    - st_certs_export
+
   # Tell `systemd` to pick-up the updated unit, running directly as calling the
   # `- meta: flush_handlers` will inevitably call the same handler from the base role.
 - name: Reload systemd
@@ -71,38 +172,33 @@
   become: True
   become_user: root
 
-- name: Discovery-server block
-  block:
+- name: Start Discovery service
+  systemd:
+    name: 'syncthing-discosrv.service'
+    enabled: True
+    masked: False
+    state: started
 
-  - name: Start Discovery service
-    systemd:
-      name: 'syncthing-discosrv.service'
-      enabled: True
-      masked: False
-      state: started
+- name: Register device ID of the Discovery server
+  ansible.builtin.command:
+    cmd: stdiscosrv
+    chdir: /var/lib/syncthing/discosrv
+  become_user: syncthing
+  become: true
+  register: st_disco_out
+  failed_when: '"Server device ID" not in st_disco_out.stdout'
+  changed_when: False
 
-  - name: Register device ID of the Discovery server
-    ansible.builtin.command:
-      cmd: stdiscosrv
-      chdir: /var/lib/syncthing/discosrv
-    become_user: syncthing
-    become: true
-    register: st_disco_out
-    failed_when: '"Server device ID" not in st_disco_out.stdout'
-    changed_when: False
+- name: Extract ID
+  set_fact:
+    st_disco: '{{ st_disco | combine({"id":st_disco_out.stdout
+                | regex_search("\sID\sis\s(\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7})",
+                "\1", multiline=True)
+                | join("")}) }}'
 
-  - name: Extract ID
-    set_fact:
-      st_disco: '{{ st_disco | combine({"id":st_disco_out.stdout
-                  | regex_search("\sID\sis\s(\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7}-\w{7})",
-                  "\1", multiline=True)
-                  | join("")}) }}'
-
-  - name: Assert ID length
-    assert:
-      that:
-        - st_disco.id | length == 63
-      success_msg: 'ID is OK: {{ st_disco.id }}'
-      fail_msg: 'ID length is incorrect, here is what we`ve got: {{ st_disco.id }}'
-
-  when: st_install_disco
+- name: Assert ID length
+  assert:
+    that:
+      - st_disco.id | length == 63
+    success_msg: 'ID is OK: {{ st_disco.id }}'
+    fail_msg: 'ID length is incorrect, here is what we`ve got: {{ st_disco.id }}'
