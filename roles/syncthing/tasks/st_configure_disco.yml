@@ -151,7 +151,7 @@
   copy:
     src: '{{ st_certs_path }}/{{ item.src }}'
     dest: '{{ item.dest }}'
-    decrypt: True
+    decrypt: true
   with_items:
     - { 'src': 'disco/cert.pem',
         'dest': '/var/lib/syncthing/discosrv/cert.pem' }
