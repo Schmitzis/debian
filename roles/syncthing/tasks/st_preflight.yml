@@ -723,7 +723,9 @@
 
     - name: Assert that exportable certificates exist
       assert:
-        that: st_client_local_certs_exist
+        that: 
+          - st_client_local_certs_exist is defined
+          - st_client_local_certs_exist
         fail_msg: |
           Unable to export certificates that don't exist.
           Check these files:
