@@ -71,13 +71,13 @@ st_client: {
   },
 
   'binary': {
-    'shasum': '03ba1fb7326d0893fc5664602694144bbdf7717a895fb554fe89fb996f116433',
-    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2/syncthing',
+    'shasum': '8dfb9a46563257f859867f8e9ded16efac612617de938b95e35c8ca887dadf16',
+    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.3_linux/syncthing',
     },
 
   'binary_arm64': {
-    'shasum': '7024810891ca014b18948ab672d4d9f5006278bd55c957b5a44aa2a08a751f1b',
-    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2_arm64/syncthing',
+    'shasum': 'ac8ea395590330353019a4424e429e5125e5cfd9b0e6afdd57e085ffeed38485',
+    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.3_aarch64/syncthing',
     }
 }
 
@@ -106,8 +106,8 @@ st_disco: {
   },
 
   'binary': {
-    'shasum': '6988838343dbf98eacb6678d551ae298fa85c1c0a4b0e2b2cff62e7228c442aa',
-    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2/stdiscosrv',
+    'shasum': '5abc9253cdd7c65111876728867428ffc1547baea4b13cf6d56cc0abe2e3a98a',
+    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.3_linux/stdiscosrv',
     }
 }
 
@@ -136,7 +136,7 @@ st_relay: {
   },
 
   'binary': {
-    'shasum': '715525cb0e835153a1ff465f312009c2ffc4d5d28294d850018087ee5727d238',
-    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.2/strelaysrv'
+    'shasum': 'bd6cff6894c104ff715c60c0522f484d9b00e36719340bd965da9566219e86cc',
+    'url': 'https://github.com/savchenko/minisync/releases/download/v1.16.3_linux/strelaysrv'
   }
 }
