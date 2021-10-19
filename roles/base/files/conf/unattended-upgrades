@@ -1,5 +1,5 @@
 Unattended-Upgrade::Origins-Pattern {
-//      "origin=Debian,codename=${distro_codename}-updates";
+        "origin=Debian,codename=${distro_codename}-updates";
 //      "origin=Debian,codename=${distro_codename}-proposed-updates";
         "origin=Debian,codename=${distro_codename},label=Debian";
         "origin=Debian,codename=${distro_codename},label=Debian-Security";
@@ -15,7 +15,7 @@ Unattended-Upgrade::Mail "root";
 Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
-Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-WithUsers "false";
 Unattended-Upgrade::OnlyOnACPower "false";
 Unattended-Upgrade::Verbose "false";
