@@ -117,6 +117,7 @@ base_fw_list:
 | rng-tools5          | `rngd`                                            |
 | rsync               | `rsync`                                           |
 | sudo                | `sudo`                                            |
+| systemd-timesyncd   | Proper NTP client.                                |
 | ufw                 | Handy interface for nftables.                     |
 | unattended-upgrades | Installs security updates automatically.          |
 

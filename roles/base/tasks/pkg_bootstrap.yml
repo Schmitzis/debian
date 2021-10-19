@@ -40,6 +40,7 @@
       - rng-tools5
       - rsync
       - sudo
+      - systemd-timesyncd
       - ufw
       - unattended-upgrades
 
