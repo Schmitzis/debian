@@ -9,6 +9,7 @@ modules = {
   'stats',               -- internal statistics
   'serve_stale < cache', -- serve stale record if parent NS is unreachable
   'rebinding < iterate', -- prevent rebinding attack
+  'prefill',
   'predict',
   'view'
 }
@@ -17,6 +18,9 @@ modules = {
 view:addr('127.0.0.1/8', function (req, qry) return policy.PASS end)
 view:addr('0.0.0.0/0', function (req, qry) return policy.DROP end)
 
+-- Block Firefox DoH
+policy.add(policy.suffix(policy.DENY, {todname('use-application-dns.net')}))
+
 {% if base_kresd_blocklist %}
 -- Add blocked hosts, reload on file change
 -- MUST be in a special .RPZ format
@@ -24,6 +28,7 @@ view:addr('0.0.0.0/0', function (req, qry) return policy.DROP end)
 policy.add(policy.rpz(policy.DENY('{{ base_kresd_blocklist }}'), true))
 {% endif %}
 
+-- DEBUG: `base_kresd_tls` is {{ base_kresd_tls }}
 {% if base_kresd_tls %}
 -- DNS-over-TLS
 policy.add(policy.all(policy.TLS_FORWARD({
@@ -35,8 +40,19 @@ policy.add(policy.all(policy.TLS_FORWARD({
 policy.add(policy.all(policy.FORWARD({'{{ base_kresd_primary_ip }}', '{{ base_kresd_secondary_ip }}'})))
 {% endif %}
 
--- Cache size
+--- Root zone preload
+prefill.config({
+  ['.'] = {
+    url = 'https://www.internic.net/domain/root.zone',
+    ca_file = '/etc/ssl/certs/ca-certificates.crt',
+    interval = 86400  -- 24h
+  }
+})
+
+-- Cache config
 cache.size = 32 * MB
+cache.max_ttl(172800) -- 48h
+cache.min_ttl(60) -- 1m
 
 --- Prefetch learning (15-minute blocks over 24 hours)
 predict.config({
