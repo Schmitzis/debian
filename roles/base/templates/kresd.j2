@@ -9,6 +9,7 @@ modules = {
   'stats',               -- internal statistics
   'serve_stale < cache', -- serve stale record if parent NS is unreachable
   'rebinding < iterate', -- prevent rebinding attack
+  'prefill',
   'predict',
   'view'
 }
@@ -34,6 +35,15 @@ policy.add(policy.all(policy.TLS_FORWARD({
 -- DNS-over-UDP
 policy.add(policy.all(policy.FORWARD({'{{ base_kresd_primary_ip }}', '{{ base_kresd_secondary_ip }}'})))
 {% endif %}
+
+--- Root zone preload
+prefill.config({
+  ['.'] = {
+    url = 'https://www.internic.net/domain/root.zone',
+    ca_file = '/etc/ssl/certs/ca-certificates.crt',
+    interval = 86400  -- 24h
+  }
+})
 
 -- Cache size
 cache.size = 32 * MB
