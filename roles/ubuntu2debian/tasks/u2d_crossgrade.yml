@@ -53,7 +53,7 @@
 
   - name: Install latest Debian kernel
     apt:
-      pkg: 
+      pkg:
         - 'linux-image-cloud-{{ arch }}'
       state: latest
     when: u2d_VM_guest

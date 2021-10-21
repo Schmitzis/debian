@@ -19,4 +19,5 @@ esc_repository: 'https://github.com/etesync/server'
 esc_rm_existing: False
 esc_rootdir: '/var/www/html/esc_server'
 esc_user: www-uvicorn
+# Tag v3.0.1
 esc_version: 'd11504093c0dff22e5371fada9037e6436abf628'

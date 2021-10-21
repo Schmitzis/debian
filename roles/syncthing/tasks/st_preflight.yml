@@ -723,7 +723,7 @@
 
     - name: Assert that exportable certificates exist
       assert:
-        that: 
+        that:
           - st_client_local_certs_exist is defined
           - st_client_local_certs_exist
         fail_msg: |

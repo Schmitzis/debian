@@ -33,7 +33,7 @@
   with_items:
     - '{{ gpg_stat.results }}'
   loop_control:
-    label: '{{ item.stat.exists }}'
+    label: '{{ item.stat.exists | default("") }}'
 
 - name: Create single 'GPG-result' variable...
   set_fact:
