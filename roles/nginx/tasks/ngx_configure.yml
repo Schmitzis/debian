@@ -27,6 +27,21 @@
       Failed to verify DH parameters, please investigate:
       {{ ngx_dhparam_verify | to_nice_yaml }}
 
+- name: Generate self-signed cert/key pair for the catch-all server
+  shell:
+    cmd: |
+      openssl ecparam -name prime256v1 > $TMPDIR/ecparam
+
+      openssl req -batch -x509 -nodes -days 3650
+      -newkey ec:$TMPDIR/ecparam
+      -keyout /etc/nginx/self-signed.key 
+      -out /etc/nginx/self-signed.cer
+
+      rm $TMPDIR/ecparam
+    creates:
+      - '/etc/nginx/self-signed.cer'
+      - '/etc/nginx/self-signed.key'
+
 - name: Provision master nginx template
   template:
     src: ngx_nginx_master.j2
@@ -49,14 +64,6 @@
       path: '/var/www/html/{{ item | regex_replace("\.", "-") }}'
       state: directory
     with_items: '{{ ngx_endpoints }}'
-
-  - name: Enable endpoints
-    file:
-      src: '/etc/nginx/sites-available/{{ item | regex_replace("\.", "-") }}.conf'
-      dest: '/etc/nginx/sites-enabled/{{ item | regex_replace("\.", "-") }}.conf'
-      state: link
-    with_items: '{{ ngx_endpoints }}'
-    notify: 'restart nginx'
 
   when: ngx_endpoints | length > 0
   # << Block end

@@ -1,5 +1,5 @@
 server {
-    server_name {{ item }};
+    server_name {{ item }} www.{{ item }};
     {% if ngx_provision_https %}
     listen 443 ssl http2;
     {% endif %}
@@ -9,10 +9,14 @@ server {
     include /etc/nginx/snippets/headers.conf;
 
     index index.html index.htm;
+    error_page 500 502 503 404 403 /404.html;
     add_header Access-Control-Allow-Origin "https://{{ item }}" always;
 
     {% if ngx_provision_https %}
+    ssl_stapling on;
+    ssl_stapling_verify on;
     ssl_certificate /etc/letsencrypt/live/{{ item }}/fullchain.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ item }}/chain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{{ item }}/privkey.pem;
     {% endif %}
 }
