@@ -16,7 +16,7 @@
   shell:
     cmd: >
       certbot certonly -n --standalone --preferred-challenges http
-      --key-type ecdsa --uir --hsts --staple-ocsp --expand --must-staple
+      --key-type ecdsa --uir --hsts --staple-ocsp --expand
       --agree-tos -d {{ item }},www.{{ item }} -m {{ ngx_cert_email }}
   register: ngx_certbot_exec
   with_items: '{{ ngx_endpoints }}'
