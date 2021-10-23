@@ -29,15 +29,19 @@
 
 - name: Generate self-signed cert/key pair for the catch-all server
   shell:
-    cmd: |
+    cmd: >
       openssl ecparam -name prime256v1 > $TMPDIR/ecparam
+
 
       openssl req -batch -x509 -nodes -days 3650
       -newkey ec:$TMPDIR/ecparam
       -keyout /etc/nginx/self-signed.key 
       -out /etc/nginx/self-signed.cer
 
+
       rm $TMPDIR/ecparam
+    executable: /bin/bash
+    chdir: /etc/nginx
     creates:
       - '/etc/nginx/self-signed.cer'
       - '/etc/nginx/self-signed.key'

@@ -626,12 +626,14 @@
     vars:
       esc_admin: '' # Optional, will be auto-generated if empty
       esc_admin_email: 'admin@example.com'
+      esc_admin_password: example_admin_password
       esc_cert_email: 'certs@example.com'
       esc_debug: False
-      esc_provision_https: True
       esc_hosts: ['etesync.example.com']
+      esc_http_auth_pass: http_password
+      esc_http_auth_user: http_user
       esc_path: '/var/www/esc_server'
-      esc_port: 80
+      esc_provision_https: True
       esc_repository: 'https://github.com/etesync/server'
       esc_rm_existing: True
       esc_rootdir: '/var/www/html/esc_server'

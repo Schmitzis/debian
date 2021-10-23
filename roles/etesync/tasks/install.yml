@@ -12,6 +12,25 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
 
+- name: Generate self-signed cert/key pair for the catch-all server
+  shell:
+    cmd: >
+      openssl ecparam -name prime256v1 > $TMPDIR/ecparam
+
+
+      openssl req -batch -x509 -nodes -days 3650
+      -newkey ec:$TMPDIR/ecparam
+      -keyout /etc/nginx/self-signed.key
+      -out /etc/nginx/self-signed.cer
+
+
+      rm $TMPDIR/ecparam
+    executable: /bin/bash
+    chdir: /etc/nginx
+    creates:
+      - '/etc/nginx/self-signed.cer'
+      - '/etc/nginx/self-signed.key'
+
 - name: Install dependencies
   apt:
     name: '{{ pkg }}'
@@ -22,6 +41,8 @@
       - clang
       - python3-certbot-nginx
       - python3-dev
+      - python3-passlib
+      - python3-pexpect
       - python3-virtualenv
       - uvicorn
 
@@ -31,12 +52,21 @@
     dest: '{{ esc_path }}'
     version: '{{ esc_version }}'
 
-- name: 'Make {{ ansible_env.USER }} an owner of .venv'
+- name: 'Make {{ esc_user }} an owner of .venv and .cache'
   file:
     state: directory
-    path: '{{ esc_path }}/.venv'
-    owner: '{{ ansible_env.USER }}'
-    group: '{{ ansible_env.USER }}'
+    path: '{{ esc_path }}/{{ item }}'
+    owner: '{{ esc_user }}'
+    group: '{{ esc_user }}'
+  with_items:
+    - '.venv'
+    - '.cache'
+
+- name: Temporarily mount /tmp with exec
+  shell:
+    cmd: 'mount -o remount,exec /tmp'
+  become: true
+  become_user: root
 
 - name: Pip-install requirements into virtualenv
   pip:
@@ -47,13 +77,23 @@
   # --build is now deprecated in pip. Keep the become_flags and become_method!
   #   - https://github.com/pypa/pip/issues/7666
   #   - https://github.com/ansible/ansible/issues/57436
-  environment:
-    TMPDIR: '{{ ansible_env.HOME }}/.cache/TMPDIR'
+  #
+  # This used to work... Until some pip update that broke it. Again.
+  #
+  # environment:
+  #   TMPDIR: '{{ esc_path }}/.cache/TMPDIR'
   become: True
-  become_user: '{{ ansible_env.USER }}'
+  become_user: '{{ esc_user }}'
   become_flags: '--login'
   # open a new systemd session that goes through pam_systemd
   become_method: sudo
+  notify: 'lock user'
+
+- name: Re-mount /tmp with noexec
+  shell:
+    cmd: 'mount -o remount,noexec /tmp'
+  become: true
+  become_user: root
 
 - name: 'Make root an owner of .venv'
   file:
@@ -63,7 +103,15 @@
     group: 'root'
     recurse: True
 
-- name: Remove example configs
+- name: Set media path permissions
+  file:
+    state: directory
+    path: '{{ esc_rootdir }}/media'
+    owner: '{{ esc_user }}'
+    group: '{{ esc_user }}'
+    recurse: True
+
+- name: Remove example configs and cache
   file:
     path: '{{ item }}'
     state: absent
@@ -76,6 +124,7 @@
     - '{{ esc_path }}/README.md'
     - '{{ esc_path }}/requirements-dev.txt'
     - '{{ esc_path }}/.github'
+    - '{{ esc_path }}/.cache'
 
 - name: Empty default index-page
   copy:

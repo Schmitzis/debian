@@ -6,19 +6,19 @@
   tags:
     - esc_assert
 
-- name: Install EteSync server
-  import_tasks: install.yml
-  become: True
-  become_user: root
-  tags:
-    - esc_install
-
 - name: Configure EteSync system user
   import_tasks: configure_user.yml
   become: True
   become_user: root
   tags:
     - esc_configure_user
+
+- name: Install EteSync server
+  import_tasks: install.yml
+  become: True
+  become_user: root
+  tags:
+    - esc_install
 
 - name: Configure EteSync server
   import_tasks: configure_server.yml

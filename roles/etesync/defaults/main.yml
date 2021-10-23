@@ -9,6 +9,7 @@ esc_admins_num: 0
 #
 esc_admin: ''
 esc_admin_email: ''
+esc_admin_password: ''
 esc_cert_email: ''
 esc_debug: False
 esc_provision_https: True

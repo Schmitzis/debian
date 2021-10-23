@@ -1,16 +1,28 @@
 ---
+- name: Add httpasswd file
+  community.general.htpasswd:
+    path: /etc/nginx/ete_passwords
+    name: '{{ esc_http_auth_user }}'
+    password: '{{ esc_http_auth_pass }}'
+    owner: root
+    group: www-data
+    mode: 0640
+
+- name: Provision master nginx config
+  template:
+    src: esc_nginx_master.j2
+    dest: /etc/nginx/nginx.conf
+
 - name: Provision EteSync nginx config
   template:
     src: esc_nginx.j2
     dest: /etc/nginx/sites-available/esc_nginx.conf
-  register: esc_nginx_provision
 
 - name: Enable config
   file:
     src: /etc/nginx/sites-available/esc_nginx.conf
     dest: /etc/nginx/sites-enabled/esc_nginx.conf
     state: link
-  register: esc_nginx_enable
 
 - name: Restart and enable nginx
   systemd:
@@ -18,4 +30,3 @@
     state: restarted
     masked: False
     enabled: True
-  when: esc_nginx_provision.changed or esc_nginx_enable.changed # noqa 503

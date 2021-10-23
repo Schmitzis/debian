@@ -4,6 +4,7 @@
     daemon_reexec: True
     daemon_reload: True
   become: True
+  become_user: root
   listen: 'reload systemd'
 
 - name: Restart nginx
@@ -11,6 +12,7 @@
     name: nginx.service
     state: restarted
   become: True
+  become_user: root
   listen: 'restart nginx'
 
 - name: Restart EteBase / Uvicorn
@@ -18,4 +20,19 @@
     name: etebase_server.service
     state: restarted
   become: True
+  become_user: root
   listen: 'restart etebase'
+
+- name: Lock EteSync user
+  user:
+    name: '{{ esc_user }}'
+    append: True
+    create_home: False
+    groups: www-data
+    home: '{{ esc_path }}'
+    move_home: False
+    shell: /usr/sbin/nologin
+    password_lock: True
+  become: True
+  become_user: root
+  listen: 'lock user'

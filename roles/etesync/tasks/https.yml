@@ -1,10 +1,20 @@
 ---
 - name: Create certbot command
   set_fact:
-    esc_certbot_cmd: 'certbot -n --nginx --agree-tos -d {{ ",".join(esc_hosts) }} -m {{ esc_cert_email }} run'
+    esc_certbot_cmd: >
+      certbot -n --nginx --agree-tos
+      --key-type ecdsa --uir --hsts --staple-ocsp --expand
+      -d {{ ",".join(esc_hosts) }} -m {{ esc_cert_email }} run
 
 - name: Provision EteSync nginx config
   shell:
     cmd: '{{ esc_certbot_cmd }}' # noqa 301
   register: esc_certbot_exec
+  failed_when: False
   notify: 'restart nginx'
+
+- name: Assert that cert was provisioned
+  assert:
+    that: >
+      'Congratulations!' not in esc_certbot_exec.stdout or
+      'Keeping the existing certificate' not in esc_certbot_exec.stderr
