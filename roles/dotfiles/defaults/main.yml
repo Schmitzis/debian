@@ -22,3 +22,4 @@ dots_remote_gitconfig: true
 dots_setup_fortunes: false
 dots_setup_neovim: false
 dots_dotfiles_list: []
+dots_repo: 'https://github.com/savchenko/dotfiles'

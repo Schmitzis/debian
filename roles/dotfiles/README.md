@@ -19,13 +19,19 @@ Ansible ≥2.10
 
 | Variable                | Description                                                      | Default |
 |-------------------------|------------------------------------------------------------------|---------|
-| dots_change_tmux_prefix | Changes `tmux` prefix from <kbd>C-Space</kbd> to <kbd>C-b</kbd>. | true    |
-| dots_extract_dotfiles   | Copy dotfiles from this role to the target, details below.       | false   |
 | dots_bash_emacs_mode    | Switch bash to "regular" Emacs-like mode.                        | false   |
+| dots_change_tmux_prefix | Changes `tmux` prefix from <kbd>C-Space</kbd> to <kbd>C-b</kbd>. | true    |
+| dots_dotfiles_list      | What, where and how, details below.                              | {}      |
+| dots_extract_dotfiles   | Copy dotfiles from this role to the target, details below.       | false   |
 | dots_remote_gitconfig   | Use `.gitconfig` without `gpgsign` and author's information.     | true    |
+| dots_repo               | Link to the dotfiles repository                                  | '...'   |
 | dots_setup_fortunes     | Copy quotes for `fortunes` and generate its search DB.           | false   |
 | dots_setup_neovim       | All-inclusive, 5-stars neovim setup.                             | false   |
-| dots_dotfiles_list      | What, where and how, details below.                              | {}      |
+
+### `dots_repo`
+
+Git repository from where dotfiles will be downloaded and stored under the `./files/` of this role.
+Defaults to [my dotfiles](https://github.com/savchenko/dotfiles), change with your own.
 
 ### `dots_dotfiles_list`
 

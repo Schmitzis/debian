@@ -15,7 +15,7 @@
     decrypt: False
     dest: /usr/share/games/fortunes
     remote_src: False
-    src: st.zip
+    src: fortunes.zip
 
 - name: Check if DB is already present
   stat:

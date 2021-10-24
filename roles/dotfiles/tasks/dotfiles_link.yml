@@ -54,7 +54,7 @@
 
   - name: Copy primary dotfiles to the remote machine
     synchronize:
-      src: './{{ item.src }}'
+      src: '{{ role_path }}/files/{{ item.src }}'
       dest: '{{ ansible_env.HOME }}/.local/etc/dotfiles/'
       archive: False
       recursive: True
