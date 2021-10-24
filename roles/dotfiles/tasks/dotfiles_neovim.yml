@@ -30,7 +30,7 @@
 
 - name: Link colour-schemes
   file:
-    src: '{{ playbook_dir }}/roles/dotfiles/files/vim/colors'
+    src: '{{ role_path }}/files/vim/colors'
     dest: '{{ ansible_env.HOME }}/.vim/colors'
     state: link
     force: True
@@ -50,7 +50,7 @@
 
 - name: Link vim-plug
   file:
-    src: '{{ playbook_dir }}/roles/dotfiles/files/vim/vim-plug/plug.vim'
+    src: '{{ role_path }}/files/vim/vim-plug/plug.vim'
     dest: '{{ ansible_env.HOME }}/.local/share/nvim/site/autoload/plug.vim'
     state: link
     force: True
