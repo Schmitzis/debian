@@ -42,3 +42,6 @@
   delegate_to: localhost
   become: True
   become_user: '{{ lookup("env", "USER") }}'
+  when:
+    - inventory_hostname not in groups['localnet']
+    - inventory_hostname != 'localhost'
