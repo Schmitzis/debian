@@ -19,3 +19,5 @@
     - "{{ ansible_env.HOME }}/.local/share"
     - "{{ ansible_env.HOME }}/.ssh"
     - "{{ ansible_env.HOME }}/.ssh/controls"
+  loop_control:
+    label: '{{ item }}'

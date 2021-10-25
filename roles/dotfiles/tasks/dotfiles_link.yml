@@ -54,13 +54,14 @@
 
   - name: Copy primary dotfiles to the remote machine
     synchronize:
-      src: '{{ role_path }}/files/{{ item.src }}'
+      src: './{{ item.src }}'
       dest: '{{ ansible_env.HOME }}/.local/etc/dotfiles/'
       archive: False
       recursive: True
       checksum: True
-      rsync_opts: ['--relative']
+      rsync_opts: ['--relative', '--recursive']
       mode: 'push'
+      use_ssh_args: True
     with_items: '{{ dots_dotfiles_list }}'
     loop_control:
       label: '{{ item.src }} --> {{ item.dest }}'
@@ -85,6 +86,7 @@
           label: '{{ item.src }} --> {{ item.dest }}'
         notify: rebuild bat cache
         register: dotfiles_linked
+        debugger: never
 
       rescue:
 
