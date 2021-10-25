@@ -1,0 +1,17 @@
+---
+mur_acme_path: '{{ ansible_env.HOME }}/acme'
+mur_acme_repository: 'https://github.com/acmesh-official/acme.sh'
+mur_acme_version: '8fcecd59a0fd991f1fb4248692af63889bb90d81' # Tag v3.0.1
+mur_certrequired: True
+mur_domain: 'mumble.example.com'
+mur_email: 'notification@example.com'
+mur_from: 'any'
+mur_host: localhost
+mur_logdays: 30
+mur_max_users: 100
+mur_max_users_per_channel: 10
+mur_obfuscate_ip_in_logs: False
+mur_port: 64738
+mur_server_password: ''
+mur_ssl_cert: ''
+mur_ssl_key: ''

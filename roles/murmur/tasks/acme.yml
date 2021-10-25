@@ -1,0 +1,53 @@
+- name: Clone ACME repository
+  git:
+    repo: '{{ mur_acme_repository }}'
+    dest: '{{ mur_acme_path }}'
+    version: '{{ mur_acme_version }}'
+
+- name: Install acme.sh
+  shell:
+    cmd: './acme.sh --install -m {{ mur_email }}'
+    chdir: '{{ mur_acme_path }}'
+
+- name: Add temporarily UFW rule to allow HTTP on :80
+  ufw:
+    rule: allow
+    name: www
+    comment: 'TempHTTP'
+
+- name: Switch ACME endpoint to LetsEncrypt
+  shell:
+    cmd: './acme.sh --set-default-ca --server letsencrypt'
+    chdir: '{{ mur_acme_path }}'
+  register: mur_cert_obtained
+
+- name: Create renewal script
+  template:
+    src: renew.sh.j2
+    dest: '{{ mur_acme_path }}/renew.sh'
+    mode: '0755'
+
+- name: Obtain certificate
+  shell:
+    cmd: >
+      ./acme.sh --issue -d {{ mur_domain }} --standalone
+      --reloadcmd "systemctl restart mumble-server.service"
+      --renew-hook "{{ mur_acme_path }}/renew.sh"
+    chdir: '{{ mur_acme_path }}'
+  register: mur_cert_obtained
+  failed_when: mur_cert_obtained.rc not in (0,2)
+
+- name: Execute renewal script to propagate the certs
+  shell:
+    cmd: '{{ mur_acme_path }}/renew.sh'
+  args:
+    creates:
+      - '/var/lib/mumble-server/{{ mur_domain }}.cer'
+      - '/var/lib/mumble-server/{{ mur_domain }}.key'
+
+- name: Remove temporarily UFW rule
+  ufw:
+    rule: allow
+    name: www
+    comment: 'TempHTTP'
+    delete: yes

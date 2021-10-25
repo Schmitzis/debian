@@ -1,0 +1,9 @@
+#!/bin/env bash
+
+cp /root/.acme.sh/{{ mur_domain }}/fullchain.cer /var/lib/mumble-server/{{ mur_domain }}.cer
+cp /root/.acme.sh/{{ mur_domain }}/{{ mur_domain }}.key /var/lib/mumble-server/{{ mur_domain }}.key
+
+chown mumble-server:mumble-server /var/lib/mumble-server/*
+
+chmod 700 /var/lib/mumble-server/{{ mur_domain }}.cer
+chmod 700 /var/lib/mumble-server/{{ mur_domain }}.key

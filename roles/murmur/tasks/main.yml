@@ -1,0 +1,51 @@
+---
+- name: Install murmur and socat (ACME dependency)
+  apt:
+    pkg: 
+      - mumble-server
+      - socat
+
+- name: Template mumble-server config
+  template:
+    src: mumble-server.ini.j2
+    dest: /etc/mumble-server.ini
+  register: mumble_server
+
+- name: Reload systemd units
+  systemd:
+    daemon_reexec: True
+    daemon_reload: True
+  when: mumble_server.changed
+
+- name: Enable and stop my_ip_server systemd service
+  systemd:
+    name: mumble-server.service
+    state: stopped
+    masked: False
+    enabled: True
+
+- name: Import ACME task-list
+  import_tasks: acme.yml
+
+- name: 'Allow mumble-server to listen on port {{ mur_port }}/TCP'
+  ufw:
+    rule: allow
+    proto: tcp
+    from: '{{ mur_from }}'
+    comment: 'Murmur TCP'
+    port: '{{ mur_port | string }}'
+
+- name: 'Allow mumble-server to listen on port {{ mur_port }}/UDP'
+  ufw:
+    rule: allow
+    proto: udp
+    from: '{{ mur_from }}'
+    comment: 'Murmur UDP'
+    port: '{{ mur_port | string }}'
+
+- name: Restart and enable mumble-server
+  systemd:
+    name: mumble-server.service
+    state: restarted
+    masked: False
+    enabled: True

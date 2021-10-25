@@ -49,7 +49,8 @@
 - name: Verify endpoints' `AllowedIPs`
   assert:
     that:
-      - item.allowedips | ipaddr('net')
+      # - item.allowedips | ipaddr('net') # fails on /32
+      - item.allowedips | ansible.netcommon.ipv4
     quiet: True
     success_msg: "Subnet {{ item.allowedips }} will be routed to \
                   {{ item.ip }}"

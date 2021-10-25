@@ -1,0 +1,132 @@
+; vim: ft=dosini:
+; Murmur configuration file.
+;
+; General notes:
+; * Settings in this file are default settings and many of them can be overridden
+;   with virtual server specific configuration via the Ice or DBus interface.
+; * Due to the way this configuration file is read some rules have to be
+;   followed when specifying variable values (as in variable = value):
+;     * Make sure to quote the value when using commas in strings or passwords.
+;        NOT variable = super,secret BUT variable = "super,secret"
+;     * Make sure to escape special characters like '\' or '"' correctly
+;        NOT variable = """ BUT variable = "\""
+;        NOT regex = \w* BUT regex = \\w*
+database=/var/lib/mumble-server/mumble-server.sqlite
+; If Murmur is started as root, which user should it switch to?
+uname=mumble-server
+
+host={{ mur_host }}
+port={{ mur_port }}
+sslCert={{ mur_ssl_cert }}
+sslKey={{ mur_ssl_key }}
+;sslPassPhrase=
+;sslCA=
+bonjour=False
+
+; Password to join server.
+serverpassword={{ mur_server_password }}
+
+; Maximum bandwidth (in bits per second) clients are allowed to send speech at.
+bandwidth=144000
+timeout=60
+
+; Maximum number of concurrent clients allowed.
+users={{ mur_max_users }}
+
+; Where users sets a blanket limit on the number of clients per virtual server,
+; usersperchannel sets a limit on the number per channel. The default is 0, for
+; no limit.
+usersperchannel={{ mur_max_users_per_channel }}
+
+; Set to 0 to keep forever, or -1 to disable logging to the DB.
+logdays={{ mur_logdays }}
+
+; If this options is enabled, only clients which have a certificate are allowed
+; to connect.
+certrequired={{ mur_certrequired }}
+
+; The obfuscate function only affects the log file and DOES NOT effect the user
+; information section in the client window.
+obfuscate={{ mur_obfuscate_ip_in_logs }}
+
+; 0 - Use SQLite's default rollback journal.
+; 1 - Use write-ahead log with synchronous=NORMAL.
+; 2 - Use write-ahead log with synchronous=FULL.
+sqlite_wal=1
+
+; Note that if this is uncommented and with empty content,
+; access will be denied.
+icesecretread=
+icesecretwrite=
+
+logfile=/var/log/mumble-server/mumble-server.log
+pidfile=/run/mumble-server/mumble-server.pid
+welcometext=
+
+; Per-user, message-per-second rate limiting
+messageburst=5
+messagelimit=1
+
+; Setting to true exposes the current user count, the maximum user count, and
+; the server's maximum bandwidth per client to unauthenticated users. In the
+; Mumble client, this information is shown in the Connect dialog.
+allowping=false
+
+; Amount of users with Opus support needed to force Opus usage, in percent.
+; 0 = Always enable Opus, 100 = enable Opus if it's supported by all clients.
+opusthreshold=100
+
+; Maximum depth of channel nesting. Note that some databases like MySQL using
+; InnoDB will fail when operating on deeply nested channels.
+channelnestinglimit=2
+
+; Maximum number of channels per server. 0 for unlimited. Note that an
+; excessive number of channels will impact server performance
+channelcountlimit=100
+
+; Regular expression used to validate channel names.
+; (Note that you have to escape backslashes with \ )
+channelname=[ \\-=\\w\\#\\[\\]\\{\\}\\(\\)\\@\\|]+
+
+; Regular expression used to validate user names.
+; (Note that you have to escape backslashes with \ )
+username=[-=\\w\\[\\]\\{\\}\\(\\)\\@\\|\\.]+
+
+; When a user connects to a server they've already been on, by default the
+; server will remember the last channel they were in and move them to it
+; automatically. Toggling this setting to false will disable that feature.
+;
+rememberchannel=false
+
+; Maximum length of text messages in characters. 0 for no limit.
+textmessagelength=2048
+
+; Maximum length of text messages in characters, with image data. 0 for no limit.
+imagemessagelength=1048576
+
+; Allow clients to use HTML in messages, user comments and channel descriptions?
+allowhtml=false
+
+; @ffdhe2048, @ffdhe3072, @ffdhe4096, @ffdhe6144, @ffdhe8192
+sslDHParams=@ffdhe2048
+
+; It is recommended that you try your cipher string using 'openssl ciphers <string>'
+; before setting it here, to get a feel for which cipher suites you will get.
+sslCiphers=ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+
+; If enabled, clients are sent information about the servers version and operating
+; system.
+sendversion=False
+
+; By default a strong amount of PBKDF2 iterations are chosen automatically. If >0 this setting
+; overrides the automatic benchmark and forces a specific number of iterations.
+; (Note that you should only change this value if you know what you are doing)
+;kdfIterations=-1
+
+; You can configure any of the configuration options for Ice here. We recommend
+; leave the defaults as they are.
+; Please note that this section has to be last in the configuration file.
+;
+[Ice]
+Ice.Warn.UnknownProperties=1
+Ice.MessageSizeMax=65536
