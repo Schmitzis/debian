@@ -371,6 +371,7 @@
       dots_remote_gitconfig: false
       dots_setup_fortunes: true
       dots_setup_neovim: true
+      dots_repo_update: False
       dots_dotfiles_list:
         #
         # WARNING: Folders must end with '/'

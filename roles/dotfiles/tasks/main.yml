@@ -3,7 +3,8 @@
   ansible.builtin.git:
     repo: '{{ dots_repo }}'
     dest: '{{ role_path }}/files'
-    update: True
+    update: '{{ dots_repo_update }}'
+  delegate_to: localhost
 
 - name: Assert that provisioning logic is sane
   assert:

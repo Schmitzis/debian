@@ -25,6 +25,7 @@ Ansible ≥2.10
 | dots_extract_dotfiles   | Copy dotfiles from this role to the target, details below.       | false   |
 | dots_remote_gitconfig   | Use `.gitconfig` without `gpgsign` and author's information.     | true    |
 | dots_repo               | Link to the dotfiles repository                                  | '...'   |
+| dots_repo_update        | Do `git pull`? Will use existing files otherwise                 | False   |
 | dots_setup_fortunes     | Copy quotes for `fortunes` and generate its search DB.           | false   |
 | dots_setup_neovim       | All-inclusive, 5-stars neovim setup.                             | false   |
 

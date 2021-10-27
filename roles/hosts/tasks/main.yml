@@ -64,6 +64,7 @@
     _host != hostvars["localhost"]["inventory_hostname"]
     and _host != inventory_hostname'
   delegate_to: localhost
+  connection: local
   become: True
   become_user: root
   # `lineinfile` can miss lines w/o being throttled on localhost
