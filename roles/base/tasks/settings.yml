@@ -68,6 +68,11 @@
     owner: root
     mode: 0644
 
+- name: Install `keyboard-configuration`
+  apt:
+    pkg: keyboard-configuration
+  when: base_set_capslock
+
 - name: Change CapsLock to Ctrl
   lineinfile:
     path: /etc/default/keyboard
