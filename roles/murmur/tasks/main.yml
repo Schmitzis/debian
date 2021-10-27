@@ -17,7 +17,7 @@
     daemon_reload: True
   when: mumble_server.changed
 
-- name: Enable and stop my_ip_server systemd service
+- name: Enable and stop mumble-server (murmur) systemd service
   systemd:
     name: mumble-server.service
     state: stopped

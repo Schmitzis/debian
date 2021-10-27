@@ -98,7 +98,7 @@
     from_ip: any
     port: '{{ wg_port | int }}'
     proto: udp
-    comment: 'Allow {{ wg_port }}/UDP on {{ wg_iface }}'
+    comment: 'Allow WG on {{ wg_port }}/UDP'
 
 - name: Allow SSH from Wireguard subnet
   ufw:
@@ -108,5 +108,5 @@
     interface: '{{ wg_iface }}'
     port: '22'
     proto: tcp
-    comment: 'Allow 22/TCP on {{ wg_iface }} from {{ wg_server_subnet }}'
+    comment: 'Allow SSH on {{ wg_iface }} from {{ wg_server_subnet }}'
   when: wg_ssh
