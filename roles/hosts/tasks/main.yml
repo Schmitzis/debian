@@ -169,7 +169,8 @@
       | intersect(hostvars[_host]["group_names"])
       | length > 0 and _host != inventory_hostname and
       _host != hostvars["localhost"]["inventory_hostname"]
-      and _host != "localhost" and hosts_remote_same_group'
+      and _host != "localhost" and hosts_remote_same_group
+      and _addr != "localhost"'
     become: True
     become_user: root
     vars:
