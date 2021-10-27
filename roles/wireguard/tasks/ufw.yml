@@ -99,7 +99,6 @@
     port: '{{ wg_port | int }}'
     proto: udp
     comment: 'Allow {{ wg_port }}/UDP on {{ wg_iface }}'
-  when: wg_srv
 
 - name: Allow SSH from Wireguard subnet
   ufw:
@@ -110,4 +109,4 @@
     port: '22'
     proto: tcp
     comment: 'Allow 22/TCP on {{ wg_iface }} from {{ wg_server_subnet }}'
-  when: wg_srv and wg_ssh
+  when: wg_ssh
