@@ -348,10 +348,10 @@
   when: base_pam_namespace
   # block end
 
-- name: Add 1s. delay if login fails
+- name: Add 0.5 second delay if login fails
   copy:
     dest: /etc/pam.d/system-login
-    content: 'auth optional pam_faildelay.so delay=1000000'
+    content: 'auth optional pam_faildelay.so delay=500000'
 
 - name: Enable APT sandboxing
   copy:
