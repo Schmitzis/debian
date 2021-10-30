@@ -97,12 +97,6 @@
     - st_certs_import
   # block_end (save certs)
 
-- name: Delete existing config
-  file:
-    path: '{{ st_client.config_dir }}/config.xml'
-    state: absent
-  when: st_client.reconfigure
-
 - name: Remove existing Client certificates
   file:
     path: '{{ item }}'
@@ -112,11 +106,25 @@
     - '{{ st_client.config_dir }}/key.pem'
   when: st_client.certs_recreate
 
+- name: Check if there is an existing config
+  stat:
+    path: '{{ st_client.config_dir }}/config.xml'
+  register: _st_client_config_exists
+
+- name: Delete existing config
+  file:
+    path: '{{ st_client.config_dir }}/config.xml'
+    state: absent
+  when: 
+    - _st_client_config_exists.stat.exists
+    - st_client.reconfigure
+
 - name: Generate config
   shell:
     cmd: 'syncthing -generate={{ st_client.config_dir }}'
     chdir: '{{ st_user_stat.home }}'
-  when: st_client.reconfigure
+  when: >
+    not _st_client_config_exists.stat.exists or st_client.reconfigure
 
 - name: Export locally saved certificates
   copy:
@@ -426,12 +434,12 @@
     attribute: 'type'
     value: 'receiveencrypted'
 
-- name: Change default folder path for the future folders to $HOME
+- name: 'Change default folder path for the future folders to {{ st_client.default_folder.path | dirname }}'
   community.general.xml:
     path: '{{ st_client.config_dir }}/config.xml'
     xpath: '/configuration/defaults/folder[@id=""]'
     attribute: 'path'
-    value: '{{ st_client.user.home }}'
+    value: '{{ st_client.default_folder.path | dirname }}'
 
 - name: Set minimum free disk space for the future folders
   community.general.xml:
