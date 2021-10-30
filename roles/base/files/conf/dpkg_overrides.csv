@@ -19,7 +19,7 @@ root,root,700,/etc/dhcp
 root,root,700,/etc/dkms
 root,root,600,/etc/e2scrub.conf
 root,root,700,/etc/etckeeper
-root,root,600,/etc/fuse.conf
+root,root,644,/etc/fuse.conf
 root,root,600,/etc/hdparm.conf
 root,root,600,/etc/hosts.allow
 root,root,600,/etc/hosts.deny
