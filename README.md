@@ -1,7 +1,7 @@
 # Playbook
 
-Configuration and maintenance of a host running Debian 11.
-
+Configuration and maintenance of a host running Debian 11.\
+Optinally updates from Buster or Ubuntu 20.04 to Bullseye.
 
 ## Example usage
 
@@ -30,6 +30,9 @@ Provisions Wireguard in any mode imaginable.
 ### [nginx](/roles/nginx/)
 Configures web-server and enrolls an arbitrary number of domains on a remote `nginx` instance.
 
+### [ufw](/roles/ufw/)
+Configures uncomplicated firewall.
+
 ### [syncthing](/roles/syncthing)
 Configures Syncthing client, relay and discovery servers.
 
@@ -44,6 +47,9 @@ Flexible management of `/etc/hosts`.
 
 ### [known_hosts](/roles/known_hosts)
 Handy autoupdater of the `known_hosts` fingerprints.
+
+### [murmur](/roles/murmur)
+Configures Mumble server (aka `murmur`).
 
 ### [ubuntu2debian](/roles/ubuntu2debian/)
 Automatically converts a host running Ubuntu 20.04 into Debian 11.
