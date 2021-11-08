@@ -104,7 +104,11 @@
     regexp: '^\s*(?!127\.)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+.+\s*$'
     state: absent
     backup: False
-  when: hosts_remote_rewrite
+  when: 
+    'hosts_remote_rewrite and
+    ansible_hostname != "localhost" and
+    hostvars[inventory_hostname]["ansible_env"]["SSH_CLIENT"] is defined and
+    hostvars[inventory_hostname]["ansible_env"]["SSH_CONNECTION"] is defined'
   become: True
   become_user: root
 
