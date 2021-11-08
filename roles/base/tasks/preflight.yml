@@ -11,8 +11,8 @@
 
 - name: Assert that we are running against the supported kernel version
   assert:
-    that: '{{ ansible_facts["kernel"].startswith("5.10") }}'
-    success_msg: 'Detected 5.10 LTS kernel'
+    that: '{{ ansible_facts["kernel"] is version('5.10', '>=') }}'
+    success_msg: 'Detected kernel {{ ansible_facts["kernel"] }}'
     fail_msg: 'Unsupported kernel version, aborting.'
 
 - name: Assert that architecture is supported
