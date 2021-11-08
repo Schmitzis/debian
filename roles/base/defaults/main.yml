@@ -63,6 +63,7 @@ base_sshd_less_secure: False
 base_sudo_cmd_nopwd: ""
 base_sudo_set: false
 base_sudo_user: '{{ ansible_env.USER }}'
+base_sudo_timeout: 15
 base_swappiness: 30
 base_thermald_profiles: []
 base_timezone: 'UTC'

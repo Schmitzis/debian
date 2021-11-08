@@ -414,6 +414,13 @@
     line: 'Defaults ignore_dot'
     validate: '/usr/sbin/visudo -cf %s'
 
+- name: 'Set sudo timeout to {{ base_sudo_timeout }}'
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^[\s]*Defaults.*\btimestamp_timeout\b.*$'
+    line: 'Defaults timestamp_timeout={{ base_sudo_timeout }}'
+    validate: '/usr/sbin/visudo -cf %s'
+
 - name: Preserve TERMINFO in sudo session
   lineinfile:
     path: /etc/sudoers.d/preserve-terminfo
