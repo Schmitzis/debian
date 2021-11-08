@@ -18,6 +18,6 @@
     - "{{ ansible_env.HOME }}/.local/runtime"
     - "{{ ansible_env.HOME }}/.local/share"
     - "{{ ansible_env.HOME }}/.ssh"
-    - "{{ ansible_env.HOME }}/.ssh/controls"
+    - "{{ ansible_env.HOME }}/.ssh/sockets"
   loop_control:
     label: '{{ item }}'
