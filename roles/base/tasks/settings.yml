@@ -421,6 +421,13 @@
     line: 'Defaults timestamp_timeout={{ base_sudo_timeout }}'
     validate: '/usr/sbin/visudo -cf %s'
 
+- name: 'Set sudo PROMPT timeout to {{ base_passwd_timeout }} minutes'
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^[\s]*Defaults.*\bpasswd_timeout\b.*$'
+    line: 'Defaults passwd_timeout={{ base_passwd_timeout }}'
+    validate: '/usr/sbin/visudo -cf %s'
+
 - name: Preserve TERMINFO in sudo session
   lineinfile:
     path: /etc/sudoers.d/preserve-terminfo
