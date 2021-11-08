@@ -139,7 +139,16 @@
   delay: 3
   retries: 3
 
-- name: Install backports
+- name: Install packages with explicit `--no-install-recommends`
+  apt:
+    pkg: '{{ sw_list_norecommends }}'
+    state: present
+    install_recommends: False
+  delay: 3
+  retries: 3
+  when: sw_list_norecommends | length > 0
+
+- name: Install backports with explicit `--no-install-recommends`
   apt:
     pkg: '{{ sw_list_backports }}'
     state: present
