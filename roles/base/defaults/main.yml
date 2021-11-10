@@ -13,6 +13,7 @@ sig_enforce: ''
 #
 base_allow_reboot: true
 base_autoupgrade: false
+base_consoleblank: 600
 base_debsecan: True
 base_disable_bluetooth: true
 base_disable_bt_autosuspend: false
@@ -22,6 +23,7 @@ base_disable_nonsof: false
 base_disable_speaker: true
 base_disable_thunderbolt: true
 base_enable_audit: false
+base_fb_configure: true
 base_fb_font_size: '10x18'
 base_fstab_noexec: true
 base_fw_list: []
@@ -50,11 +52,11 @@ base_logind_lid_action: suspend
 base_logind_powerbutton_action: poweroff
 base_nmi_watchdog: true
 base_pam_namespace: False
+base_passwd_timeout: '0.2'
 base_pkg_remove: ['rpcbind']
 base_reports_email: 'root'
 base_require_tty_pty: False
 base_set_capslock: false
-base_fb_configure: true
 base_set_dpkg_overrides: false
 base_set_hostname: false
 base_set_sigenforce: true
@@ -62,9 +64,8 @@ base_sleep_enabled: false
 base_sshd_less_secure: False
 base_sudo_cmd_nopwd: ""
 base_sudo_set: false
-base_sudo_user: '{{ ansible_env.USER }}'
 base_sudo_timeout: 15
-base_passwd_timeout: '0.2'
+base_sudo_user: '{{ ansible_env.USER }}'
 base_swappiness: 30
 base_thermald_profiles: []
 base_timezone: 'UTC'

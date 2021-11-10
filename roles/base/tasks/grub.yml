@@ -32,8 +32,8 @@
     line: >
       GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=1 kaslr apparmor=1 security=apparmor ipv6.disable=1
       kernel.kptr_restrict=2 slab_nomerge mce=0 page_alloc.shuffle=1 mitigations=auto
-      audit={{ base_enable_audit | int }} init_on_alloc=1
-      init_on_free={{ base_init_on_free | int }} pti=auto vsyscall=none
+      consoleblank={{ base_consoleblank | int }} audit={{ base_enable_audit | int }}
+      init_on_alloc=1 init_on_free={{ base_init_on_free | int }} pti=auto vsyscall=none
       extra_latent_entropy{{ cpu_iommu }} fsck.mode=force fsck.repair=preen
       {{ base_grub_optional }} {{ sig_enforce }} kernel.kexec_load_disabled=1"
     regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
