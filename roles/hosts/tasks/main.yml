@@ -7,13 +7,48 @@
 - name: (Block) Interrogate all hosts
   block:
 
+  - name: Register hosts status
+    wait_for_connection:
+      timeout: 1
+    loop: '{{ groups["all"] }}'
+    delegate_to: '{{ item }}'
+    run_once: True
+    ignore_unreachable: True
+    ignore_errors: True
+    when: item != 'localhost' and item != lookup('pipe','hostname')
+    register: hosts_status
+
+  - name: Create list of alive hosts
+    set_fact:
+      hosts_alive: '{{ hosts_alive | default([]) + [item.item] }}'
+    with_items: '{{ hosts_status.results }}'
+    loop_control:
+      label: '{{ item.item }}'
+    when: >
+      not item.failed | default(False)
+      and not item.skipped | default(False)
+
+  - name: Register groups list without the dead hosts...
+    set_fact:
+      groups_alive: >
+        {{ groups_alive | default([])+
+        [{'key':item.key,'value':item.value | intersect(hosts_alive)}]
+        }}
+    loop: "{{ groups | dict2items }}"
+    loop_control:
+      label: '{{ item.key }}'
+
+  - name: ...and convert list of lists to the dictionary
+    set_fact:
+      groups_alive: '{{ groups_alive | items2dict }}'
+
   - name: Register information about the whole inventory
     setup:
     delegate_to: "{{ item }}"
     delegate_facts: true
-    loop: "{{ groups['all'] }}"
+    loop: "{{ groups_alive['all'] }}"
     run_once: True
-    when: item != 'localhost'
+    when: item != 'localhost' and item != lookup('pipe','hostname')
 
   - name: Register hostnames and addresses
     set_fact:
@@ -27,7 +62,7 @@
       hosts_combined:
         "{{ hosts_combined
         + [hostvars[item]['ansible_host'] + '	' + item] }}"
-    with_items: '{{ groups["all"] }}'
+    with_items: '{{ groups_alive["all"] }}'
     when: item not in ['localhost', '127.0.0.1', '127.0.1.1']
     delegate_to: localhost
 
@@ -104,7 +139,7 @@
     regexp: '^\s*(?!127\.)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+.+\s*$'
     state: absent
     backup: False
-  when: 
+  when:
     'hosts_remote_rewrite and
     ansible_hostname != "localhost" and
     hostvars[inventory_hostname]["ansible_env"]["SSH_CLIENT"] is defined and
