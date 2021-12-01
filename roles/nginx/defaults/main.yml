@@ -1,9 +1,0 @@
----
-#
-# Exposed to a user
-#
-ngx_cert_email: ''
-ngx_endpoints: []
-ngx_flavour: 'extras'
-ngx_provision_https: False
-ngx_resolver: '127.0.0.1'
