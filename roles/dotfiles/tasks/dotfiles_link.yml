@@ -124,16 +124,52 @@
   when: dots_extract_dotfiles
   # Block end (extract dotfiles)
 
-  # Link from this role
-- name: Link dotfiles from this role to $HOME
-  file:
-    src: '{{ role_path }}/files/{{ item.src }}'
-    dest: '{{ ansible_env.HOME }}/{{ item.dest }}'
-    state: '{{ item.state }}'
-    force: True
-  with_items: '{{ dots_dotfiles_list }}'
-  loop_control:
-    label: '{{ item.src }} --> {{ item.dest }}'
+- name: (Block) Link from this role
+  block:
+
+  - name: Link dotfiles from this role to $HOME
+    file:
+      src: '{{ role_path }}/files/{{ item.src }}'
+      dest: '{{ ansible_env.HOME }}/{{ item.dest }}'
+      state: '{{ item.state }}'
+      force: True
+    with_items: '{{ dots_dotfiles_list }}'
+    loop_control:
+      label: '{{ item.src }} --> {{ item.dest }}'
+    notify: rebuild bat cache
+    register: dotfiles_linked
+    debugger: never
+
+  rescue:
+
+    - name: Rescue failed symlinks
+      block:
+
+      - name: Create missing directories...
+        file:
+          path: '{{ item.invocation.module_args.dest | dirname }}'
+          state: directory
+          recurse: True
+        loop: '{{ dotfiles_linked.results }}'
+        loop_control:
+          label: '{{ item.path | default("") }}'
+        when: item.failed
+
+      - name: Try to link again
+        file:
+          src: '{{ ansible_env.HOME }}/.local/etc/dotfiles/{{ item.src }}'
+          dest: '{{ ansible_env.HOME }}/{{ item.dest }}'
+          state: '{{ item.state }}'
+          force: True
+        become: True
+        become_user: '{{ ansible_env.USER }}'
+        with_items: '{{ dots_dotfiles_list }}'
+        loop_control:
+          label: '{{ item.src }} --> {{ item.dest }}'
+        register: dotfiles_linked_2nd
+
+      - name: Assert that dotfiles are linked in full
+        assert:
+          that: dotfiles_linked_2nd.msg == 'All items completed'
+
   when: not dots_extract_dotfiles
-  notify: rebuild bat cache
-  register: dotfiles_linked
