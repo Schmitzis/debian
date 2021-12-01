@@ -21,6 +21,7 @@
   - name: Create list of alive hosts
     set_fact:
       hosts_alive: '{{ hosts_alive | default([]) + [item.item] }}'
+      groups_alive: []
     with_items: '{{ hosts_status.results }}'
     loop_control:
       label: '{{ item.item }}'
@@ -31,7 +32,7 @@
   - name: Register groups list without the dead hosts...
     set_fact:
       groups_alive: >
-        {{ groups_alive | default([])+
+        {{ groups_alive | default([]) +
         [{'key':item.key,'value':item.value | intersect(hosts_alive)}]
         }}
     loop: "{{ groups | dict2items }}"
@@ -142,6 +143,7 @@
   when:
     'hosts_remote_rewrite and
     ansible_hostname != "localhost" and
+    ansible_hostname != lookup("pipe","hostname") and
     hostvars[inventory_hostname]["ansible_env"]["SSH_CLIENT"] is defined and
     hostvars[inventory_hostname]["ansible_env"]["SSH_CONNECTION"] is defined'
   become: True
