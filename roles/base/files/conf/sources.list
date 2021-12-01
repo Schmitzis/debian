@@ -1,14 +1,18 @@
 # Main
-deb     https://deb.debian.org/debian bullseye           main contrib non-free
-deb-src https://deb.debian.org/debian bullseye           main contrib non-free
+deb     https://deb.debian.org/debian                 bullseye                   main contrib non-free
+deb-src https://deb.debian.org/debian                 bullseye                   main contrib non-free
 
 # Security
-deb     https://security.debian.org   bullseye-security  main contrib non-free
-deb-src https://security.debian.org   bullseye-security  main contrib non-free
+deb     https://security.debian.org                   bullseye-security          main contrib non-free
+deb-src https://security.debian.org                   bullseye-security          main contrib non-free
 
 # https://wiki.debian.org/StableUpdates
-deb     https://deb.debian.org/debian bullseye-updates   main contrib non-free
-deb-src https://deb.debian.org/debian bullseye-updates   main contrib non-free
+deb     https://deb.debian.org/debian                 bullseye-updates           main contrib non-free
+deb-src https://deb.debian.org/debian                 bullseye-updates           main contrib non-free
 
 # Backports
-deb     https://deb.debian.org/debian bullseye-backports main contrib non-free
+deb     https://deb.debian.org/debian                 bullseye-backports         main contrib non-free
+
+# Fasttrack
+deb     https://fasttrack.debian.net/debian-fasttrack/ bullseye-fasttrack         main contrib
+deb     https://fasttrack.debian.net/debian-fasttrack/ bullseye-backports-staging main contrib

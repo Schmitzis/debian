@@ -14,6 +14,11 @@
     owner: root
     mode: 0644
 
+- name: Install fasttrack-keyring
+  apt:
+    pkg: fasttrack-archive-keyring
+    state: present
+
 - name: Upgrade system packages
   apt:
     update-cache: True
