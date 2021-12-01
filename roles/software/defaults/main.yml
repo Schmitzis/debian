@@ -22,6 +22,7 @@ sw_list_office: []
 sw_list_utils: []
 sw_list_virtio: []
 sw_list_wayland: []
+sw_list_norecommends: []
 sw_list_wireless: []
 sw_setup_audio: false
 sw_setup_clevis: false
