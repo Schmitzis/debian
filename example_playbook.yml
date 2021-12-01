@@ -35,6 +35,7 @@
             dest: 'rtl_bt/rtl8761b_fw.bin',
             checksum: 'sha256:0b59a1f2422c006837c4b5e46b59d49bfdbca1defb958adbbc0d57ebdc19cc82' }
       base_generate_moduli: false          # OpenSSH DH moduli
+      base_grub_hardened: True             # 'Harden' the GRUB_CMDLINE?
       base_grub_optional: "i8042.unlock=1" # list of optional GRUB parameters
       base_grub_timeout: 3                 # Boot timeout in seconds
       base_hide_pid: false                 # Disable acces to /proc in /etc/fstab
@@ -73,6 +74,7 @@
       base_set_sigenforce: true            # Enable module signing verification
       base_sleep_enabled: true             # Enable sleep & suspend?
       base_sshd_less_secure: false         # Less restrictive SSH ciphers & MACs
+      base_sshd_accelerate: True           # Exclusively use AES128GCM and UMAC128ETM
       base_sudo_cmd_nopwd: "/usr/bin/alsaucm"
       base_sudo_set: true
       base_sudo_user: '{{ ansible_env.USER }}'

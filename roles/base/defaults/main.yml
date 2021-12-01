@@ -62,6 +62,7 @@ base_set_dpkg_overrides: false
 base_set_hostname: false
 base_set_sigenforce: true
 base_sleep_enabled: false
+base_sshd_accelerate: False
 base_sshd_less_secure: False
 base_sudo_cmd_nopwd: ""
 base_sudo_set: false

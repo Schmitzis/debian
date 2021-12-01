@@ -78,6 +78,7 @@ Ansible ≥2.10
 | base_set_hostname              | Set target's hostname to the `inventory_hostname`                        | False              |
 | base_set_sigenforce            | Enforce kernel modules signature verification, only with SecureBoot.     | True               |
 | base_sleep_enabled             | Enable (hybrid) suspend and sleep?                                       | False              |
+| base_sshd_accelerate           | Exclusively use AES128GCM and UMAC128ETM.                                | False              |
 | base_sshd_less_secure          | Enable aes256-cbc cipher and hmac-sha-256 MAC.                           | False              |
 | base_sudo_cmd_nopwd            | Comma-separated paths user can run with passwordless `sudo`.             | ""                 |
 | base_sudo_set                  | Configure `sudo`-capable user?                                           | False              |

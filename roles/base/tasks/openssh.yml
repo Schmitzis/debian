@@ -59,16 +59,39 @@
     - reconfigure sshd
     - restart sshd
 
-- name: Enable less secure ciphers
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^Ciphers\s'
-    line: 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-cbc'
-  when: base_sshd_less_secure
 
-- name: Enable less secure MACs
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^MACs\s'
-    line: 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256'
+- name: (Block) Improve SSHd compatibility
+  block:
+
+  - name: Enable less secure ciphers
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^Ciphers\s'
+      line: 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-cbc'
+
+  - name: Enable less secure MACs
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^MACs\s'
+      line: 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256'
+
   when: base_sshd_less_secure
+  # block_end (sshd_less_secure)
+
+- name: (Block) Use fastest sane crypto available
+  block:
+
+  - name: Use AES128-GCM as the only cipher
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^Ciphers\s'
+      line: 'Ciphers aes128-gcm@openssh.com'
+
+  - name: Use uMAC128-ETM as the only MAC
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^MACs\s'
+      line: 'MACs umac-128-etm@openssh.com'
+
+  when: base_sshd_accelerate
+  # block_end (sshd_accelerate)
