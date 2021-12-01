@@ -20,7 +20,7 @@
   #   - https://tails.boum.org/contribute/design/kernel_hardening/
   #   - https://kernsec.org/wiki/index.php/Kernel_Self_Protection_Project/Recommended_Settings
   #   - https://github.com/torvalds/linux/commit/6471384af
-- name: Configure GRUB_CMDLINE
+- name: Configure hardened GRUB_CMDLINE
   lineinfile:
     path: /etc/default/grub
     # Bullseye, v5.10+
@@ -34,9 +34,22 @@
       kernel.kptr_restrict=2 slab_nomerge mce=0 page_alloc.shuffle=1 mitigations=auto
       consoleblank={{ base_consoleblank | int }} audit={{ base_enable_audit | int }}
       init_on_alloc=1 init_on_free={{ base_init_on_free | int }} pti=auto vsyscall=none
-      extra_latent_entropy{{ cpu_iommu }} fsck.mode=force fsck.repair=preen
+      extra_latent_entropy {{ cpu_iommu }} fsck.mode=force fsck.repair=preen
       {{ base_grub_optional }} {{ sig_enforce }} kernel.kexec_load_disabled=1"
     regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
+  when: base_grub_hardened
+  notify: grub_update
+
+- name: Configure regular GRUB_CMDLINE
+  lineinfile:
+    path: /etc/default/grub
+    line: >
+      GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=1 ipv6.disable=1
+      consoleblank={{ base_consoleblank | int }} audit={{ base_enable_audit | int }}
+      extra_latent_entropy {{ cpu_iommu }} fsck.mode=force fsck.repair=preen
+      {{ base_grub_optional }}"
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
+  when: not base_grub_hardened
   notify: grub_update
 
 - name: Set Grub timeout

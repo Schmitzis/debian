@@ -45,6 +45,7 @@ Ansible ≥2.10
 | base_fstab_noexec              | Mount /dev/shm with nodev, nosuid, and noexec.                           | True               |
 | base_fw_list                   | List of firmware files to download and install on target.                | []                 |
 | base_generate_moduli           | Generate new set of 4096 DH moduli.                                      | False              |
+| base_grub_hardened             | "Harden" the GRUB config?                                                | True               |
 | base_grub_optional             | Additional options for `GRUB_CMDLINE_LINUX_DEFAULT`.                     | -                  |
 | base_grub_timeout              | Timeout of the default GRUB menu in seconds.                             | 1                  |
 | base_hda_options               | List of options that will be applied to `snd-hda-intel`.                 | []                 |

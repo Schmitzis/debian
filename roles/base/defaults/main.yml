@@ -28,6 +28,7 @@ base_fb_font_size: '10x18'
 base_fstab_noexec: true
 base_fw_list: []
 base_generate_moduli: false
+base_grub_hardened: True
 base_grub_optional: ""
 base_grub_timeout: 1
 base_hda_options: []
