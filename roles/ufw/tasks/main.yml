@@ -13,6 +13,8 @@
         warn: false
       changed_when: False
       delegate_to: localhost
+      become: True
+      become_user: '{{ lookup("env", "USER") }}'
       register: ufw_operator_ip_wan
 
     - name: Cleanup operator`s WAN IP
