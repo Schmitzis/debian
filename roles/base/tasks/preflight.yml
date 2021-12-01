@@ -114,15 +114,20 @@
     cpu_vendor: '{{ cpu_model.stdout_lines[0] | default("") | string }}'
     cpu_iommu: ""
 
-- name: Register IOMMU GRUB parameter for Intel
-  set_fact:
-    cpu_iommu: ' intel_iommu=on' # igfx_off(,on)
-  when: '"Intel" in cpu_vendor'
+- name: (Block) When target isn't virtual...
+  block:
 
-- name: Register IOMMU GRUB parameter for AMD
-  set_fact:
-    cpu_iommu: ' amd_iommu=on'
-  when: '"AMD" in cpu_vendor'
+  - name: Register IOMMU GRUB parameter for Intel
+    set_fact:
+      cpu_iommu: 'intel_iommu=on' # igfx_off(,on)
+    when: '"Intel" in cpu_vendor'
+
+  - name: Register IOMMU GRUB parameter for AMD
+    set_fact:
+      cpu_iommu: 'amd_iommu=on'
+    when: '"AMD" in cpu_vendor'
+
+  when: not base_VM_guest
 
 - name: Register if this is UEFI boot
   shell:
