@@ -5,7 +5,7 @@
   become: True
   become_user: root
   listen: 'reconfigure sshd'
-  when: ansible_connection != local
+  when: ansible_connection != 'local'
 
 - name: restart sshd
   service:
@@ -14,7 +14,7 @@
   become: True
   become_user: root
   listen: 'restart sshd'
-  when: ansible_connection != local
+  when: ansible_connection != 'local'
 
 - name: restart ufw
   service:
