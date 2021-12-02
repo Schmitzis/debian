@@ -43,6 +43,7 @@ Ansible ≥2.10
 | base_fb_configure              | Configure framebuffer/console: font size, encoding, etc.                 | True               |
 | base_fb_font_size              | Framebuffer font size                                                    | 10x18              |
 | base_fstab_noexec              | Mount /dev/shm with nodev, nosuid, and noexec.                           | True               |
+| base_fstab_noexec_tmp          | Mount /tmp with noexec.                                                  | False              |
 | base_fw_list                   | List of firmware files to download and install on target.                | []                 |
 | base_generate_moduli           | Generate new set of 4096 DH moduli.                                      | False              |
 | base_grub_hardened             | "Harden" the GRUB config?                                                | True               |

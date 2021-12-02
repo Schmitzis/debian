@@ -192,6 +192,21 @@
       replace: '\g<1> \g<2> \g<3>,nosuid,nodev,noexec \g<4>'
     notify: 'reload systemd'
 
+  - name: Mount /dev/shm with nodev, nosuid and noexec
+    lineinfile:
+      path: /etc/fstab
+      line: 'tmpfs /dev/shm tmpfs defaults,nosuid,nodev,noexec 0 0'
+      regexp: '^tmpfs\s\/dev\/shm.*'
+      insertafter: EOF
+      state: present
+    notify: 'reload systemd'
+
+  when: base_fstab_noexec
+  # block end
+
+- name: (Block) Mount /tmp with noexec
+  block:
+
   - name: Mount /tmp with nodev, nosuid and noexec
     lineinfile:
       path: /etc/fstab
@@ -210,16 +225,7 @@
       state: present
     notify: 'reload systemd'
 
-  - name: Mount /dev/shm with nodev, nosuid and noexec
-    lineinfile:
-      path: /etc/fstab
-      line: 'tmpfs /dev/shm tmpfs defaults,nosuid,nodev,noexec 0 0'
-      regexp: '^tmpfs\s\/dev\/shm.*'
-      insertafter: EOF
-      state: present
-    notify: 'reload systemd'
-
-  when: base_fstab_noexec
+  when: base_fstab_noexec_tmp
   # block end
 
   # sleep - turn off screens

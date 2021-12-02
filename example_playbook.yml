@@ -12,20 +12,21 @@
       name: base
     tags: role_base
     vars:
-      base_allow_reboot: false             # Allow system reboot when necessary?
-      base_autoupgrade: false              # Automatically upgrade from Buster to Bullsye?
-      base_debsecan: true                  # Report applicable CVEs via `debsecan`
-      base_disable_bluetooth: false
-      base_disable_bt_autosuspend: false   # Disable bluetooth autosuspend?
-      base_disable_firewire: true
-      base_disable_hfs: true               # Disable HFS filesystem support?
-      base_disable_nonsof: true            # Disable non-sof Intel HDA?
-      base_disable_speaker: false          # Disable internal speaker?
-      base_disable_thunderbolt: false
-      base_enable_audit: false             # Enable AuditD?
-      base_fb_configure: true              # Configure framebuffer?
+      base_allow_reboot: False             # Allow system reboot when necessary?
+      base_autoupgrade: False              # Automatically upgrade from Buster to Bullsye?
+      base_debsecan: True                  # Report applicable CVEs via `debsecan`
+      base_disable_bluetooth: False
+      base_disable_bt_autosuspend: False   # Disable bluetooth autosuspend?
+      base_disable_firewire: True
+      base_disable_hfs: True               # Disable HFS filesystem support?
+      base_disable_nonsof: True            # Disable non-sof Intel HDA?
+      base_disable_speaker: False          # Disable internal speaker?
+      base_disable_thunderbolt: False
+      base_enable_audit: False             # Enable AuditD?
+      base_fb_configure: True              # Configure framebuffer?
       base_fb_font_size: 10x18             # Framebuffer font size
-      base_fstab_noexec: true
+      base_fstab_noexec: True
+      base_fstab_noexec_tmp: False         # Mount /tmp with noexec?
       base_hda_options: []                 # snd-hda-intel module options
       base_fw_list:                        # Install under /lib/firmware/
         - { src: 'https://raw.githubusercontent.com/Realtek-OpenSource/android_hardware_realtek/rtk1395/bt/rtkbt/Firmware/BT/rtl8761b_config',
@@ -34,22 +35,22 @@
         - { src: 'https://raw.githubusercontent.com/Realtek-OpenSource/android_hardware_realtek/rtk1395/bt/rtkbt/Firmware/BT/rtl8761b_fw',
             dest: 'rtl_bt/rtl8761b_fw.bin',
             checksum: 'sha256:0b59a1f2422c006837c4b5e46b59d49bfdbca1defb958adbbc0d57ebdc19cc82' }
-      base_generate_moduli: false          # OpenSSH DH moduli
+      base_generate_moduli: False          # OpenSSH DH moduli
       base_grub_hardened: True             # 'Harden' the GRUB_CMDLINE?
       base_grub_optional: "i8042.unlock=1" # list of optional GRUB parameters
       base_grub_timeout: 3                 # Boot timeout in seconds
-      base_hide_pid: false                 # Disable acces to /proc in /etc/fstab
-      base_init_on_free: false             # init_on_free=? kernel parameter
-      base_install_recommends: true        # Install from APT-Recommends by default?
+      base_hide_pid: False                 # Disable acces to /proc in /etc/fstab
+      base_init_on_free: False             # init_on_free=? kernel parameter
+      base_install_recommends: True        # Install from APT-Recommends by default?
       base_locale: en_AU.UTF-8
-      base_locale_singular: true           # Do not fetch other locales
-      base_logind_configure: false
+      base_locale_singular: True           # Do not fetch other locales
+      base_logind_configure: False
       base_logind_idle_action: suspend
       base_logind_idle_time: 600
       base_logind_lid_action: suspend
       base_logind_powerbutton_action: poweroff
-      base_nmi_watchdog: false
-      base_pam_namespace: false            # Private namespace with polyinstantiated directories
+      base_nmi_watchdog: False
+      base_pam_namespace: False            # Private namespace with polyinstantiated directories
       base_pkg_remove:
         - wpasupplicant
         - rpcbind
@@ -61,22 +62,22 @@
       base_reports_email: 'root'           # Mail reports to root user
       base_require_tty_pty: False          # `use_pty` & `requiretty`
       base_kresd_blocklist: ""
-      base_kresd_install: true             # Install and configure knot-resolver (`kresd`)
+      base_kresd_install: True             # Install and configure knot-resolver (`kresd`)
       base_kresd_listen_on_ip: 127.0.0.1
       base_kresd_primary_hostname: dns.quad9.net
       base_kresd_primary_ip: 9.9.9.9
       base_kresd_secondary_hostname: dns.quad9.net
       base_kresd_secondary_ip: 149.112.112.112
-      base_kresd_tls: true
-      base_set_capslock: true              # Set CapsLock as CTRL key?
-      base_set_dpkg_overrides: true        # Tighten permissions via `dpkg-statoverride`
-      base_set_hostname: false             # Set target hostname to the inventory name
-      base_set_sigenforce: true            # Enable module signing verification
-      base_sleep_enabled: true             # Enable sleep & suspend?
-      base_sshd_less_secure: false         # Less restrictive SSH ciphers & MACs
+      base_kresd_tls: True
+      base_set_capslock: True              # Set CapsLock as CTRL key?
+      base_set_dpkg_overrides: True        # Tighten permissions via `dpkg-statoverride`
+      base_set_hostname: False             # Set target hostname to the inventory name
+      base_set_sigenforce: True            # Enable module signing verification
+      base_sleep_enabled: True             # Enable sleep & suspend?
+      base_sshd_less_secure: False         # Less restrictive SSH ciphers & MACs
       base_sshd_accelerate: True           # Exclusively use AES128GCM and UMAC128ETM
       base_sudo_cmd_nopwd: "/usr/bin/alsaucm"
-      base_sudo_set: true
+      base_sudo_set: True
       base_sudo_user: '{{ ansible_env.USER }}'
       base_swappiness: 30
       base_thermald_profiles:
@@ -157,18 +158,18 @@
       #
       # Toggle installation of a certain software list
       #
-      sw_setup_audio: true
-      sw_setup_clevis: true
-      sw_setup_dev: true
-      sw_setup_fonts: true
-      sw_setup_fs: true
-      sw_setup_i2c: true
-      sw_setup_internet: true
-      sw_setup_multimedia: true
-      sw_setup_office: true
-      sw_setup_utils: true
-      sw_setup_wayland: true
-      sw_setup_wireless: true
+      sw_setup_audio: True
+      sw_setup_clevis: True
+      sw_setup_dev: True
+      sw_setup_fonts: True
+      sw_setup_fs: True
+      sw_setup_i2c: True
+      sw_setup_internet: True
+      sw_setup_multimedia: True
+      sw_setup_office: True
+      sw_setup_utils: True
+      sw_setup_wayland: True
+      sw_setup_wireless: True
       #
       # Configure systemd units
       #
@@ -185,10 +186,10 @@
       #
       # Configure libvirt / virt-manager
       #
-      sw_virtio_install: true
-      sw_virtio_network_autostart: true
-      sw_virtio_use_default_network: true
-      sw_virtio_user_addgroup: true
+      sw_virtio_install: True
+      sw_virtio_network_autostart: True
+      sw_virtio_use_default_network: True
+      sw_virtio_user_addgroup: True
       #
       # Software lists
       #
@@ -363,16 +364,16 @@
       name: dotfiles
     tags: role_dotfiles
     vars:
-      dots_change_tmux_prefix: false
+      dots_change_tmux_prefix: False
       # Logic:
-      #   - if `extract_dotfiles` is true, dotfiles are copied to the target host
-      #   - if `extract_dotfiles` is false and target is localhost - link from the role
-      #   - if `extract_dotfiles` is false and target is remote - fail gracefully
-      dots_extract_dotfiles: false
-      dots_bash_emacs_mode: false
-      dots_remote_gitconfig: false
-      dots_setup_fortunes: true
-      dots_setup_neovim: true
+      #   - if `extract_dotfiles` is True, dotfiles are copied to the target host
+      #   - if `extract_dotfiles` is False and target is localhost - link from the role
+      #   - if `extract_dotfiles` is False and target is remote - fail gracefully
+      dots_extract_dotfiles: False
+      dots_bash_emacs_mode: False
+      dots_remote_gitconfig: False
+      dots_setup_fortunes: True
+      dots_setup_neovim: True
       dots_repo_update: False
       dots_dotfiles_list:
         #
@@ -426,12 +427,12 @@
       name: transfer_agent
     tags: role_transfer
     vars:
-      tag_add_rsync: true             # Allow `rsync` in addition to sftp?
+      tag_add_rsync: True             # Allow `rsync` in addition to sftp?
       tag_agent_group: agents
       tag_agent_name: xfer_agent
-      tag_pubkey_from_current_user: true
-      tag_pubkey_from_others: true
-      tag_remove_existing_user: true  # Remove $HOME of the existing agent?
+      tag_pubkey_from_current_user: True
+      tag_pubkey_from_others: True
+      tag_remove_existing_user: True  # Remove $HOME of the existing agent?
 
 
   - name: Execute Syncthing role
@@ -442,25 +443,25 @@
       st_install_client: True
       st_install_disco: True
       st_install_relay: True
-      st_reinstall: true
+      st_reinstall: True
 
       st_client: {
         'addr': '' ,                  # Address on which Client will listen, default: 127.0.0.1
-        'addr_use_wan': true,         # Overwrite `st_client.addr` with the discovered WAN ip?
-        'announce_broadcast': true,   # Enable "local discovery"?
-        'certs_export': false,        # Upload existing certificates?
-        'certs_import': false,        # Download existing certificates?
-        'certs_recreate': true,
+        'addr_use_wan': True,         # Overwrite `st_client.addr` with the discovered WAN ip?
+        'announce_broadcast': True,   # Enable "local discovery"?
+        'certs_export': False,        # Upload existing certificates?
+        'certs_import': False,        # Download existing certificates?
+        'certs_recreate': True,
         'config_dir': '',             # Will be replaced with $XDG_CONFIG_HOME/syncthing if empty
-        'gui': true,
-        'gui_tls': true,
+        'gui': True,
+        'gui_tls': True,
         'gui_user': 'foo',            # GUI/API username
         'gui_user_password', 'bar',   # GUI user password, will be hashed using BCrypt
         'min_free_space': 5,          # Minimum free disk space to keep
-        'nat': false,                 # Uses upstream-controlled STUN
+        'nat': False,                 # Uses upstream-controlled STUN
         'port': '',                   # Port on which Client's GUI/API will listen, default: 8384
-        'reconfigure': true,          # Overwrite existing config?
-        'untrusted': true,            # Set device as "untrusted" by default?
+        'reconfigure': True,          # Overwrite existing config?
+        'untrusted': True,            # Set device as "untrusted" by default?
 
         'user': {
           'name': '',                 # Defaults to SSH user
@@ -475,25 +476,25 @@
 
         'disco': {
           'addr': '127.0.0.1',        # Discovery-server to which Client will connect
-          'addr_overwrite': true,     # Overwrite Disco address with the server from this role?
+          'addr_overwrite': True,     # Overwrite Disco address with the server from this role?
           'port': 8443,               # Port on which Client will try to find Disco, default: 8443
           'id': '',                   # ID of Disco to which Client will connect
-          'id_overwrite': true,       # Overwrite `st_client.disco.id` with the `st_disco.id`?
-          'enable': true              # Use "global announcements" aka Discovery-server?
+          'id_overwrite': True,       # Overwrite `st_client.disco.id` with the `st_disco.id`?
+          'enable': True              # Use "global announcements" aka Discovery-server?
           },
 
         'relay': {
-          'enable': true,             # Enable relaying?
+          'enable': True,             # Enable relaying?
           'addr': '',
-          'addr_overwrite': true,     # Overwrite Relay address with the server from this role?
+          'addr_overwrite': True,     # Overwrite Relay address with the server from this role?
           'port': 22067,
           'id': '',
-          'id_overwrite': true,       # Overwrite `st_client.relay.id` with the `st_relay.id`?
+          'id_overwrite': True,       # Overwrite `st_client.relay.id` with the `st_relay.id`?
           'reconnect_interval_minutes': 10
           },
 
         'start': {                    # Configure autostart via systemd
-          'on_boot': true,
+          'on_boot': True,
           'on_role_completion': 'restarted'   # Either: 'reloaded', 'restarted' or 'stopped'
         },
 
@@ -505,13 +506,13 @@
 
       st_disco: {
         'addr': '127.0.0.1',         # Address on which Disco listens itself
-        'addr_use_wan': true,        # Use discovered WAN IP instead of the provided address?
-        'certs_export': false,       # Upload existing certificates?
-        'certs_import': false,       # Download existing certificates?
-        'certs_recreate': true,
+        'addr_use_wan': True,        # Use discovered WAN IP instead of the provided address?
+        'certs_export': False,       # Upload existing certificates?
+        'certs_import': False,       # Download existing certificates?
+        'certs_recreate': True,
         'id': '',                    # Disco's own ID, *will* be overwritten during run
         'port': '',                  # Port on which Disco will listen itself, default: 8443
-        'replicate': false,          # Add `st_disco_replica` into the systemd config?
+        'replicate': False,          # Add `st_disco_replica` into the systemd config?
 
         'replica': {
           'addr': '10.0.0.1',        # Address which Disco will use for replication
@@ -522,7 +523,7 @@
           },
 
         'start': {                   # Configure autostart via systemd
-          'on_boot': true,
+          'on_boot': True,
           'on_role_completion': 'restarted'   # Either: 'reloaded', 'restarted' or 'stopped'
         },
 
@@ -534,23 +535,23 @@
 
       st_relay: {
         'addr': '',
-        'addr_use_wan': true,
-        'certs_export': false,       # Upload existing certificates?
-        'certs_import': false,       # Download existing certificates?
-        'certs_recreate': true,
+        'addr_use_wan': True,
+        'certs_export': False,       # Upload existing certificates?
+        'certs_import': False,       # Download existing certificates?
+        'certs_recreate': True,
         'network_timeout_string': '2m0s',
         'ping_interval_string': '1m0s',
         'port': 22067,
 
         'nat': {
-          'enabled': false,          # Use UPnP/NAT-PMP to acquire external port mapping?
+          'enabled': False,          # Use UPnP/NAT-PMP to acquire external port mapping?
           'lease_minutes': 60,
           'renewal_minutes': 30,
           'timeout_seconds': 10
         },
 
         'start': {                   # Configure autostart via systemd
-          'on_boot': true,
+          'on_boot': True,
           'on_role_completion': 'restarted'   # Either: 'reloaded', 'restarted' or 'stopped'
         },
 
@@ -592,17 +593,17 @@
             psk: 'Fo1UMMLxbyPiYwrJ/vE7tqPa66gblskjIc5xyQPsXgg=',
             ip: '10.3.1.20',
             keepalive: '90' }
-      wg_autostart: true
-      wg_forward: true   # Forward between clients?
+      wg_autostart: True
+      wg_forward: True   # Forward between clients?
       wg_iface: wg8
-      wg_overwrite: true # Overwrite existing config?
+      wg_overwrite: True # Overwrite existing config?
       wg_peerkey: OIxcoXM0NaNtsSZM7aNGDeqpUiQxkZ4+eG9OmLSFe3k=
       wg_port: 12345
       wg_server_ip: 10.0.0.10
       wg_server_subnet: '10.0.0.0/8'
-      wg_ssh: true       # Allow incoming tcp/22 from WG subnet?
-      wg_start: true     # Start WG at the end of play?
-      wg_systemd: true   # Enable systemd unit on startup?
+      wg_ssh: True       # Allow incoming tcp/22 from WG subnet?
+      wg_start: True     # Start WG at the end of play?
+      wg_systemd: True   # Enable systemd unit on startup?
 
 
   - name: Execute `nginx` role
