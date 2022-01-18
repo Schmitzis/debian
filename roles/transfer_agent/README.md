@@ -47,14 +47,15 @@ Don't forget to adjust your config if you decide to change the name of the group
 
 ## Role Variables
 
-| Variable                     | Description                                                                   | Default |
-|------------------------------|-------------------------------------------------------------------------------|---------|
-| tag_agent_name               | Username to create                                                            | xfer    |
-| tag_agent_group              | Users from this group will be chroot'ed to their home directories.            | agents  |
-| tag_add_rsync                | Add `rsync` binaries                                                          | true    |
-| tag_pubkey_from_current_user | Add local `~/.ssh/id_rsa.pub` to the target's `~/.ssh/authorized_keys`.       | true    |
-| tag_pubkey_from_others       | Add all *.pub keys from `../files/` to the target's `~/.ssh/authorized_keys`. | true    |
-| tag_remove_existing_user     | Wipe existing user if found, delete all their files.                          | false   |
+| Variable                     | Description                                                                   | Default          |
+|------------------------------|-------------------------------------------------------------------------------|------------------|
+| tag_agent_name               | Username to create                                                            | xfer             |
+| tag_home                     | Path to the user's $HOME _without_ leading slash.                             | /home/AGENT_NAME |
+| tag_agent_group              | Users from this group will be chroot'ed to their home directories.            | agents           |
+| tag_add_rsync                | Add `rsync` binaries                                                          | true             |
+| tag_pubkey_from_current_user | Add local `~/.ssh/id_rsa.pub` to the target's `~/.ssh/authorized_keys`.       | true             |
+| tag_pubkey_from_others       | Add all *.pub keys from `../files/` to the target's `~/.ssh/authorized_keys`. | true             |
+| tag_remove_existing_user     | Wipe existing user if found, delete all their files.                          | false            |
 
 
 ### Dependencies
