@@ -168,8 +168,7 @@
       fail_msg: >
         Unexpected response `{{ st_disco_url_check.status }}` from {{ st_client.binary.url }}
       success_msg: >
-        Status {{ st_disco_url_check.status }}, served by {{ st_disco_url_check.server }}
-        with message {{ st_disco_url_check.msg }}
+        Status {{ st_disco_url_check.status }} with message {{ st_disco_url_check.msg }}
 
   - name: (Block) Import disco certificates from remote
     block:
@@ -305,8 +304,7 @@
       fail_msg: >
         Unexpected response `{{ st_relay_url_check.status }}` from {{ st_client.binary.url }}
       success_msg: >
-        Status {{ st_relay_url_check.status }}, served by {{ st_relay_url_check.server }}
-        with message {{ st_relay_url_check.msg }}
+        Status {{ st_relay_url_check.status }} with message {{ st_relay_url_check.msg }}
 
   - name: (Block) Import relay certificates from remote
     block:
@@ -636,8 +634,7 @@
       fail_msg: >
         Unexpected response `{{ st_client_url_check.status }}` from {{ st_client.binary.url }}
       success_msg: >
-        Status {{ st_client_url_check.status }}, served by {{ st_client_url_check.server }}
-        with message {{ st_client_url_check.msg }}
+        Status {{ st_client_url_check.status }} with message {{ st_client_url_check.msg }}
 
   - name: Set config folder to the default one
     set_fact:
