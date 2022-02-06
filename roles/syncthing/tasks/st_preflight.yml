@@ -66,6 +66,14 @@
                 | ansible.netcommon.ipv4("address")
                 | ansible.netcommon.ipaddr("public") }}'
 
+- name: Fallback to first public IP known to the host
+  set_fact:
+    st_wan_ip: '{{ ansible_all_ipv4_addresses
+                | ansible.netcommon.ipv4("address")
+                | ansible.netcommon.ipaddr("public")
+                | join("") | string }}'
+  when: not st_wan_ip
+
 - name: Assert there is only 1 WAN IP
   assert:
     that: st_wan_ip | ansible.netcommon.ipaddr("size") == 1
