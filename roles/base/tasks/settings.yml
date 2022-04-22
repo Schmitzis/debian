@@ -413,6 +413,13 @@
     line: 'Defaults env_reset'
     validate: '/usr/sbin/visudo -cf %s'
 
+- name: Disable admin_flag (~/.sudo_as_admin_successful)
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^[\s]*Defaults.*\badmin_flag\b.*$'
+    line: 'Defaults !admin_flag'
+    validate: '/usr/sbin/visudo -cf %s'
+
 - name: Enable ignore_dot in /etc/sudoers
   lineinfile:
     path: /etc/sudoers
