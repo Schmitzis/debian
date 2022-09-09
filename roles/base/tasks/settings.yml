@@ -372,6 +372,7 @@
     create: 'yes'
     line: '{{ item }}'
   with_items:
+    - 'APT::Cmd::Show-Update-Stats "1";'
     - 'APT::ExtractTemplates::TempDir "~/.cache/TMPDIR/apt";'
     - 'APT::Get::AllowUnauthenticated "false";'
     - 'APT::Install-Recommends "{{ base_install_recommends | int }}";'
